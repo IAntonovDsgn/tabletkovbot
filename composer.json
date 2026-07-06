@@ -11,7 +11,8 @@
   "require-dev": {
     "pestphp/pest": "^4.7",
     "phpstan/phpstan": "^2.2",
-    "friendsofphp/php-cs-fixer": "^3.95"
+    "friendsofphp/php-cs-fixer": "^3.95",
+    "mockery/mockery": "^1.6"
   },
   "autoload": {
     "psr-4": {

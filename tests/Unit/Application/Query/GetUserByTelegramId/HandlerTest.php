@@ -1,30 +1,34 @@
 <?php
 
-test('handle() - пользователь существует', function ($telegramId, $name, $exceptionClass) {
-    $existingUser = new User($telegramId, $name);
+namespace Tests\Unit\Application\Query\GetUserByTelegramId;
 
-    $userRepo = mock(UserRepositoryInterface::class);
-    $userRepo->shouldReceive('findByTelegramId')
-        ->with($telegramId)
-        ->andReturn($existingUser);
+use App\Application\Query\GetUser\Handler;
+use App\Domain\User\User;
+use App\Domain\User\UserRepositoryInterface;
+use Mockery;
 
-    $handler = new Handler();
+test(
+    'findByTelegramId()',
+    function (int $userTelegramId, bool $isUserExist) {
+        if ($isUserExist) {
+            $existingUser = new User(1, $userTelegramId, true);
+        } else {
+            $existingUser = null;
+        }
 
-    if (!is_null($exceptionClass)) {
-        $user = $handler->handle($telegramId);
+        $userRepositoryMock = Mockery::mock(UserRepositoryInterface::class)
+            ->shouldReceive('findByTelegramId')
+            ->with($userTelegramId)
+            ->andReturn($existingUser)
+            ->getMock();
+
+        $handler = new Handler($userRepositoryMock);
+        $user = $handler->getUserByTelegramId($userTelegramId);
         expect($user)->toBe($existingUser);
-    } else {
-        expect(fn () => $handler->handle($telegramId))
-            ->toThrow($exceptionClass);
     }
-})->with('user exist');
+)->with('get user by telegram id');
 
-dataset('user exist', [
-    'correct $telegramId and $name' => [3, 'John Doe', null],
-    'incorrect $telegramId 1' => [-1, 'John Doe', RequestUserException::class],
-    'incorrect $telegramId 2' => ['first', 'John Doe', RequestUserException::class],
-    'incorrect $telegramId 3' => [true, 'John Doe', RequestUserException::class],
-    'incorrect $telegramId 4' => ['', 'John Doe', RequestUserException::class],
-    'incorrect $name 1' => [3, '', RequestUserException::class],
-    'incorrect $name 2' => [3, true, RequestUserException::class],
+dataset('get user by telegram id', [
+    'user exist' => [3, true],
+    'user not exist' => [3, false],
 ]);
