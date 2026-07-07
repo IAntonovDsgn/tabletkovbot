@@ -9,4 +9,9 @@ interface MedicamentRepositoryInterface
     public function findByUserIdAndMedicamentName(string $medicamentName, int $userId): ?Medicament;
 
     public function findById(int $id): ?Medicament;
+
+    /**
+     * @return Medicament[]
+     */
+    public function findByUserId(int $userId): array;
 }
