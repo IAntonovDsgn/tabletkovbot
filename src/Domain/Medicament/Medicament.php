@@ -16,7 +16,7 @@ class Medicament
         ?DateTimeImmutable $notificationTime = null,
         private readonly ?int $id = null,
     ) {
-        if (!is_null($notificationTime)) {
+        if (! is_null($notificationTime)) {
             $this->notificationTime = $notificationTime->format(self::TIME_FORMAT);
         }
     }

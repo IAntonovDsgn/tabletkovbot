@@ -26,7 +26,7 @@ final readonly class Handler
 
         if (is_null($medicament)) {
             throw new CreateIntakeMarkException('Не найден медикамент');
-        } elseif (!$medicament->isActive()) {
+        } elseif (! $medicament->isActive()) {
             throw new CreateIntakeMarkException('Медикамент не активен');
         } elseif (is_null($user)) {
             throw new CreateIntakeMarkException('Не найден пользователь');

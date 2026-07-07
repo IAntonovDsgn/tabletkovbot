@@ -28,7 +28,7 @@ final readonly class Handler
 
         if (is_null($medicament)) {
             throw new ChangeMedicamentNotificationTimeException('Не найден медикамен');
-        } elseif ($medicament->isActive() === false) {
+        } elseif (! $medicament->isActive()) {
             throw new ChangeMedicamentNotificationTimeException('Медикамент был удален');
         }
 

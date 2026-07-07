@@ -19,7 +19,7 @@ final readonly class Handler
 
          if (is_null($intakeMark)) {
              throw new DeactivateIntakeMarkException('Intake Mark not found');
-         } elseif (!$intakeMark->isActive()) {
+         } elseif (! $intakeMark->isActive()) {
              throw new DeactivateIntakeMarkException('Intake Mark is not active');
          }
 

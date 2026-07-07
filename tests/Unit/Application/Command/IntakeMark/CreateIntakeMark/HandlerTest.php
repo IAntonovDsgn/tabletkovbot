@@ -23,7 +23,7 @@ test('', function (bool $isUserExist, bool $isMedicamentExist, bool $isMedicamen
 
     if ($isMedicamentExist) {
         $medicament = MedicamentFactory::create('testMedicament', $userId);
-        if (!$isMedicamentActive) {
+        if (! $isMedicamentActive) {
             $medicament->deactivate();
         }
     }

@@ -16,7 +16,7 @@ test('', function ($isIntakeMarkExist, $isIntakeMarkActive) {
 
     if ($isIntakeMarkExist) {
         $intakeMark = IntakeMarkFactory::create($userId, $medicamentId);
-        if (!$isIntakeMarkActive) {
+        if (! $isIntakeMarkActive) {
             $intakeMark->deactivate();
         }
     } else {

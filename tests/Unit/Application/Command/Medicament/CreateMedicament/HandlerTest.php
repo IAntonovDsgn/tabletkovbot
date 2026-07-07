@@ -26,7 +26,7 @@ test('', function (bool $isMedicamentExist): void {
         ->with($medicamentName, $userId)
         ->andReturn($medicament);
 
-    if (!$isMedicamentExist) {
+    if (! $isMedicamentExist) {
         $medicamentRepositoryMock
             ->shouldReceive('save')
             ->with($medicament)

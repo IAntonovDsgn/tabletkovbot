@@ -20,7 +20,7 @@ final readonly class Handler
         $medicaments = $this->medicamentRepository->findByUserId($userId);
 
         foreach ($medicaments as $key => $medicament) {
-            if (!$medicament->isActive()) {
+            if (! $medicament->isActive()) {
                 unset($medicaments[$key]);
             }
         }

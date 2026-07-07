@@ -21,7 +21,7 @@ final readonly class Handler
         $intakeMarks = $this->intakeMarkRepository->findByUserId($userId);
 
         foreach ($intakeMarks as $key => $intakeMark) {
-            if (!$intakeMark->isIncludeInInterval($startDate, $endDate)) {
+            if (! $intakeMark->isIncludeInInterval($startDate, $endDate)) {
                 unset($intakeMarks[$key]);
             }
         }
