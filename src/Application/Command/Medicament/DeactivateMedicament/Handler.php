@@ -21,7 +21,7 @@ final readonly class Handler
         if (is_null($medicament)) {
             throw new DeactivateMedicamentException('Медикамент не найден');
         } elseif ($medicament->isActive() === false) {
-            throw new DeactivateMedicamentException('Медикамент был удален');
+            throw new DeactivateMedicamentException('Медикамент не активен');
         }
 
         $medicament->deactivate();

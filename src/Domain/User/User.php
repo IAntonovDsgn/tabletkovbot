@@ -15,4 +15,9 @@ class User
     {
         $this->hasNotification = true;
     }
+
+    public function disableNotifications(): void
+    {
+        $this->hasNotification = false;
+    }
 }

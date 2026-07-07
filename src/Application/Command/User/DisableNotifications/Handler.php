@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Command\User\EnableNotifications;
+namespace App\Application\Command\User\DisableNotifications;
 
 use App\Domain\User\UserRepositoryInterface;
 
@@ -12,17 +12,17 @@ final readonly class Handler
     }
 
     /**
-     * @throws EnableNotificationsException
+     * @throws DisableNotificationsException
      */
     public function __invoke(int $userId): void
     {
         $user = $this->userRepository->findByUserId($userId);
 
         if (is_null($user)) {
-            throw new EnableNotificationsException('Пользователь не найден');
+            throw new DisableNotificationsException('Пользователь не найден');
         }
 
-        $user->enableNotifications();
+        $user->disableNotifications();
         $this->userRepository->save($user);
     }
 }
