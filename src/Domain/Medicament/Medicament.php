@@ -4,34 +4,26 @@ namespace App\Domain\Medicament;
 
 use DateTimeImmutable;
 
-final class Medicament
+class Medicament
 {
-    public function __construct (
-        private string $name,
+    const string TIME_FORMAT = 'H:i:s';
+    private readonly string $notificationTime;
+
+    protected function __construct(
+        private readonly string $name,
         private readonly int $userId,
-        private ?DateTimeImmutable $notificationTime = null,
-        private bool $isActive = true,
+        private bool $isActive,
+        ?DateTimeImmutable $notificationTime = null,
         private readonly ?int $id = null,
-        private readonly ?DateTimeImmutable $createdAt = null,
-        private readonly ?DateTimeImmutable $updatedAt = null,
-    ) {}
-
-    /**
-     * @throws MedicamentException
-     */
-    public function setName(string $name): void
-    {
-        if ($name === '') {
-            throw new MedicamentException('Name cannot be empty');
+    ) {
+        if (!is_null($notificationTime)) {
+            $this->notificationTime = $notificationTime->format(self::TIME_FORMAT);
         }
-
-        $this->name = $name;
     }
 
     public function setNotificationTime(DateTimeImmutable $time): void
     {
-        $time->format('H:i:s');
-        $this->notificationTime = $time;
+        $this->notificationTime = $time->format(self::TIME_FORMAT);
     }
 
     public function deactivate(): void

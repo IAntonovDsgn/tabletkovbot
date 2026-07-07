@@ -6,7 +6,7 @@ services:
       - "${NGINX_HOST_PORT}:80"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ../src/public:/var/www/tabletkovbot/src/public:ro
+      - ../src/Public:/var/www/tabletkovbot/src/Public:ro
     depends_on:
        php:
         condition: service_started
