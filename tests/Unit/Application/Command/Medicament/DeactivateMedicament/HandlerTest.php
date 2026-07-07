@@ -26,23 +26,23 @@ test('', function (bool $isMedicamentExist, bool $isMedicamentActive) {
     if ($isMedicamentExist) {
         $medicamentRepositoryMock
             ->shouldReceive('save')
-            ->with(Mockery::type(Medicament::class));
+            ->with($medicament);
     }
 
     $handler = new Handler($medicamentRepositoryMock);
 
-    if (!$isMedicamentExist || !$isMedicamentActive) {
-        expect(fn() => $handler($medicamentId))
-            ->toThrow(DeactivateMedicamentException::class);
-    } else {
+    if ($isMedicamentExist && $isMedicamentActive) {
         expect(fn() => $handler($medicamentId))
             ->not->toThrow(Throwable::class);
+    } else {
+        expect(fn() => $handler($medicamentId))
+            ->toThrow(DeactivateMedicamentException::class);
     }
 
 })->with('delete medicament');
 
 dataset('delete medicament', [
-    'medicament exist' => [true, true],
-    'medicament not exist' => [false, false],
-    'medicament exist, but not active' => [true, false],
+    'medicament exist - метод не выбрасывает исключение' => [true, true],
+    'medicament not exist - метод выбрасывает исключение' => [false, false],
+    'medicament exist, but not active - метод выбрасывает исключение' => [true, false],
 ]);

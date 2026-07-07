@@ -42,7 +42,7 @@ test('', function ($isIntakeMarkExist, $isIntakeMarkActive) {
 })->with('deactivate intake mark');
 
 dataset('deactivate intake mark', [
-    'intake mark exist and active' => [true, true],
-    'intake mark not exist' => [false, false],
-    'intake mark exist, but not active' => [true, false],
+    'intake mark exist and active - метод не выбрасывает исключение' => [true, true],
+    'intake mark not exist - метод выбрасывает исключение' => [false, false],
+    'intake mark exist, but not active - метод выбрасывает исключение' => [true, false],
 ]);

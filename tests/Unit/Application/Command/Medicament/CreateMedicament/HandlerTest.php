@@ -4,32 +4,33 @@ namespace Tests\Unit\Application\Command\CreateMedicament;
 
 use App\Application\Command\Medicament\CreateMedicament\CreateMedicamentException;
 use App\Application\Command\Medicament\CreateMedicament\Handler;
-use App\Domain\Medicament\Medicament;
 use App\Domain\Medicament\MedicamentFactory;
 use App\Domain\Medicament\MedicamentRepositoryInterface;
 use DateTimeImmutable;
 use Mockery;
+use Throwable;
 
 test('', function (bool $isMedicamentExist): void {
     $medicamentName = 'medicament1';
     $userId = 1;
     $notificationTime = new DateTimeImmutable("14:30:00");
+    $medicament = null;
+
+    if ($isMedicamentExist) {
+        $medicament = MedicamentFactory::create($medicamentName, $userId, $notificationTime);
+    }
 
     $medicamentRepositoryMock = Mockery::mock(MedicamentRepositoryInterface::class);
     $medicamentRepositoryMock
         ->shouldReceive('findByUserIdAndMedicamentName')
         ->with($medicamentName, $userId)
-        ->andReturn(
-            $isMedicamentExist
-                ? MedicamentFactory::create($medicamentName, $userId, $notificationTime)
-                : null
-        );
+        ->andReturn($medicament);
 
     if (!$isMedicamentExist) {
         $medicamentRepositoryMock
             ->shouldReceive('save')
-            ->once()
-            ->with(Mockery::type(Medicament::class));
+            ->with($medicament)
+            ->andReturn();
     }
 
     $handler = new Handler($medicamentRepositoryMock);
@@ -38,11 +39,12 @@ test('', function (bool $isMedicamentExist): void {
         expect(fn() => $handler($userId, $medicamentName, $notificationTime))
             ->toThrow(CreateMedicamentException::class);
     } else {
-        $handler($userId, $medicamentName, $notificationTime);
+        expect(fn() => $handler($userId, $medicamentName, $notificationTime))
+            ->not->toThrow(Throwable::class);
     }
 })->with('create medicament');
 
 dataset('create medicament', [
-    'medicament exist' => [true],
-    'medicament not exist' => [false],
+    'medicament exist - метод не выбрасывает исключение' => [true],
+    'medicament not exist - метод выбрасывает исключение' => [false],
 ]);

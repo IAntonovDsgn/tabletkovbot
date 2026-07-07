@@ -15,15 +15,10 @@ final readonly class Handler
 
     /**
      * @return IntakeMark[]
-     * @throws GetReportDataException
      */
     public function __invoke(int $userId, DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
     {
         $intakeMarks = $this->intakeMarkRepository->findByUserId($userId);
-
-        if (empty($intakeMarks)) {
-            throw new GetReportDataException('Intake Marks not found');
-        }
 
         foreach ($intakeMarks as $key => $intakeMark) {
             if (!$intakeMark->isIncludeInInterval($startDate, $endDate)) {

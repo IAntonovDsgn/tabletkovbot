@@ -10,4 +10,9 @@ class User
         private readonly ?int $id = null
     ) {
     }
+
+    public function enableNotifications(): void
+    {
+        $this->hasNotification = true;
+    }
 }

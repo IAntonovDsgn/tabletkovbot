@@ -28,16 +28,16 @@ test('', function (bool $isMedicamentExist, bool $isMedicamentActive) {
     $handler = new Handler($medicamentRepositoryMock);
     $result = $handler($userId);
 
-    if (!$isMedicamentExist || !$isMedicamentActive) {
-        expect(count($result))->toBe(0);
-    } else {
+    if ($isMedicamentExist && $isMedicamentActive) {
         expect(count($result))->toBe(1);
+    } else {
+        expect(count($result))->toBe(0);
     }
 
 })->with('get medicament by user id');
 
 dataset('get medicament by user id', [
-    'Medicament exist' => [true, true],
-    'Medicament not exist' => [false, true],
-    'Medicament exist, but not active' => [true, false]
+    'One medicament exist and active - получаем массив с 1 элементом' => [true, true],
+    'Medicament not exist - получаем пустой массив' => [false, true],
+    'Medicament exist, but not active - получаем пустой массив' => [true, false]
 ]);

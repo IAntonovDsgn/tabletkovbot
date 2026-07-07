@@ -60,11 +60,11 @@ test('', function (bool $isUserExist, bool $isMedicamentExist, bool $isMedicamen
 })->with('create intake mark');
 
 dataset('create intake mark', [
-    'user exist, medicament exist, medicament is active' => [true, true, true],
-    'user not exist, medicament exist, medicament is active' => [false, true, true],
-    'user exist, medicament not exist, medicament is active' => [true, false, true],
-    'user exist, medicament exist, medicament is not active' => [true, true, false],
-    'user not exist, medicament not exist, medicament is active' => [false, false, true],
-    'user not exist, medicament exist, medicament is not active' => [false, true, false],
-    'user exist, medicament not exist, medicament is not active' => [true, false, false],
+    'user exist, medicament exist, medicament is active - метод не выбрасывает исключение' => [true, true, true],
+    'user not exist, medicament exist, medicament is active - метод выбрасывает исключение' => [false, true, true],
+    'user exist, medicament not exist, medicament is active - метод выбрасывает исключение' => [true, false, true],
+    'user exist, medicament exist, medicament is not active - метод выбрасывает исключение' => [true, true, false],
+    'user not exist, medicament not exist, medicament is active - метод выбрасывает исключение' => [false, false, true],
+    'user not exist, medicament exist, medicament is not active - метод выбрасывает исключение' => [false, true, false],
+    'user exist, medicament not exist, medicament is not active - метод выбрасывает исключение' => [true, false, false],
 ]);

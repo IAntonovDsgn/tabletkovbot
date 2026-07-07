@@ -10,9 +10,10 @@ use App\Domain\Medicament\MedicamentRepositoryInterface;
 use Mockery;
 use Throwable;
 
-test('', function (string $newNotificationTime, bool $isMedicamentExist, bool $isMedicamentActive) {
+test('', function (bool $isMedicamentExist, bool $isMedicamentActive) {
     $medicamentId = 1;
     $medicament = null;
+    $newNotificationTime = "14:00:00";
 
     if ($isMedicamentExist) {
         $medicament = MedicamentFactory::create('testMedicament', $medicamentId);
@@ -35,18 +36,18 @@ test('', function (string $newNotificationTime, bool $isMedicamentExist, bool $i
 
     $handler = new Handler($medicamentRepositoryMock);
 
-    if (!$isMedicamentExist || !$isMedicamentActive) {
-        expect(fn() => $handler($medicamentId, $newNotificationTime))
-            ->toThrow(ChangeMedicamentNotificationTimeException::class);
-    } else {
+    if ($isMedicamentExist && $isMedicamentActive) {
         expect(fn() => $handler($medicamentId, $newNotificationTime))
             ->not->toThrow(Throwable::class);
+    } else {
+        expect(fn() => $handler($medicamentId, $newNotificationTime))
+            ->toThrow(ChangeMedicamentNotificationTimeException::class);
     }
 
 })->with('change-medicament-notification-time');
 
 dataset('change-medicament-notification-time', [
-    'medicament exist' => ["14:00:00", true, true],
-    'medicament not exist' => ["14:00:00", false, false],
-    'medicament exist, but not active' => ["14:00:00", true, false],
+    'medicament exist and active - метод не выбрасывает исключение' => [true, true],
+    'medicament not exist - метод выбрасывает исключение' => [false, false],
+    'medicament exist, but not active - метод выбрасывает исключение' => [true, false],
 ]);
