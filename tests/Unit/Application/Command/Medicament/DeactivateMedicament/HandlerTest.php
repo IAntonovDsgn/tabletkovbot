@@ -2,7 +2,6 @@
 
 use App\Application\Command\Medicament\DeactivateMedicament\DeactivateMedicamentException;
 use App\Application\Command\Medicament\DeactivateMedicament\Handler;
-use App\Domain\Medicament\Medicament;
 use App\Domain\Medicament\MedicamentFactory;
 use App\Domain\Medicament\MedicamentRepositoryInterface;
 

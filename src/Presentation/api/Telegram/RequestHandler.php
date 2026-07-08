@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Presentation\http\Telegram;
+namespace App\Presentation\api\Telegram;
 
 use Telegram\Bot\Objects\Update;
 

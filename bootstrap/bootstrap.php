@@ -1,12 +1,12 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../components/Log/Log.php';
+require_once __DIR__ . '/../src/Infrastructure/Services/Logger/LoggerFacade.php';
 
-use App\Components\Log\Log;
+use App\Infrastructure\Services\Logger\LoggerFacade;
 
-$timezone = $_ENV['APP_TIMEZONE'] ?? 'Asia/Yekaterinburg';
+$timezone = $_ENV['APP_TIMEZONE'];
 date_default_timezone_set($timezone);
 
-$config = require __DIR__ . '/../config/log.php';
-Log::init($config);
+$config = require __DIR__ . '/../config/logger.php';
+LoggerFacade::init($config);
