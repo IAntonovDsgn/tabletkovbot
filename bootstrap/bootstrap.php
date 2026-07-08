@@ -5,5 +5,8 @@ require_once __DIR__ . '/../components/Log/Log.php';
 
 use App\Components\Log\Log;
 
+$timezone = $_ENV['APP_TIMEZONE'] ?? 'Asia/Yekaterinburg';
+date_default_timezone_set($timezone);
+
 $config = require __DIR__ . '/../config/log.php';
 Log::init($config);

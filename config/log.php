@@ -4,7 +4,6 @@ namespace App\config;
 
 return [
     'channel' => env('app'),
-    'timezone' => env('LOG_CHANNEL_TIMEZONE', 'Asia/Yekaterinburg'),
     'handlers' => [
         [
             'type' => 'stream',
