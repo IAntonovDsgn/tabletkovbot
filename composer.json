@@ -7,7 +7,10 @@
     "doctrine/dbal": "^3.8",
     "irazasyed/telegram-bot-sdk": "^3.6",
     "vlucas/phpdotenv": "^5.5",
-    "monolog/monolog": "^3.10"
+    "monolog/monolog": "^3.10",
+    "symfony/console": "^8.1",
+    "symfony/dotenv": "^8.1",
+    "guzzlehttp/guzzle": "^7.13"
   },
   "require-dev": {
     "pestphp/pest": "^4.7",

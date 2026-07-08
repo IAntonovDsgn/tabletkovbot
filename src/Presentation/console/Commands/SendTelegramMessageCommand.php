@@ -2,45 +2,49 @@
 
 namespace App\Presentation\console\Commands;
 
-use App\Services\TelegramService;
-use Exception;
-use Illuminate\Console\Attributes\Description;
-use Illuminate\Console\Attributes\Signature;
-use Illuminate\Support\Facades\Config;
+use App\Infrastructure\Services\Telegram\TelegramFacade;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
 class SendTelegramMessageCommand extends Command
 {
-    public function handle(TelegramService $telegramService): void
+    protected function configure(): void
     {
-        $message = $this->argument('message');
-        $userId = $this->argument('user_id') ?? $this->getDefaultUserId();
+        $this->setName('app:tg-bot-send-message');
+        $this->addArgument('message', InputArgument::REQUIRED);
+        $this->addArgument('user_id', InputArgument::OPTIONAL, '', null);
+        $this->addArgument('reply_to_message_id', InputArgument::OPTIONAL);
+        $this->addArgument('parse_mode', InputArgument::OPTIONAL);
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $message = $input->getArgument('message');
+        $userId = $input->getArgument('user_id');
 
         if (!is_string($userId) || !is_string($message)) {
-            $this->error('User ID and Message ID and must be a string');
-            return;
+            $output->writeln("<error>User ID and Message ID and must be a string</error>");
+            return self::FAILURE;
         }
 
-        $parseMode = is_string($this->option('parse_mode'))
-            ? $this->option('parse_mode')
+        $parseMode = is_string($input->hasArgument('parse_mode'))
+            ? $input->getArgument('parse_mode')
             : null;
 
-        $replyToMessageId = is_int($this->option('reply_to_message_id'))
-            ? $this->option('reply_to_message_id')
+        $replyToMessageId = is_int($input->hasArgument('reply_to_message_id'))
+            ? $input->getArgument('reply_to_message_id')
             : null;
 
         try {
-            $response = $telegramService->sendMessage($userId, $message, $replyToMessageId, $parseMode);
-            $this->info(print_r($response, true));
-        } catch (Exception $e) {
-            $this->error('Failed to send message: ' . $e->getMessage());
+            $response = TelegramFacade::sendMessage($userId, $message, $replyToMessageId, $parseMode);
+            $output->writeln(print_r($response, true));
+            return self::SUCCESS;
+        } catch (Throwable $e) {
+            $output->writeln("<error>Failed to send message: " . $e->getMessage() . "</error>");
+            return self::FAILURE;
         }
-    }
-
-    private function getDefaultUserId(): string
-    {
-        return is_string(Config::get('services.telegram.default_user_id'))
-            ? Config::get('services.telegram.default_user_id')
-            : '';
     }
 }

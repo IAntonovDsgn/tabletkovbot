@@ -2,9 +2,11 @@
 
 namespace App\Infrastructure\Services\Logger;
 
+use BadMethodCallException;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 class LoggerFacade
 {
@@ -28,7 +30,7 @@ class LoggerFacade
     public static function getLogger(): LoggerInterface
     {
         if (self::$logger === null) {
-            throw new \RuntimeException('Logger has not been initialized. Call LoggerFacade::initFromConfig() first.');
+            throw new RuntimeException('Logger has not been initialized. Call LoggerFacade::initFromConfig() first.');
         }
         return self::$logger;
     }
@@ -44,6 +46,6 @@ class LoggerFacade
             $logger->log(...$arguments);
             return;
         }
-        throw new \BadMethodCallException("Method LoggerFacade::$name does not exist.");
+        throw new BadMethodCallException("Method LoggerFacade::$name does not exist.");
     }
 }
