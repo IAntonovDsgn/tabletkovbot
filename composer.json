@@ -6,7 +6,8 @@
     "php-di/php-di": "^7.0",
     "doctrine/dbal": "^3.8",
     "irazasyed/telegram-bot-sdk": "^3.6",
-    "vlucas/phpdotenv": "^5.5"
+    "vlucas/phpdotenv": "^5.5",
+    "monolog/monolog": "^3.10"
   },
   "require-dev": {
     "pestphp/pest": "^4.7",
