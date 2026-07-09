@@ -2,7 +2,7 @@
 
 namespace Presentation\console;
 
-require __DIR__ . '/../../../bootstrap/bootstrap.php';
+require __DIR__ . '/bootstrap/bootstrap.php';
 
 use App\Presentation\console\Commands\GetTelegramUpdatesCommand;
 use App\Presentation\console\Commands\SendTelegramMessageCommand;

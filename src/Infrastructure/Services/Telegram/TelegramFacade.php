@@ -39,10 +39,12 @@ final class TelegramFacade
         }
 
         $requestProperties = [
-            'chat_id' => $userId,
-            'text' => $message,
-            'parse_mode' => $parseMode,
-            'reply_to_message_id' => $replyToMessageId,
+            'form_params' => [
+                'chat_id' => $userId,
+                'text' => $message,
+                'parse_mode' => $parseMode,
+                'reply_to_message_id' => $replyToMessageId,
+            ]
         ];
 
         $response = self::$httpClient->post('/bot' . self::$token . '/sendMessage', $requestProperties)->getBody();

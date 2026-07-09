@@ -15,7 +15,7 @@ class SendTelegramMessageCommand extends Command
     {
         $this->setName('app:tg-bot-send-message');
         $this->addArgument('message', InputArgument::REQUIRED);
-        $this->addArgument('user_id', InputArgument::OPTIONAL, '', null);
+        $this->addArgument('user_id', InputArgument::REQUIRED);
         $this->addArgument('reply_to_message_id', InputArgument::OPTIONAL);
         $this->addArgument('parse_mode', InputArgument::OPTIONAL);
     }

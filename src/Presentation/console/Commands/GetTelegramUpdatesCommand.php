@@ -3,10 +3,10 @@
 namespace App\Presentation\console\Commands;
 
 use App\Infrastructure\Services\Telegram\TelegramFacade;
-use Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
 class GetTelegramUpdatesCommand extends Command
 {
@@ -22,7 +22,7 @@ class GetTelegramUpdatesCommand extends Command
             $result = 'Updates: '.print_r($response, true);
             $output->writeln($result);
             return self::SUCCESS;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $output->writeln("<error>Failed: " . $e->getMessage() . "</error>");
             return self::FAILURE;
         }
