@@ -2,7 +2,7 @@
 
 namespace App\Presentation\Console\Commands;
 
-use App\Domain\Telegram\TelegramFacadeInterface;
+use App\Domain\TelegramMessage\TelegramMessageFacadeInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,7 +11,7 @@ use Throwable;
 
 class SendTelegramMessageCommand extends Command
 {
-    public function __construct(private readonly TelegramFacadeInterface $telegramFacade)
+    public function __construct(private readonly TelegramMessageFacadeInterface $telegramFacade)
     {
         parent::__construct();
     }
@@ -31,7 +31,7 @@ class SendTelegramMessageCommand extends Command
         $chatId = $input->getArgument('chat_id');
 
         if (!is_string($chatId) || !is_string($message)) {
-            $output->writeln("<error>Chat ID and Message ID and must be a string</error>");
+            $output->writeln("<error>Chat ID and TelegramMessage ID and must be a string</error>");
             return self::FAILURE;
         }
 

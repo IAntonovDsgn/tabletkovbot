@@ -2,9 +2,9 @@
 
 namespace App\config;
 
-use App\Domain\Telegram\TelegramFacadeInterface;
+use App\Domain\TelegramMessage\TelegramMessageFacadeInterface;
 use App\Infrastructure\Services\Logger\LoggerFacade;
-use App\Infrastructure\Services\Telegram\TelegramFacade;
+use App\Infrastructure\Services\TelegramMessage\TelegramTelegramMessageFacade;
 use Psr\Log\LoggerInterface;
 
 return [
@@ -12,8 +12,8 @@ return [
         return LoggerFacade::getLogger();
     },
 
-    TelegramFacadeInterface::class => function () {
-        return new TelegramFacade();
+    TelegramMessageFacadeInterface::class => function () {
+        return new TelegramTelegramMessageFacade();
     },
 
     'telegram.config' => function () {

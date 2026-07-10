@@ -2,7 +2,8 @@
 
 namespace App\Presentation\Console\Commands;
 
-use App\Domain\Telegram\TelegramFacadeInterface;
+
+use App\Application\Query\TelegramMessage\GetUpdates\Handler;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -10,8 +11,9 @@ use Throwable;
 
 class GetTelegramUpdatesCommand extends Command
 {
-    public function __construct(private readonly TelegramFacadeInterface $telegramFacade)
-    {
+    public function __construct(
+        private readonly Handler $handler,
+    ) {
         parent::__construct();
     }
 
@@ -23,7 +25,7 @@ class GetTelegramUpdatesCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $response = $this->telegramFacade->getUpdates();
+            $response = $this->handler->handle();
             $result = 'Updates: '.print_r($response, true);
             $output->writeln($result);
             return self::SUCCESS;

@@ -1,15 +1,17 @@
 <?php
 
-namespace App\Infrastructure\Services\Telegram;
+namespace App\Infrastructure\Services\TelegramMessage;
 
-use App\Domain\Telegram\TelegramFacadeInterface;
+use App\Domain\TelegramMessage\TelegramMessage;
+use App\Domain\TelegramMessage\TelegramMessageFacadeInterface;
 use App\Infrastructure\ServiceContainer\ServiceContainer;
 use DI\DependencyException;
 use DI\NotFoundException;
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
-final readonly class TelegramFacade implements TelegramFacadeInterface
+final readonly class TelegramTelegramMessageFacade implements TelegramMessageFacadeInterface
 {
     private Client $httpClient;
     private string $token;
@@ -18,7 +20,8 @@ final readonly class TelegramFacade implements TelegramFacadeInterface
      * @throws DependencyException
      * @throws NotFoundException
      */
-    public function __construct() {
+    public function __construct()
+    {
         $telegramConfig = ServiceContainer::get('telegram.config');
         $this->token = $telegramConfig['token'];
         $this->httpClient = new Client(['base_uri' => $telegramConfig['base_url']]);
@@ -28,18 +31,13 @@ final readonly class TelegramFacade implements TelegramFacadeInterface
      * @throws GuzzleException
      * @throws TelegramException
      */
-    public function sendMessage(
-        string $chatId,
-        string $message,
-        ?int $replyToMessageId = null,
-        ?string $parseMode = 'html',
-    ): void {
+    public function sendMessage(TelegramMessage $message): void
+    {
         $requestProperties = [
             'form_params' => [
-                'chat_id' => $chatId,
-                'text' => $message,
-                'parse_mode' => $parseMode,
-                'reply_to_message_id' => $replyToMessageId,
+                'chat_id' => $message->getChatId(),
+                'text' => $message->getText(),
+                'parse_mode' => 'html',
             ]
         ];
 
@@ -47,7 +45,7 @@ final readonly class TelegramFacade implements TelegramFacadeInterface
         $statusCode = $response->getStatusCode();
 
         if ($statusCode !== 200) {
-            throw new TelegramException('Telegram Facade returned status code ' . $statusCode);
+            throw new TelegramException('TelegramMessage Facade returned status code ' . $statusCode);
         }
     }
 
@@ -57,7 +55,22 @@ final readonly class TelegramFacade implements TelegramFacadeInterface
      */
     public function getUpdates(): array
     {
+        $result = [];
         $response = $this->httpClient->post('/bot' . $this->token . '/getUpdates')->getBody();
-        return json_decode($response, true);
+        $messages = json_decode($response, true)['result'];
+
+        foreach ($messages as $message) {
+            try {
+                $result[] = new TelegramMessage(
+                    $message['message']['chat']['id'],
+                    $message['message']['text'],
+                    $message['message']['message_id'],
+                );
+            } catch (Exception) {
+                throw new TelegramException('Incorrect message');
+            }
+        }
+
+        return $result;
     }
 }
