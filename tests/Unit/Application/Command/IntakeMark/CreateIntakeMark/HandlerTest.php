@@ -2,36 +2,35 @@
 
 use App\Application\Command\IntakeMark\CreateIntakeMark\CreateIntakeMarkException;
 use App\Application\Command\IntakeMark\CreateIntakeMark\Handler;
+use App\Domain\Chat\ChatFactory;
+use App\Domain\Chat\ChatRepositoryInterface;
 use App\Domain\IntakeMark\IntakeMarkFactory;
 use App\Domain\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Medicament\MedicamentFactory;
 use App\Domain\Medicament\MedicamentRepositoryInterface;
-use App\Domain\User\UserFactory;
-use App\Domain\User\UserRepositoryInterface;
 
-test('', function (bool $isUserExist, bool $isMedicamentExist, bool $isMedicamentActive) {
+test('', function (bool $isChatExist, bool $isMedicamentExist, bool $isMedicamentActive) {
     $medicamentId = 1;
-    $userId = 1;
-    $telegramId = 1;
+    $chatId = 1;
 
     $intakeMarkRepositoryMock = Mockery::mock(IntakeMarkRepositoryInterface::class);
-    $userRepositoryMock = Mockery::mock(UserRepositoryInterface::class);
+    $chatRepositoryMock = Mockery::mock(ChatRepositoryInterface::class);
     $medicamentRepositoryMock = Mockery::mock(MedicamentRepositoryInterface::class);
 
-    $user = UserFactory::create($telegramId);
+    $chat = ChatFactory::create($chatId);
     $medicament = null;
 
     if ($isMedicamentExist) {
-        $medicament = MedicamentFactory::create('testMedicament', $userId);
+        $medicament = MedicamentFactory::create('testMedicament', $chatId);
         if (! $isMedicamentActive) {
             $medicament->deactivate();
         }
     }
 
-    $userRepositoryMock
-        ->shouldReceive('findByUserId')
-        ->with($userId)
-        ->andReturn($isUserExist ? $user : null);
+    $chatRepositoryMock
+        ->shouldReceive('findById')
+        ->with($chatId)
+        ->andReturn($isChatExist ? $chat : null);
 
 
     $medicamentRepositoryMock
@@ -40,31 +39,31 @@ test('', function (bool $isUserExist, bool $isMedicamentExist, bool $isMedicamen
         ->andReturn($medicament);
 
 
-    if ($isUserExist && $isMedicamentExist && $isMedicamentActive) {
-        $intakeMark = IntakeMarkFactory::create($userId, $medicamentId);
+    if ($isChatExist && $isMedicamentExist && $isMedicamentActive) {
+        $intakeMark = IntakeMarkFactory::create($chatId, $medicamentId);
         $intakeMarkRepositoryMock
             ->shouldReceive('save')
             ->with($intakeMark)
             ->andReturn();
     }
 
-    $handler = new Handler($intakeMarkRepositoryMock, $medicamentRepositoryMock, $userRepositoryMock);
+    $handler = new Handler($intakeMarkRepositoryMock, $medicamentRepositoryMock, $chatRepositoryMock);
 
-    if ($isUserExist && $isMedicamentExist && $isMedicamentActive) {
-        expect(fn() => $handler($medicamentId, $userId))
+    if ($isChatExist && $isMedicamentExist && $isMedicamentActive) {
+        expect(fn() => $handler($medicamentId, $chatId))
             ->not->toThrow(Throwable::class);
     } else {
-        expect(fn() => $handler($medicamentId, $userId))
+        expect(fn() => $handler($medicamentId, $chatId))
             ->toThrow(CreateIntakeMarkException::class);
     }
 })->with('create intake mark');
 
 dataset('create intake mark', [
-    'user exist, medicament exist, medicament is active - метод не выбрасывает исключение' => [true, true, true],
-    'user not exist, medicament exist, medicament is active - метод выбрасывает исключение' => [false, true, true],
-    'user exist, medicament not exist, medicament is active - метод выбрасывает исключение' => [true, false, true],
-    'user exist, medicament exist, medicament is not active - метод выбрасывает исключение' => [true, true, false],
-    'user not exist, medicament not exist, medicament is active - метод выбрасывает исключение' => [false, false, true],
-    'user not exist, medicament exist, medicament is not active - метод выбрасывает исключение' => [false, true, false],
-    'user exist, medicament not exist, medicament is not active - метод выбрасывает исключение' => [true, false, false],
+    'chat exist, medicament exist, medicament is active - метод не выбрасывает исключение' => [true, true, true],
+    'chat not exist, medicament exist, medicament is active - метод выбрасывает исключение' => [false, true, true],
+    'chat exist, medicament not exist, medicament is active - метод выбрасывает исключение' => [true, false, true],
+    'chat exist, medicament exist, medicament is not active - метод выбрасывает исключение' => [true, true, false],
+    'chat not exist, medicament not exist, medicament is active - метод выбрасывает исключение' => [false, false, true],
+    'chat not exist, medicament exist, medicament is not active - метод выбрасывает исключение' => [false, true, false],
+    'chat exist, medicament not exist, medicament is not active - метод выбрасывает исключение' => [true, false, false],
 ]);

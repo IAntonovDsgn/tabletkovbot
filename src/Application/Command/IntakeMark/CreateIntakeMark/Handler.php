@@ -2,37 +2,37 @@
 
 namespace App\Application\Command\IntakeMark\CreateIntakeMark;
 
+use App\Domain\Chat\ChatRepositoryInterface;
 use App\Domain\IntakeMark\IntakeMarkFactory;
 use App\Domain\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Medicament\MedicamentRepositoryInterface;
-use App\Domain\User\UserRepositoryInterface;
 
 final readonly class Handler
 {
     public function __construct(
         private IntakeMarkRepositoryInterface $intakeMarkRepository,
         private MedicamentRepositoryInterface $medicamentRepository,
-        private UserRepositoryInterface $userRepository
+        private ChatRepositoryInterface $chatRepository
     ) {
     }
 
     /**
      * @throws CreateIntakeMarkException
      */
-    public function __invoke(int $medicamentId, int $userId): void
+    public function __invoke(int $medicamentId, int $chatId): void
     {
-        $user = $this->userRepository->findByUserId($userId);
+        $chat = $this->chatRepository->findById($chatId);
         $medicament = $this->medicamentRepository->findById($medicamentId);
 
         if (is_null($medicament)) {
-            throw new CreateIntakeMarkException('Не найден медикамент');
+            throw new CreateIntakeMarkException('Медикамент не найден');
         } elseif (! $medicament->isActive()) {
             throw new CreateIntakeMarkException('Медикамент не активен');
-        } elseif (is_null($user)) {
-            throw new CreateIntakeMarkException('Не найден пользователь');
+        } elseif (is_null($chat)) {
+            throw new CreateIntakeMarkException('Чат не найден');
         }
 
-        $intakeMark = IntakeMarkFactory::create($userId, $medicamentId);
+        $intakeMark = IntakeMarkFactory::create($chatId, $medicamentId);
         $this->intakeMarkRepository->save($intakeMark);
     }
 }

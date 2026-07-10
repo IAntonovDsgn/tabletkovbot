@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Domain\User;
+namespace App\Domain\Chat;
 
-class User
+class Chat
 {
     protected function __construct(
-        private readonly int $telegramId,
+        private readonly int $chatId,
         private bool $hasNotification,
-        private readonly ?int $id = null
     ) {
     }
 

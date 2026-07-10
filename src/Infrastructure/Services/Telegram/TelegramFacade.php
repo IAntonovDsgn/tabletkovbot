@@ -29,7 +29,7 @@ final class TelegramFacade
      * @throws TelegramException
      */
     public static function sendMessage(
-        string $userId,
+        string $chatId,
         string $message,
         ?int $replyToMessageId = null,
         ?string $parseMode = 'html',
@@ -40,7 +40,7 @@ final class TelegramFacade
 
         $requestProperties = [
             'form_params' => [
-                'chat_id' => $userId,
+                'chat_id' => $chatId,
                 'text' => $message,
                 'parse_mode' => $parseMode,
                 'reply_to_message_id' => $replyToMessageId,

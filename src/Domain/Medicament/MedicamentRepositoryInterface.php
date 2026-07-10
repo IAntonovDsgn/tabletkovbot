@@ -6,12 +6,12 @@ interface MedicamentRepositoryInterface
 {
     public function save(Medicament $medicament): void;
 
-    public function findByUserIdAndMedicamentName(string $medicamentName, int $userId): ?Medicament;
+    public function findByChatIdAndMedicamentName(string $medicamentName, int $chatId): ?Medicament;
 
     public function findById(int $id): ?Medicament;
 
     /**
      * @return Medicament[]
      */
-    public function findByUserId(int $userId): array;
+    public function findByChatId(int $chatId): array;
 }

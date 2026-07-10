@@ -11,5 +11,5 @@ interface IntakeMarkRepositoryInterface
     /**
      * @return IntakeMark[]
      */
-    public function findByUserId(int $userId): array;
+    public function findByChatId(int $chatId): array;
 }

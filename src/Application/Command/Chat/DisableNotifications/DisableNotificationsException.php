@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Command\User\DisableNotifications;
+namespace App\Application\Command\Chat\DisableNotifications;
 
 class DisableNotificationsException extends \Exception
 {}

@@ -16,15 +16,15 @@ final readonly class Handler
     /**
      * @throws CreateMedicamentException
      */
-    public function __invoke(int $userId, string $medicamentName, ?DateTimeImmutable $notificationTime): void
+    public function __invoke(int $chatId, string $medicamentName, ?DateTimeImmutable $notificationTime): void
     {
-        $sameExistMedicament = $this->medicamentRepository->findByUserIdAndMedicamentName($medicamentName, $userId);
+        $sameExistMedicament = $this->medicamentRepository->findByChatIdAndMedicamentName($medicamentName, $chatId);
 
         if (! is_null($sameExistMedicament)) {
             throw new CreateMedicamentException('Медикамент уже существует');
         }
 
-        $medicament = MedicamentFactory::create($medicamentName, $userId, $notificationTime);
+        $medicament = MedicamentFactory::create($medicamentName, $chatId, $notificationTime);
         $this->medicamentRepository->save($medicament);
     }
 }

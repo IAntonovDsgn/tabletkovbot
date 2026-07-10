@@ -11,11 +11,11 @@ use Throwable;
 
 test('', function ($isIntakeMarkExist, $isIntakeMarkActive) {
     $intakeMarkId = 1;
-    $userId = 1;
+    $chatId = 1;
     $medicamentId = 1;
 
     if ($isIntakeMarkExist) {
-        $intakeMark = IntakeMarkFactory::create($userId, $medicamentId);
+        $intakeMark = IntakeMarkFactory::create($chatId, $medicamentId);
         if (! $isIntakeMarkActive) {
             $intakeMark->deactivate();
         }
@@ -32,10 +32,10 @@ test('', function ($isIntakeMarkExist, $isIntakeMarkActive) {
     $handler = new Handler($intakeMarkRepositoryMock);
 
     if ($isIntakeMarkActive && $isIntakeMarkExist) {
-        expect(fn() => $handler($userId))
+        expect(fn() => $handler($chatId))
             ->not->toThrow(Throwable::class);
     } else {
-        expect(fn() => $handler($userId))
+        expect(fn() => $handler($chatId))
             ->toThrow(DeactivateIntakeMarkException::class);
     }
 

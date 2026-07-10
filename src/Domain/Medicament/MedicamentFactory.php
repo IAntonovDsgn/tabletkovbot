@@ -8,13 +8,13 @@ class MedicamentFactory extends Medicament
 {
     public static function create(
         string $name,
-        int $userId,
+        int $chatId,
         ?DateTimeImmutable $notificationTime = null
     ): Medicament
     {
         return new Medicament(
             $name,
-            $userId,
+            $chatId,
             true,
             $notificationTime
         );

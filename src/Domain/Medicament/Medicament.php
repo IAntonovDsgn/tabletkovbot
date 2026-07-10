@@ -11,7 +11,7 @@ class Medicament
 
     protected function __construct(
         private readonly string $name,
-        private readonly int $userId,
+        private readonly int $chatId,
         private bool $isActive,
         ?DateTimeImmutable $notificationTime = null,
         private readonly ?int $id = null,

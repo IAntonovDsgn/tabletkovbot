@@ -16,9 +16,9 @@ final readonly class Handler
     /**
      * @return IntakeMark[]
      */
-    public function __invoke(int $userId, DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
+    public function __invoke(int $chatId, DateTimeImmutable $startDate, DateTimeImmutable $endDate): array
     {
-        $intakeMarks = $this->intakeMarkRepository->findByUserId($userId);
+        $intakeMarks = $this->intakeMarkRepository->findByChatId($chatId);
 
         foreach ($intakeMarks as $key => $intakeMark) {
             if (! $intakeMark->isIncludeInInterval($startDate, $endDate)) {

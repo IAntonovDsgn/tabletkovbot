@@ -7,20 +7,20 @@ use DateTimeImmutable;
 class IntakeMarkFactory extends IntakeMark
 {
     public static function create(
-        int $userId,
+        int $chatId,
         int $medicamentId,
     ): IntakeMark
     {
         return new IntakeMark
         (
-            $userId,
+            $chatId,
             $medicamentId,
             true,
         );
     }
 
     public static function restore(
-        int $userId,
+        int $chatId,
         int $medicamentId,
         bool $isActive,
         DateTimeImmutable $createdAt,
@@ -28,7 +28,7 @@ class IntakeMarkFactory extends IntakeMark
     ): IntakeMark
     {
         return new IntakeMark(
-            $userId,
+            $chatId,
             $medicamentId,
             $isActive,
             $createdAt,

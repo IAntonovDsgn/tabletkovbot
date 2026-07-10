@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Command\User\EnableNotifications;
+namespace App\Application\Command\Chat\EnableNotifications;
 
 final class EnableNotificationsException extends \Exception
 {}

@@ -1,18 +1,18 @@
 <?php
 
-namespace Tests\Unit\Application\Command\GetMedicamentsByUserId;
+namespace Tests\Unit\Application\Command\GetMedicamentsByChatId;
 
-use App\Application\Query\Medicament\GetMedicamentsByUserId\Handler;
+use App\Application\Query\Medicament\GetMedicamentsByChatId\Handler;
 use App\Domain\Medicament\MedicamentFactory;
 use App\Domain\Medicament\MedicamentRepositoryInterface;
 use Mockery;
 
 test('', function (bool $isMedicamentExist, bool $isMedicamentActive) {
-    $userId = 1;
+    $chatId = 1;
     $medicaments = [];
 
     if ($isMedicamentExist) {
-        $medicament = MedicamentFactory::create('testMedicament', $userId);
+        $medicament = MedicamentFactory::create('testMedicament', $chatId);
         if (! $isMedicamentActive) {
             $medicament->deactivate();
         }
@@ -21,12 +21,12 @@ test('', function (bool $isMedicamentExist, bool $isMedicamentActive) {
 
     $medicamentRepositoryMock = Mockery::mock(MedicamentRepositoryInterface::class);
     $medicamentRepositoryMock
-        ->shouldReceive('findByUserId')
-        ->with($userId)
+        ->shouldReceive('findByChatId')
+        ->with($chatId)
         ->andReturn($medicaments);
 
     $handler = new Handler($medicamentRepositoryMock);
-    $result = $handler($userId);
+    $result = $handler($chatId);
 
     if ($isMedicamentExist && $isMedicamentActive) {
         expect(count($result))->toBe(1);
@@ -34,9 +34,9 @@ test('', function (bool $isMedicamentExist, bool $isMedicamentActive) {
         expect(count($result))->toBe(0);
     }
 
-})->with('get medicament by user id');
+})->with('get medicament by chat id');
 
-dataset('get medicament by user id', [
+dataset('get medicament by chat id', [
     'One medicament exist and active - получаем массив с 1 элементом' => [true, true],
     'Medicament not exist - получаем пустой массив' => [false, true],
     'Medicament exist, but not active - получаем пустой массив' => [true, false]

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Query\Medicament\GetMedicamentsByUserId;
+namespace App\Application\Query\Medicament\GetMedicamentsByChatId;
 
 use App\Domain\Medicament\Medicament;
 use App\Domain\Medicament\MedicamentRepositoryInterface;
@@ -15,9 +15,9 @@ final readonly class Handler
     /**
      * @return Medicament[]
      */
-    public function __invoke(int $userId): array
+    public function __invoke(int $chatId): array
     {
-        $medicaments = $this->medicamentRepository->findByUserId($userId);
+        $medicaments = $this->medicamentRepository->findByChatId($chatId);
 
         foreach ($medicaments as $key => $medicament) {
             if (! $medicament->isActive()) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Unit\Application\Query\Medicament\GetMedicamentsByUserId;
+namespace App\Tests\Unit\Application\Query\Medicament\GetMedicamentsByChatId;
 
 use App\Application\Query\IntakeMark\GetReportData\Handler;
 use App\Domain\IntakeMark\IntakeMarkFactory;
@@ -8,20 +8,20 @@ use App\Domain\IntakeMark\IntakeMarkRepositoryInterface;
 use DateTimeImmutable;
 use Mockery;
 
-test('', function (bool $isIntakeMarksForUserExist, DateTimeImmutable $createdAt) {
-    $userId = 1;
+test('', function (bool $isIntakeMarksForChatExist, DateTimeImmutable $createdAt) {
+    $chatId = 1;
     $medicamentId = 1;
     $intakeMarks = [];
 
-    if ($isIntakeMarksForUserExist) {
-        $intakeMark = IntakeMarkFactory::restore($userId, $medicamentId, true, $createdAt, 1);
+    if ($isIntakeMarksForChatExist) {
+        $intakeMark = IntakeMarkFactory::restore($chatId, $medicamentId, true, $createdAt, 1);
         $intakeMarks[] = $intakeMark;
     }
 
     $intakeMarkRepositoryMock = Mockery::mock(IntakeMarkRepositoryInterface::class);
     $intakeMarkRepositoryMock
-        ->shouldReceive('findByUserId')
-        ->with($userId)
+        ->shouldReceive('findByChatId')
+        ->with($chatId)
         ->andReturn($intakeMarks);
 
     $handler = new Handler($intakeMarkRepositoryMock);
@@ -29,12 +29,12 @@ test('', function (bool $isIntakeMarksForUserExist, DateTimeImmutable $createdAt
     $endDate = DateTimeImmutable::createFromFormat("Y-m-d", "2027-01-01");
     $isIncludeInInterval = $createdAt >= $startDate && $createdAt <= $endDate;
 
-    if ($isIntakeMarksForUserExist && $isIncludeInInterval) {
-        $result = $handler($userId, $startDate, $endDate);
+    if ($isIntakeMarksForChatExist && $isIncludeInInterval) {
+        $result = $handler($chatId, $startDate, $endDate);
         expect($result)->toBeArray()
             ->and($result)->toHaveCount(1);
     } else {
-        $result = $handler($userId, $startDate, $endDate);
+        $result = $handler($chatId, $startDate, $endDate);
         expect($result)->toBeArray()
             ->and($result)->toBeEmpty();
     }

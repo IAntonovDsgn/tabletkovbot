@@ -1,36 +1,36 @@
 <?php
 
-namespace Tests\Unit\Application\Query\GetUserByTelegramId;
+namespace Tests\Unit\Application\Query\GetChatById;
 
-use App\Application\Query\User\GetUser\Handler;
-use App\Domain\User\UserFactory;
-use App\Domain\User\UserRepositoryInterface;
+use App\Application\Query\Chat\GetChat\Handler;
+use App\Domain\Chat\ChatFactory;
+use App\Domain\Chat\ChatRepositoryInterface;
 use Mockery;
 
 test(
     '',
-    function (bool $isUserExist) {
-        $userTelegramId = 1;
+    function (bool $isChatExist) {
+        $chatId = 1;
 
-        if ($isUserExist) {
-            $existingUser = UserFactory::create($userTelegramId);
+        if ($isChatExist) {
+            $existingChat = ChatFactory::create($chatId);
         } else {
-            $existingUser = null;
+            $existingChat = null;
         }
 
-        $userRepositoryMock = Mockery::mock(UserRepositoryInterface::class)
-            ->shouldReceive('findByTelegramId')
-            ->with($userTelegramId)
-            ->andReturn($existingUser)
+        $chatRepositoryMock = Mockery::mock(ChatRepositoryInterface::class)
+            ->shouldReceive('findById')
+            ->with($chatId)
+            ->andReturn($existingChat)
             ->getMock();
 
-        $handler = new Handler($userRepositoryMock);
-        $user = $handler->getUserByTelegramId($userTelegramId);
-        expect($user)->toBe($existingUser);
+        $handler = new Handler($chatRepositoryMock);
+        $chat = $handler->getChatById($chatId);
+        expect($chat)->toBe($existingChat);
     }
-)->with('get user by telegram id');
+)->with('get chat by id');
 
-dataset('get user by telegram id', [
-    'user exist - получаем экземпляр модели User' => true,
-    'user not exist - получаем null' => false
+dataset('get chat by id', [
+    'chat exist - получаем экземпляр модели Chat' => true,
+    'chat not exist - получаем null' => false
 ]);

@@ -10,7 +10,7 @@ class IntakeMark
     private readonly string $createdAt;
 
     protected function __construct(
-        private readonly int $userId,
+        private readonly int $chatId,
         private int $medicamentId,
         private bool $isActive,
         DateTimeImmutable $createdAt = new DateTimeImmutable(),

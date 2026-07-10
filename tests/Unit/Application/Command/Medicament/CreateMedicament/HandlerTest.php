@@ -12,18 +12,18 @@ use Throwable;
 
 test('', function (bool $isMedicamentExist): void {
     $medicamentName = 'medicament1';
-    $userId = 1;
+    $chatId = 1;
     $notificationTime = new DateTimeImmutable("14:30:00");
     $medicament = null;
 
     if ($isMedicamentExist) {
-        $medicament = MedicamentFactory::create($medicamentName, $userId, $notificationTime);
+        $medicament = MedicamentFactory::create($medicamentName, $chatId, $notificationTime);
     }
 
     $medicamentRepositoryMock = Mockery::mock(MedicamentRepositoryInterface::class);
     $medicamentRepositoryMock
-        ->shouldReceive('findByUserIdAndMedicamentName')
-        ->with($medicamentName, $userId)
+        ->shouldReceive('findByChatIdAndMedicamentName')
+        ->with($medicamentName, $chatId)
         ->andReturn($medicament);
 
     if (! $isMedicamentExist) {
@@ -36,10 +36,10 @@ test('', function (bool $isMedicamentExist): void {
     $handler = new Handler($medicamentRepositoryMock);
 
     if ($isMedicamentExist) {
-        expect(fn() => $handler($userId, $medicamentName, $notificationTime))
+        expect(fn() => $handler($chatId, $medicamentName, $notificationTime))
             ->toThrow(CreateMedicamentException::class);
     } else {
-        expect(fn() => $handler($userId, $medicamentName, $notificationTime))
+        expect(fn() => $handler($chatId, $medicamentName, $notificationTime))
             ->not->toThrow(Throwable::class);
     }
 })->with('create medicament');

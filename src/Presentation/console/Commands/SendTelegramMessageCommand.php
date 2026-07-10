@@ -15,7 +15,7 @@ class SendTelegramMessageCommand extends Command
     {
         $this->setName('app:tg-bot-send-message');
         $this->addArgument('message', InputArgument::REQUIRED);
-        $this->addArgument('user_id', InputArgument::REQUIRED);
+        $this->addArgument('chat_id', InputArgument::REQUIRED);
         $this->addArgument('reply_to_message_id', InputArgument::OPTIONAL);
         $this->addArgument('parse_mode', InputArgument::OPTIONAL);
     }
@@ -23,10 +23,10 @@ class SendTelegramMessageCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $message = $input->getArgument('message');
-        $userId = $input->getArgument('user_id');
+        $chatId = $input->getArgument('chat_id');
 
-        if (!is_string($userId) || !is_string($message)) {
-            $output->writeln("<error>User ID and Message ID and must be a string</error>");
+        if (!is_string($chatId) || !is_string($message)) {
+            $output->writeln("<error>Chat ID and Message ID and must be a string</error>");
             return self::FAILURE;
         }
 
@@ -39,7 +39,7 @@ class SendTelegramMessageCommand extends Command
             : null;
 
         try {
-            $response = TelegramFacade::sendMessage($userId, $message, $replyToMessageId, $parseMode);
+            $response = TelegramFacade::sendMessage($chatId, $message, $replyToMessageId, $parseMode);
             $output->writeln(print_r($response, true));
             return self::SUCCESS;
         } catch (Throwable $e) {
