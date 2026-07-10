@@ -2,42 +2,38 @@
 
 namespace App\Infrastructure\Services\Telegram;
 
+use App\Domain\Telegram\TelegramFacadeInterface;
+use App\Infrastructure\ServiceContainer\ServiceContainer;
+use DI\DependencyException;
+use DI\NotFoundException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
-final class TelegramFacade
+final readonly class TelegramFacade implements TelegramFacadeInterface
 {
-    private static Client $httpClient;
-    private static bool $isInitialized = false;
-    private static string $token;
+    private Client $httpClient;
+    private string $token;
 
-    public static function init(array $config): void
-    {
-        if (self::$isInitialized) {
-            return;
-        }
-        $baseUrl = $config['base_url'];
-        self::$token = $config['token'];
-        self::$httpClient = new Client(['base_uri' => $baseUrl]);
-        self::$isInitialized = true;
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    public function __construct() {
+        $telegramConfig = ServiceContainer::get('telegram.config');
+        $this->token = $telegramConfig['token'];
+        $this->httpClient = new Client(['base_uri' => $telegramConfig['base_url']]);
     }
 
     /**
-     * @return array<string,mixed>
-     *
      * @throws GuzzleException
      * @throws TelegramException
      */
-    public static function sendMessage(
+    public function sendMessage(
         string $chatId,
         string $message,
         ?int $replyToMessageId = null,
         ?string $parseMode = 'html',
-    ): array {
-        if (!self::$isInitialized) {
-            throw new TelegramException('Telegram Facade is not initialized');
-        }
-
+    ): void {
         $requestProperties = [
             'form_params' => [
                 'chat_id' => $chatId,
@@ -47,23 +43,21 @@ final class TelegramFacade
             ]
         ];
 
-        $response = self::$httpClient->post('/bot' . self::$token . '/sendMessage', $requestProperties)->getBody();
-        return json_decode($response, true);
+        $response = $this->httpClient->post('/bot' . $this->token . '/sendMessage', $requestProperties);
+        $statusCode = $response->getStatusCode();
+
+        if ($statusCode !== 200) {
+            throw new TelegramException('Telegram Facade returned status code ' . $statusCode);
+        }
     }
 
     /**
-     * @return array<string,mixed>
-     *
      * @throws GuzzleException
      * @throws TelegramException
      */
-    public static function getUpdates(): array
+    public function getUpdates(): array
     {
-        if (!self::$isInitialized) {
-            throw new TelegramException('Telegram Facade is not initialized');
-        }
-
-        $response = self::$httpClient->post('/bot' . self::$token . '/getUpdates')->getBody();
+        $response = $this->httpClient->post('/bot' . $this->token . '/getUpdates')->getBody();
         return json_decode($response, true);
     }
 }

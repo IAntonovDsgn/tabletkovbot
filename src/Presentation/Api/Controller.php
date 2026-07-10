@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Presentation\api\Telegram;
+namespace App\Presentation\Api;
 
 use Telegram\Bot\Objects\Update;
 
-class RequestHandler
+class Controller
 {
     public function handle(Update $requestData): void
     {

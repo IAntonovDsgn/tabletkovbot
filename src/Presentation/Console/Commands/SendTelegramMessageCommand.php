@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Presentation\console\Commands;
+namespace App\Presentation\Console\Commands;
 
-use App\Infrastructure\Services\Telegram\TelegramFacade;
+use App\Domain\Telegram\TelegramFacadeInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,6 +11,11 @@ use Throwable;
 
 class SendTelegramMessageCommand extends Command
 {
+    public function __construct(private readonly TelegramFacadeInterface $telegramFacade)
+    {
+        parent::__construct();
+    }
+
     protected function configure(): void
     {
         $this->setName('app:tg-bot-send-message');
@@ -39,8 +44,7 @@ class SendTelegramMessageCommand extends Command
             : null;
 
         try {
-            $response = TelegramFacade::sendMessage($chatId, $message, $replyToMessageId, $parseMode);
-            $output->writeln(print_r($response, true));
+            $this->telegramFacade->sendMessage($chatId, $message, $replyToMessageId, $parseMode);
             return self::SUCCESS;
         } catch (Throwable $e) {
             $output->writeln("<error>Failed to send message: " . $e->getMessage() . "</error>");

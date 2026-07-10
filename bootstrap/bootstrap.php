@@ -2,8 +2,9 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use App\Infrastructure\ServiceContainer\ServiceContainer;
 use App\Infrastructure\Services\Logger\LoggerFacade;
-use App\Infrastructure\Services\Telegram\TelegramFacade;
+use DI\ContainerBuilder;
 use Symfony\Component\Dotenv\Dotenv;
 
 $dotenv = new Dotenv();
@@ -16,5 +17,10 @@ if (isset($_ENV['APP_TIMEZONE'])) {
 $loggerConfig = require __DIR__ . '/../config/logger.php';
 LoggerFacade::init($loggerConfig);
 
-$telegramConfig = require __DIR__ . '/../config/telegram.php';
-TelegramFacade::init($telegramConfig);
+$containerBuilder = new ContainerBuilder();
+$containerBuilder->useAutowiring(true);
+$containerBuilder->addDefinitions(require __DIR__ . '/../config/container.php');
+
+$container = $containerBuilder->build();
+
+ServiceContainer::set($container);
