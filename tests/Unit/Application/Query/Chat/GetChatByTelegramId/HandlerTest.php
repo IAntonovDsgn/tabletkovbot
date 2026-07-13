@@ -3,7 +3,7 @@
 namespace Tests\Unit\Application\Query\GetChatById;
 
 use App\Application\Query\Chat\GetChat\Handler;
-use App\Domain\Chat\ChatFactory;
+use App\Domain\Chat\Chat;
 use App\Domain\Chat\ChatRepositoryInterface;
 use Mockery;
 
@@ -13,7 +13,7 @@ test(
         $chatId = 1;
 
         if ($isChatExist) {
-            $existingChat = ChatFactory::create($chatId);
+            $existingChat = new Chat($chatId);
         } else {
             $existingChat = null;
         }

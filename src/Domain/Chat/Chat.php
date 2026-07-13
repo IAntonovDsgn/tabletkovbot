@@ -4,9 +4,9 @@ namespace App\Domain\Chat;
 
 class Chat
 {
-    protected function __construct(
-        private readonly int $chatId,
-        private bool $hasNotification,
+    public function __construct(
+        private readonly int $id,
+        private bool $hasNotification = true,
     ) {
     }
 

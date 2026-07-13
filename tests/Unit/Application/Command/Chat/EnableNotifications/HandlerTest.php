@@ -4,7 +4,7 @@ namespace App\Tests\Unit\Application\Command\Chat\EnableNotifications;
 
 use App\Application\Command\Chat\EnableNotifications\EnableNotificationsException;
 use App\Application\Command\Chat\EnableNotifications\Handler;
-use App\Domain\Chat\ChatFactory;
+use App\Domain\Chat\Chat;
 use App\Domain\Chat\ChatRepositoryInterface;
 use Mockery;
 use Throwable;
@@ -14,7 +14,7 @@ test('', function (bool $isChatExist) {
     $chat = null;
 
     if ($isChatExist) {
-        $chat = ChatFactory::create($chatId);
+        $chat = new Chat($chatId);
     }
 
     $chatRepositoryMock = Mockery::mock(ChatRepositoryInterface::class);

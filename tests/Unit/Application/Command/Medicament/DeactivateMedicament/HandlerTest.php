@@ -2,7 +2,7 @@
 
 use App\Application\Command\Medicament\DeactivateMedicament\DeactivateMedicamentException;
 use App\Application\Command\Medicament\DeactivateMedicament\Handler;
-use App\Domain\Medicament\MedicamentFactory;
+use App\Domain\Medicament\Medicament;
 use App\Domain\Medicament\MedicamentRepositoryInterface;
 
 test('', function (bool $isMedicamentExist, bool $isMedicamentActive) {
@@ -10,7 +10,7 @@ test('', function (bool $isMedicamentExist, bool $isMedicamentActive) {
     $medicament = null;
 
     if ($isMedicamentExist) {
-        $medicament = MedicamentFactory::create('testMedicament', $medicamentId);
+        $medicament = new Medicament('testMedicament', 1, id: $medicamentId);
         if (! $isMedicamentActive) {
             $medicament->deactivate();
         }

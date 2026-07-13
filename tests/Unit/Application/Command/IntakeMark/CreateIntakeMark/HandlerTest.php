@@ -2,11 +2,11 @@
 
 use App\Application\Command\IntakeMark\CreateIntakeMark\CreateIntakeMarkException;
 use App\Application\Command\IntakeMark\CreateIntakeMark\Handler;
-use App\Domain\Chat\ChatFactory;
+use App\Domain\Chat\Chat;
 use App\Domain\Chat\ChatRepositoryInterface;
-use App\Domain\IntakeMark\IntakeMarkFactory;
+use App\Domain\IntakeMark\IntakeMark;
 use App\Domain\IntakeMark\IntakeMarkRepositoryInterface;
-use App\Domain\Medicament\MedicamentFactory;
+use App\Domain\Medicament\Medicament;
 use App\Domain\Medicament\MedicamentRepositoryInterface;
 
 test('', function (bool $isChatExist, bool $isMedicamentExist, bool $isMedicamentActive) {
@@ -17,11 +17,11 @@ test('', function (bool $isChatExist, bool $isMedicamentExist, bool $isMedicamen
     $chatRepositoryMock = Mockery::mock(ChatRepositoryInterface::class);
     $medicamentRepositoryMock = Mockery::mock(MedicamentRepositoryInterface::class);
 
-    $chat = ChatFactory::create($chatId);
+    $chat = new Chat($chatId);
     $medicament = null;
 
     if ($isMedicamentExist) {
-        $medicament = MedicamentFactory::create('testMedicament', $chatId);
+        $medicament = new Medicament('testMedicament', $chatId);
         if (! $isMedicamentActive) {
             $medicament->deactivate();
         }
@@ -40,7 +40,7 @@ test('', function (bool $isChatExist, bool $isMedicamentExist, bool $isMedicamen
 
 
     if ($isChatExist && $isMedicamentExist && $isMedicamentActive) {
-        $intakeMark = IntakeMarkFactory::create($chatId, $medicamentId);
+        $intakeMark = new IntakeMark($chatId, $medicamentId);
         $intakeMarkRepositoryMock
             ->shouldReceive('save')
             ->with($intakeMark)

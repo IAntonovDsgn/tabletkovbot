@@ -5,7 +5,6 @@ namespace Tests\Unit\Application\Command\ChangeMedicamentNotificationTime;
 use App\Application\Command\Medicament\ChangeMedicamentNotificationTime\ChangeMedicamentNotificationTimeException;
 use App\Application\Command\Medicament\ChangeMedicamentNotificationTime\Handler;
 use App\Domain\Medicament\Medicament;
-use App\Domain\Medicament\MedicamentFactory;
 use App\Domain\Medicament\MedicamentRepositoryInterface;
 use Mockery;
 use Throwable;
@@ -16,7 +15,7 @@ test('', function (bool $isMedicamentExist, bool $isMedicamentActive) {
     $newNotificationTime = "14:00:00";
 
     if ($isMedicamentExist) {
-        $medicament = MedicamentFactory::create('testMedicament', $medicamentId);
+        $medicament = new Medicament('testMedicament', 1, id: $medicamentId);
         if (! $isMedicamentActive) {
             $medicament->deactivate();
         }

@@ -9,11 +9,11 @@ class Medicament
     const string TIME_FORMAT = 'H:i:s';
     private readonly string $notificationTime;
 
-    protected function __construct(
+    public function __construct(
         private readonly string $name,
         private readonly int $chatId,
-        private bool $isActive,
         ?DateTimeImmutable $notificationTime = null,
+        private bool $isActive = true,
         private readonly ?int $id = null,
     ) {
         if (! is_null($notificationTime)) {

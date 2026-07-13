@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Infrastructure\Services\TelegramMessage;
+namespace App\Infrastructure\Services\Message;
 
-use App\Domain\TelegramMessage\TelegramMessage;
-use App\Domain\TelegramMessage\TelegramMessageFacadeInterface;
-use App\Infrastructure\ServiceContainer\ServiceContainer;
+use App\Domain\Message\Message;
+use App\Domain\Message\MessageFacadeInterface;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use ServiceContainer;
 
-final readonly class TelegramTelegramMessageFacade implements TelegramMessageFacadeInterface
+final readonly class MessageFacade implements MessageFacadeInterface
 {
     private Client $httpClient;
     private string $token;
@@ -29,14 +29,15 @@ final readonly class TelegramTelegramMessageFacade implements TelegramMessageFac
 
     /**
      * @throws GuzzleException
-     * @throws TelegramException
+     * @throws MessageException
      */
-    public function sendMessage(TelegramMessage $message): void
+    public function sendMessage(Message $message): void
     {
         $requestProperties = [
             'form_params' => [
                 'chat_id' => $message->getChatId(),
                 'text' => $message->getText(),
+                "reply_to_message_id" => $message->getReplyToMessageId(),
                 'parse_mode' => 'html',
             ]
         ];
@@ -45,13 +46,13 @@ final readonly class TelegramTelegramMessageFacade implements TelegramMessageFac
         $statusCode = $response->getStatusCode();
 
         if ($statusCode !== 200) {
-            throw new TelegramException('TelegramMessage Facade returned status code ' . $statusCode);
+            throw new MessageException('Message Facade returned status code ' . $statusCode);
         }
     }
 
     /**
      * @throws GuzzleException
-     * @throws TelegramException
+     * @throws MessageException
      */
     public function getUpdates(): array
     {
@@ -61,13 +62,13 @@ final readonly class TelegramTelegramMessageFacade implements TelegramMessageFac
 
         foreach ($messages as $message) {
             try {
-                $result[] = new TelegramMessage(
+                $result[] = new Message(
                     $message['message']['chat']['id'],
                     $message['message']['text'],
                     $message['message']['message_id'],
                 );
             } catch (Exception) {
-                throw new TelegramException('Incorrect message');
+                throw new MessageException('Incorrect message');
             }
         }
 

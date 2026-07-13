@@ -9,11 +9,11 @@ class IntakeMark
     const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
     private readonly string $createdAt;
 
-    protected function __construct(
+    public function __construct(
         private readonly int $chatId,
         private int $medicamentId,
-        private bool $isActive,
         DateTimeImmutable $createdAt = new DateTimeImmutable(),
+        private bool $isActive = true,
         private readonly ?int $id = null,
     ) {
         $this->createdAt = $createdAt->format(self::DATE_TIME_FORMAT);

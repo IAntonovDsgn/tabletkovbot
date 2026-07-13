@@ -4,7 +4,7 @@ namespace Unit\Application\Command\IntakeMark\DeactivateIntakeMark;
 
 use App\Application\Command\IntakeMark\DeactivateIntakeMark\DeactivateIntakeMarkException;
 use App\Application\Command\IntakeMark\DeactivateIntakeMark\Handler;
-use App\Domain\IntakeMark\IntakeMarkFactory;
+use App\Domain\IntakeMark\IntakeMark;
 use App\Domain\IntakeMark\IntakeMarkRepositoryInterface;
 use Mockery;
 use Throwable;
@@ -15,7 +15,7 @@ test('', function ($isIntakeMarkExist, $isIntakeMarkActive) {
     $medicamentId = 1;
 
     if ($isIntakeMarkExist) {
-        $intakeMark = IntakeMarkFactory::create($chatId, $medicamentId);
+        $intakeMark = new IntakeMark($chatId, $medicamentId);
         if (! $isIntakeMarkActive) {
             $intakeMark->deactivate();
         }

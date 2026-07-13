@@ -4,7 +4,7 @@ namespace Tests\Unit\Application\Command\Chat\CreateChat;
 
 use App\Application\Command\Chat\CreateChat\Handler;
 use App\Application\Command\Chat\CreateChat\CreateChatException;
-use App\Domain\Chat\ChatFactory;
+use App\Domain\Chat\Chat;
 use App\Domain\Chat\ChatRepositoryInterface;
 use Mockery;
 use Throwable;
@@ -14,10 +14,12 @@ test('', function (bool $isChatExist) {
     $chat = null;
 
     if ($isChatExist) {
-        $chat = ChatFactory::create($chatId);
+        $chat = new Chat($chatId);
     }
 
     $chatRepositoryMock = Mockery::mock(ChatRepositoryInterface::class);
+    $chatRepositoryMock->shouldReceive('startTransaction');
+    $chatRepositoryMock->shouldReceive('finishTransaction');
     $chatRepositoryMock
         ->shouldReceive('findById')
         ->with($chatId)

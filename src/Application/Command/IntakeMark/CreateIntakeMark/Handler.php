@@ -3,7 +3,7 @@
 namespace App\Application\Command\IntakeMark\CreateIntakeMark;
 
 use App\Domain\Chat\ChatRepositoryInterface;
-use App\Domain\IntakeMark\IntakeMarkFactory;
+use App\Domain\IntakeMark\IntakeMark;
 use App\Domain\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Medicament\MedicamentRepositoryInterface;
 
@@ -32,7 +32,7 @@ final readonly class Handler
             throw new CreateIntakeMarkException('Чат не найден');
         }
 
-        $intakeMark = IntakeMarkFactory::create($chatId, $medicamentId);
+        $intakeMark = new IntakeMark($chatId, $medicamentId);
         $this->intakeMarkRepository->save($intakeMark);
     }
 }

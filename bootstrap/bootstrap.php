@@ -2,7 +2,6 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use App\Infrastructure\ServiceContainer\ServiceContainer;
 use App\Infrastructure\Services\Logger\LoggerFacade;
 use DI\ContainerBuilder;
 use Symfony\Component\Dotenv\Dotenv;

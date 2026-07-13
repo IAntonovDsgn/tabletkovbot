@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Domain\TelegramMessage;
+namespace App\Domain\Message;
 
-class TelegramMessage
+class Message
 {
     public function __construct(
         private readonly int $chatId,
         private readonly string $text,
+        private readonly ?int $replyToMessageId = null,
         private ?int $id = null,
     ) {}
 
@@ -18,5 +19,10 @@ class TelegramMessage
     public function getText(): string
     {
         return $this->text;
+    }
+
+    public function getReplyToMessageId(): ?int
+    {
+        return $this->replyToMessageId;
     }
 }

@@ -4,9 +4,9 @@ namespace Presentation\console;
 
 require __DIR__ . '/../../../bootstrap/bootstrap.php';
 
-use App\Infrastructure\ServiceContainer\ServiceContainer;
 use App\Presentation\console\Commands\GetTelegramUpdatesCommand;
 use App\Presentation\console\Commands\SendTelegramMessageCommand;
+use ServiceContainer;
 use Symfony\Component\Console\Application;
 
 $application = new Application('app', 'n/a');

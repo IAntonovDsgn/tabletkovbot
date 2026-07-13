@@ -4,7 +4,7 @@ namespace Tests\Unit\Application\Command\CreateMedicament;
 
 use App\Application\Command\Medicament\CreateMedicament\CreateMedicamentException;
 use App\Application\Command\Medicament\CreateMedicament\Handler;
-use App\Domain\Medicament\MedicamentFactory;
+use App\Domain\Medicament\Medicament;
 use App\Domain\Medicament\MedicamentRepositoryInterface;
 use DateTimeImmutable;
 use Mockery;
@@ -17,7 +17,7 @@ test('', function (bool $isMedicamentExist): void {
     $medicament = null;
 
     if ($isMedicamentExist) {
-        $medicament = MedicamentFactory::create($medicamentName, $chatId, $notificationTime);
+        $medicament = new Medicament($medicamentName, $chatId, $notificationTime);
     }
 
     $medicamentRepositoryMock = Mockery::mock(MedicamentRepositoryInterface::class);

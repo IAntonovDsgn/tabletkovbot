@@ -1,11 +1,8 @@
 <?php
 
-namespace App\Infrastructure\ServiceContainer;
-
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
-use RuntimeException;
 
 final class ServiceContainer
 {

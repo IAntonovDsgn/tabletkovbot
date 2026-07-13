@@ -3,7 +3,7 @@
 namespace App\Tests\Unit\Application\Query\Medicament\GetMedicamentsByChatId;
 
 use App\Application\Query\IntakeMark\GetReportData\Handler;
-use App\Domain\IntakeMark\IntakeMarkFactory;
+use App\Domain\IntakeMark\IntakeMark;
 use App\Domain\IntakeMark\IntakeMarkRepositoryInterface;
 use DateTimeImmutable;
 use Mockery;
@@ -14,7 +14,7 @@ test('', function (bool $isIntakeMarksForChatExist, DateTimeImmutable $createdAt
     $intakeMarks = [];
 
     if ($isIntakeMarksForChatExist) {
-        $intakeMark = IntakeMarkFactory::restore($chatId, $medicamentId, true, $createdAt, 1);
+        $intakeMark = new IntakeMark($chatId, $medicamentId, $createdAt, true, 1);
         $intakeMarks[] = $intakeMark;
     }
 

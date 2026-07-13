@@ -2,7 +2,7 @@
 
 namespace App\Application\Command\Medicament\CreateMedicament;
 
-use App\Domain\Medicament\MedicamentFactory;
+use App\Domain\Medicament\Medicament;
 use App\Domain\Medicament\MedicamentRepositoryInterface;
 use DateTimeImmutable;
 
@@ -24,7 +24,12 @@ final readonly class Handler
             throw new CreateMedicamentException('Медикамент уже существует');
         }
 
-        $medicament = MedicamentFactory::create($medicamentName, $chatId, $notificationTime);
+        $medicament = new Medicament(
+            $medicamentName,
+            $chatId,
+            $notificationTime,
+        );
+
         $this->medicamentRepository->save($medicament);
     }
 }

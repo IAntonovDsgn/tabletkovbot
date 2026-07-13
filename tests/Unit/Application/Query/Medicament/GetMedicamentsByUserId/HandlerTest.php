@@ -3,7 +3,7 @@
 namespace Tests\Unit\Application\Command\GetMedicamentsByChatId;
 
 use App\Application\Query\Medicament\GetMedicamentsByChatId\Handler;
-use App\Domain\Medicament\MedicamentFactory;
+use App\Domain\Medicament\Medicament;
 use App\Domain\Medicament\MedicamentRepositoryInterface;
 use Mockery;
 
@@ -12,7 +12,7 @@ test('', function (bool $isMedicamentExist, bool $isMedicamentActive) {
     $medicaments = [];
 
     if ($isMedicamentExist) {
-        $medicament = MedicamentFactory::create('testMedicament', $chatId);
+        $medicament = new Medicament('testMedicament', $chatId);
         if (! $isMedicamentActive) {
             $medicament->deactivate();
         }
