@@ -8,7 +8,7 @@ use App\Domain\Message\MessageFacadeInterface;
 final readonly class Handler
 {
     public function __construct(
-        private MessageFacadeInterface $telegramMessageFacade
+        private MessageFacadeInterface $messageFacade
     ) {}
 
     /**
@@ -16,6 +16,6 @@ final readonly class Handler
      */
     public function handle(): array
     {
-        return $this->telegramMessageFacade->getUpdates();
+        return $this->messageFacade->getUpdates();
     }
 }

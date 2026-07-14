@@ -38,10 +38,10 @@ test('', function (bool $isMedicamentExist, bool $isMedicamentActive) {
             ->toThrow(DeactivateMedicamentException::class);
     }
 
-})->with('delete medicament');
+})->with('delete medicament dataset');
 
-dataset('delete medicament', [
+dataset('delete medicament dataset', [
     'medicament exist - метод не выбрасывает исключение' => [true, true],
-    'medicament not exist - метод выбрасывает исключение' => [false, false],
+    'medicament is not exist - метод выбрасывает исключение' => [false, false],
     'medicament exist, but not active - метод выбрасывает исключение' => [true, false],
 ]);

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Presentation\Console\Commands;
+namespace App\Presentation\Console\Command;
 
 
 use App\Application\Query\TelegramMessage\GetUpdates\Handler;
