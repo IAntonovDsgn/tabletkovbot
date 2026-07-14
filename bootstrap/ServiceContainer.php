@@ -19,9 +19,6 @@ final class ServiceContainer
      */
     public static function get(string $id): mixed
     {
-        if (self::$container === null) {
-            throw new RuntimeException('Контейнер не инициализирован');
-        }
         return self::$container->get($id);
     }
 }

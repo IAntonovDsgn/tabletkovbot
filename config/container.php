@@ -6,15 +6,14 @@ use App\Domain\Message\MessageFacadeInterface;
 use App\Infrastructure\Services\Logger\LoggerFacade;
 use App\Infrastructure\Services\Message\MessageFacade;
 use Psr\Log\LoggerInterface;
+use function DI\autowire;
 
 return [
     LoggerInterface::class => function () {
         return LoggerFacade::getLogger();
     },
 
-    MessageFacadeInterface::class => function () {
-        return new MessageFacade();
-    },
+    MessageFacadeInterface::class => autowire(MessageFacade::class),
 
     'telegram.config' => function () {
         return require __DIR__ . '/telegram.php';
