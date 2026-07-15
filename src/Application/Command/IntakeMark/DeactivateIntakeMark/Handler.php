@@ -2,7 +2,7 @@
 
 namespace App\Application\Command\IntakeMark\DeactivateIntakeMark;
 
-use App\Domain\IntakeMark\IntakeMarkRepositoryInterface;
+use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 
 final readonly class Handler
 {

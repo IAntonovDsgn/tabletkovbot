@@ -4,8 +4,8 @@ namespace App\Tests\Unit\Application\Command\Chat\EnableNotifications;
 
 use App\Application\Command\Chat\EnableNotifications\EnableNotificationsException;
 use App\Application\Command\Chat\EnableNotifications\Handler;
-use App\Domain\Chat\Chat;
-use App\Domain\Chat\ChatRepositoryInterface;
+use App\Domain\Entities\Chat\Chat;
+use App\Domain\Entities\Chat\ChatRepositoryInterface;
 use Mockery;
 use Throwable;
 

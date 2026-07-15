@@ -2,8 +2,8 @@
 
 namespace App\Application\Command\Medicament\CreateMedicament;
 
-use App\Domain\Medicament\Medicament;
-use App\Domain\Medicament\MedicamentRepositoryInterface;
+use App\Domain\Entities\Medicament\Medicament;
+use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use DateTimeImmutable;
 
 final readonly class Handler

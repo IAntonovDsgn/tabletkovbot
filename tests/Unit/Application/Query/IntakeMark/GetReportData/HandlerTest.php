@@ -3,8 +3,8 @@
 namespace App\Tests\Unit\Application\Query\Medicament\GetMedicamentsByChatId;
 
 use App\Application\Query\IntakeMark\GetReportData\Handler;
-use App\Domain\IntakeMark\IntakeMark;
-use App\Domain\IntakeMark\IntakeMarkRepositoryInterface;
+use App\Domain\Entities\IntakeMark\IntakeMark;
+use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use DateTimeImmutable;
 use Mockery;
 

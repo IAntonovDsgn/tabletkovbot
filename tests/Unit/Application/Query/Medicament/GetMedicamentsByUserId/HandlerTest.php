@@ -3,8 +3,8 @@
 namespace Tests\Unit\Application\Command\GetMedicamentsByChatId;
 
 use App\Application\Query\Medicament\GetMedicamentsByChatId\Handler;
-use App\Domain\Medicament\Medicament;
-use App\Domain\Medicament\MedicamentRepositoryInterface;
+use App\Domain\Entities\Medicament\Medicament;
+use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use Mockery;
 
 test('', function (bool $isMedicamentExist, bool $isMedicamentActive) {

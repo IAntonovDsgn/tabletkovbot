@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Domain\Session;
+namespace App\Domain\Entities\Session;
+
+use App\Domain\Exceptions\TransitionStateException;
 
 final class Session
 {
     private StateEnum $state;
+    private string $value = '';
     private readonly SessionStateMachine $sessionStateMachine;
 
     public function __construct(

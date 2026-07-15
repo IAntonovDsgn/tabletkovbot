@@ -4,8 +4,8 @@ namespace Tests\Unit\Application\Command\CreateMedicament;
 
 use App\Application\Command\Medicament\CreateMedicament\CreateMedicamentException;
 use App\Application\Command\Medicament\CreateMedicament\Handler;
-use App\Domain\Medicament\Medicament;
-use App\Domain\Medicament\MedicamentRepositoryInterface;
+use App\Domain\Entities\Medicament\Medicament;
+use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use DateTimeImmutable;
 use Mockery;
 use Throwable;

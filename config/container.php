@@ -2,7 +2,7 @@
 
 namespace App\config;
 
-use App\Domain\Message\MessageFacadeInterface;
+use App\Domain\Entities\Message\MessageFacadeInterface;
 use App\Infrastructure\Services\TelegramMessage\TelegramMessageFacade;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
@@ -10,6 +10,7 @@ use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Telegram\Bot\Api;
+
 use function DI\autowire;
 
 return [

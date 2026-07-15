@@ -2,8 +2,8 @@
 
 namespace App\Infrastructure\Services\TelegramMessage;
 
-use App\Domain\Message\Message;
-use App\Domain\Message\MessageFacadeInterface;
+use App\Domain\Entities\Message\Message;
+use App\Domain\Entities\Message\MessageFacadeInterface;
 use App\Infrastructure\Facade\ServiceContainer\ServiceContainer;
 use DI\DependencyException;
 use DI\NotFoundException;

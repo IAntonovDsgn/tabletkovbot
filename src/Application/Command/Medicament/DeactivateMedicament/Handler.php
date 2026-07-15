@@ -2,7 +2,7 @@
 
 namespace App\Application\Command\Medicament\DeactivateMedicament;
 
-use App\Domain\Medicament\MedicamentRepositoryInterface;
+use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 
 final readonly class Handler
 {

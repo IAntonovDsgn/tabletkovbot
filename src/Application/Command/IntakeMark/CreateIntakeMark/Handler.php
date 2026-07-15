@@ -2,10 +2,10 @@
 
 namespace App\Application\Command\IntakeMark\CreateIntakeMark;
 
-use App\Domain\Chat\ChatRepositoryInterface;
-use App\Domain\IntakeMark\IntakeMark;
-use App\Domain\IntakeMark\IntakeMarkRepositoryInterface;
-use App\Domain\Medicament\MedicamentRepositoryInterface;
+use App\Domain\Entities\Chat\ChatRepositoryInterface;
+use App\Domain\Entities\IntakeMark\IntakeMark;
+use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
+use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 
 final readonly class Handler
 {

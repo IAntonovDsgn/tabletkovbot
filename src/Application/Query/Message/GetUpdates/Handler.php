@@ -2,8 +2,8 @@
 
 namespace App\Application\Query\Message\GetUpdates;
 
-use App\Domain\Message\Message;
-use App\Domain\Message\MessageFacadeInterface;
+use App\Domain\Entities\Message\Message;
+use App\Domain\Entities\Message\MessageFacadeInterface;
 
 final readonly class Handler
 {

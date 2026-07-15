@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Presentation\Console\Command;
+namespace App\Presentation\Console\Commands;
 
 
 use App\Application\Query\Message\GetUpdates\Handler;

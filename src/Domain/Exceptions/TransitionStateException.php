@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Session;
+namespace App\Domain\Exceptions;
 
 class TransitionStateException extends \Exception
 {}

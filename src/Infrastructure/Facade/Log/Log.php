@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
  * @method static void debug(string $message, array $context = [])
  * @method static void log(string $level, string $message, array $context = [])
  */
-class Log
+final class Log
 {
     private static ?LoggerInterface $logger = null;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Message;
+namespace App\Domain\Entities\Message;
 
 interface MessageFacadeInterface
 {

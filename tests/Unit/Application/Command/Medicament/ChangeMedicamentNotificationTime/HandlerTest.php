@@ -4,8 +4,8 @@ namespace Tests\Unit\Application\Command\ChangeMedicamentNotificationTime;
 
 use App\Application\Command\Medicament\ChangeMedicamentNotificationTime\ChangeMedicamentNotificationTimeException;
 use App\Application\Command\Medicament\ChangeMedicamentNotificationTime\Handler;
-use App\Domain\Medicament\Medicament;
-use App\Domain\Medicament\MedicamentRepositoryInterface;
+use App\Domain\Entities\Medicament\Medicament;
+use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use Mockery;
 use Throwable;
 

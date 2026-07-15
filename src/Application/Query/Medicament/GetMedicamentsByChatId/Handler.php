@@ -2,8 +2,8 @@
 
 namespace App\Application\Query\Medicament\GetMedicamentsByChatId;
 
-use App\Domain\Medicament\Medicament;
-use App\Domain\Medicament\MedicamentRepositoryInterface;
+use App\Domain\Entities\Medicament\Medicament;
+use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 
 final readonly class Handler
 {

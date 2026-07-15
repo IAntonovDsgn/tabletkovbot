@@ -12,7 +12,7 @@ $controller = ServiceContainer::get(Controller::class);
 $update = Telegram::getWebhookUpdate();
 
 try {
-    $controller->handleUpdatesAction($update);
+    $controller->handleTelegramWebhookAction($update);
 } catch (App\Presentation\Api\ControllerException $e) {
     Log::error($e);
 }

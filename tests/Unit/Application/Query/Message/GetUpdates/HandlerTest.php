@@ -1,11 +1,11 @@
 <?php
 
-use App\Domain\Message\MessageFacadeInterface;
+use App\Domain\Entities\Message\MessageFacadeInterface;
 
 test('', function (int $countMessages) {
     $messages = [];
     for ($i = 0; $i < $countMessages; $i++) {
-        $messages[] = new App\Domain\Message\Message($i+1, 'test message');
+        $messages[] = new \App\Domain\Entities\Message\Message($i+1, 'test message');
     }
 
     $messageFacade = Mockery::mock(MessageFacadeInterface::class);

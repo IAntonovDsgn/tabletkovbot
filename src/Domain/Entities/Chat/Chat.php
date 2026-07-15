@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Chat;
+namespace App\Domain\Entities\Chat;
 
 class Chat
 {

@@ -2,11 +2,12 @@
 
 namespace App\Application\Command\Session\TransitToState;
 
-use App\Domain\Session\Session;
-use App\Domain\Session\SessionRepositoryInterface;
-use App\Domain\Session\StateEnum;
-use App\Domain\Session\StateHandlerInterface;
-use App\Domain\Session\TransitionStateException;
+use App\Application\Command\Session\TransitToState\StateHandlers\ChangeNameMedicamentEnteredStateHandler;
+use App\Domain\Entities\Session\Session;
+use App\Domain\Entities\Session\SessionRepositoryInterface;
+use App\Domain\Entities\Session\StateEnum;
+use App\Domain\Entities\Session\StateHandlerInterface;
+use App\Domain\Exceptions\TransitionStateException;
 use Throwable;
 
 final readonly class Handler
@@ -19,14 +20,16 @@ final readonly class Handler
     /**
      * @throws TransitionStateException
      */
-    public function handle(int $chatId, StateEnum $receivedState): void
+    public function handle(RequestDTO $requestData): void
     {
-        $newStateInstance = $this->getStateClassInstance($receivedState);
+        $newState = $requestData->newState;
+        $chatId = $requestData->chatId;
+        $newStateInstance = $this->getStateClassInstance($newState);
 
         try {
             $this->sessionRepository->beginTransaction();
             $session = $this->sessionRepository->getByChatId($chatId) ?? new Session($chatId);
-            $session->transitionToState($receivedState);
+            $session->transitionToState($newState);
 
             if (! is_null($newStateInstance)) {
                 $newStateInstance->handle();
@@ -43,7 +46,7 @@ final readonly class Handler
     private function getStateClassInstance(StateEnum $state): ?StateHandlerInterface
     {
         return match ($state) {
-            StateEnum::MENU => new StateMenuHandler(),
+            StateEnum::CHANGE_NAME_MEDICAMENT_ENTERED => new ChangeNameMedicamentEnteredStateHandler(),
             default => null,
         };
     }

@@ -2,7 +2,7 @@
 
 namespace App\Application\Command\Medicament\ChangeMedicamentNotificationTime;
 
-use App\Domain\Medicament\MedicamentRepositoryInterface;
+use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use DateTimeImmutable;
 use ValueError;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Session;
+namespace App\Domain\Entities\Session;
 
 enum StateEnum: string {
     case MENU = 'menu';
@@ -10,7 +10,7 @@ enum StateEnum: string {
     case CHANGE_MEDICAMENT_SELECTED = 'change_medicament_selected';
     case CHANGE_MEDICAMENT_SELECTED_NAME = 'change_medicament_selected_name';
     case CHANGE_NAME_MEDICAMENT_SELECTED = 'change_name_medicament_selected';
-    case CHANGE_NAME_MEDICAMENT_ENTERED = 'change_name_medicament';
+    case CHANGE_NAME_MEDICAMENT_ENTERED = 'change_name_medicament_entered';
     case CHANGE_NOTIFICATION_TIME_SELECTED = 'change_notification_time_selected';
     case CHANGE_NOTIFICATION_TIME_ENTERED = 'change_notification_time_entered';
     case DELETE_MEDICAMENT_SELECTED = 'delete_medicament_selected';

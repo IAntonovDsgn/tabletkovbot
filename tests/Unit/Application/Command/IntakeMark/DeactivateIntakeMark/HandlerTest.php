@@ -4,8 +4,8 @@ namespace Unit\Application\Command\IntakeMark\DeactivateIntakeMark;
 
 use App\Application\Command\IntakeMark\DeactivateIntakeMark\DeactivateIntakeMarkException;
 use App\Application\Command\IntakeMark\DeactivateIntakeMark\Handler;
-use App\Domain\IntakeMark\IntakeMark;
-use App\Domain\IntakeMark\IntakeMarkRepositoryInterface;
+use App\Domain\Entities\IntakeMark\IntakeMark;
+use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use Mockery;
 use Throwable;
 

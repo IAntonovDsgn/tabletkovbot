@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\IntakeMark;
+namespace App\Domain\Entities\IntakeMark;
 
 interface IntakeMarkRepositoryInterface
 {

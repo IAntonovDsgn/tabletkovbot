@@ -2,12 +2,12 @@
 
 use App\Application\Command\IntakeMark\CreateIntakeMark\CreateIntakeMarkException;
 use App\Application\Command\IntakeMark\CreateIntakeMark\Handler;
-use App\Domain\Chat\Chat;
-use App\Domain\Chat\ChatRepositoryInterface;
-use App\Domain\IntakeMark\IntakeMark;
-use App\Domain\IntakeMark\IntakeMarkRepositoryInterface;
-use App\Domain\Medicament\Medicament;
-use App\Domain\Medicament\MedicamentRepositoryInterface;
+use App\Domain\Entities\Chat\Chat;
+use App\Domain\Entities\Chat\ChatRepositoryInterface;
+use App\Domain\Entities\IntakeMark\IntakeMark;
+use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
+use App\Domain\Entities\Medicament\Medicament;
+use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 
 test('', function (bool $isChatExist, bool $isMedicamentExist, bool $isMedicamentActive) {
     $medicamentId = 1;

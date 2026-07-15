@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Medicament;
+namespace App\Domain\Entities\Medicament;
 
 interface MedicamentRepositoryInterface
 {

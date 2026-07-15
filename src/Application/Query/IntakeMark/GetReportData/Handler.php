@@ -2,8 +2,8 @@
 
 namespace App\Application\Query\IntakeMark\GetReportData;
 
-use App\Domain\IntakeMark\IntakeMark;
-use App\Domain\IntakeMark\IntakeMarkRepositoryInterface;
+use App\Domain\Entities\IntakeMark\IntakeMark;
+use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use DateTimeImmutable;
 
 final readonly class Handler

@@ -2,8 +2,8 @@
 
 use App\Application\Command\Medicament\DeactivateMedicament\DeactivateMedicamentException;
 use App\Application\Command\Medicament\DeactivateMedicament\Handler;
-use App\Domain\Medicament\Medicament;
-use App\Domain\Medicament\MedicamentRepositoryInterface;
+use App\Domain\Entities\Medicament\Medicament;
+use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 
 test('', function (bool $isMedicamentExist, bool $isMedicamentActive) {
     $medicamentId = 1;

@@ -2,7 +2,7 @@
 
 namespace App\Application\Command\Chat\EnableNotifications;
 
-use App\Domain\Chat\ChatRepositoryInterface;
+use App\Domain\Entities\Chat\ChatRepositoryInterface;
 
 final readonly class Handler
 {
