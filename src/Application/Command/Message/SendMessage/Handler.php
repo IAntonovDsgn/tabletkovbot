@@ -16,7 +16,7 @@ final readonly class Handler
     /**
      * @throws SendMessageException
      */
-    public function __invoke(int $chatId, string $text, ?int $replyToMessageId = null): void
+    public function handle(int $chatId, string $text, ?int $replyToMessageId = null): void
     {
         $chat = $this->chatRepository->findById($chatId);
 

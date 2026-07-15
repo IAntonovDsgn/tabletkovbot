@@ -36,7 +36,7 @@ class SendTelegramMessageCommand extends Command
 
         try {
             $handler = new Handler();
-            $handler($message, $chatId, $replyToMessageId);
+            $handler->handle($message, $chatId, $replyToMessageId);
             return self::SUCCESS;
         } catch (Throwable $e) {
             $output->writeln("<error>Failed to send message: " . $e->getMessage() . "</error>");

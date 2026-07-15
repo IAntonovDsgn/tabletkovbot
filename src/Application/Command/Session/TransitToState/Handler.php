@@ -2,7 +2,6 @@
 
 namespace App\Application\Command\Session\TransitToState;
 
-use App\Application\Command\Session\TransitToState\States\StateMenuHandler;
 use App\Domain\Session\Session;
 use App\Domain\Session\SessionRepositoryInterface;
 use App\Domain\Session\StateEnum;
@@ -20,7 +19,7 @@ final readonly class Handler
     /**
      * @throws TransitionStateException
      */
-    public function __invoke(int $chatId, StateEnum $receivedState): void
+    public function handle(int $chatId, StateEnum $receivedState): void
     {
         $newStateInstance = $this->getStateClassInstance($receivedState);
 
@@ -28,7 +27,11 @@ final readonly class Handler
             $this->sessionRepository->beginTransaction();
             $session = $this->sessionRepository->getByChatId($chatId) ?? new Session($chatId);
             $session->transitionToState($receivedState);
-            $newStateInstance->handle();
+
+            if (! is_null($newStateInstance)) {
+                $newStateInstance->handle();
+            }
+
             $this->sessionRepository->save($session);
             $this->sessionRepository->commitTransaction();
         } catch (Throwable $e) {
@@ -37,10 +40,11 @@ final readonly class Handler
         }
     }
 
-    private function getStateClassInstance(StateEnum $state): StateHandlerInterface
+    private function getStateClassInstance(StateEnum $state): ?StateHandlerInterface
     {
         return match ($state) {
             StateEnum::MENU => new StateMenuHandler(),
+            default => null,
         };
     }
 }

@@ -4,12 +4,12 @@ namespace App\Infrastructure\Services\Message;
 
 use App\Domain\Message\Message;
 use App\Domain\Message\MessageFacadeInterface;
+use App\Infrastructure\Facade\ServiceContainer\ServiceContainer;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use ServiceContainer;
 
 final readonly class MessageFacade implements MessageFacadeInterface
 {

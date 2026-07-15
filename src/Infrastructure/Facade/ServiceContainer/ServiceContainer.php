@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Infrastructure\Facade\ServiceContainer;
+
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;

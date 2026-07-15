@@ -3,7 +3,7 @@
 namespace App\Presentation\Console\Command;
 
 
-use App\Application\Query\TelegramMessage\GetUpdates\Handler;
+use App\Application\Query\Message\GetUpdates\Handler;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

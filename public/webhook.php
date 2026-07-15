@@ -1,15 +1,18 @@
 <?php
 
-namespace App;
-
 require __DIR__ . '/../bootstrap/bootstrap.php';
 
+use App\Infrastructure\Facade\ServiceContainer\ServiceContainer;
 use App\Presentation\Api\Controller;
-use ServiceContainer;
+use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Laravel\Facades\Telegram;
 
-$handler = ServiceContainer::get(Controller::class);
-
+/** @var Controller $controller */
+$controller = ServiceContainer::get(Controller::class);
 $update = Telegram::getWebhookUpdate();
 
-$handler->handle($update);
+try {
+    $controller->handleUpdatesAction($update);
+} catch (App\Presentation\Api\ControllerException $e) {
+    Log::error($e);
+}

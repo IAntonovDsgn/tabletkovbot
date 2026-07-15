@@ -4,5 +4,5 @@ namespace App\Domain\Session;
 
 interface StateHandlerInterface
 {
-    public function handle();
+    public function handle(): void;
 }
