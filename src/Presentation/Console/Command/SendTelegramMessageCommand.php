@@ -2,7 +2,6 @@
 
 namespace App\Presentation\Console\Command;
 
-use App\Application\Command\Message\SendMessage\Handler;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,6 +10,11 @@ use Throwable;
 
 class SendTelegramMessageCommand extends Command
 {
+    public function __construct(
+        private readonly \App\Application\Command\Message\SendMessage\Handler $sendMessageHandler,
+    ) {
+        parent::__construct();
+    }
     protected function configure(): void
     {
         $this->setName('app:tg-bot-send-message');
@@ -25,18 +29,12 @@ class SendTelegramMessageCommand extends Command
         $message = $input->getArgument('message');
         $chatId = $input->getArgument('chat_id');
 
-        if (!is_string($chatId) || !is_string($message)) {
-            $output->writeln("<error>Chat ID and Message ID and must be a string</error>");
-            return self::FAILURE;
-        }
-
         $replyToMessageId = is_int($input->hasArgument('reply_to_message_id'))
             ? $input->getArgument('reply_to_message_id')
             : null;
 
         try {
-            $handler = new Handler();
-            $handler->handle($message, $chatId, $replyToMessageId);
+            $this->sendMessageHandler->handle($chatId, $message, $replyToMessageId);
             return self::SUCCESS;
         } catch (Throwable $e) {
             $output->writeln("<error>Failed to send message: " . $e->getMessage() . "</error>");

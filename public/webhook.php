@@ -2,9 +2,9 @@
 
 require __DIR__ . '/../bootstrap/bootstrap.php';
 
+use App\Infrastructure\Facade\Log\Log;
 use App\Infrastructure\Facade\ServiceContainer\ServiceContainer;
 use App\Presentation\Api\Controller;
-use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Laravel\Facades\Telegram;
 
 /** @var Controller $controller */
