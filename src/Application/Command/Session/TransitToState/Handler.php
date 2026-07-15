@@ -31,7 +31,6 @@ final readonly class Handler
             $newStateInstance->handle();
             $this->sessionRepository->save($session);
             $this->sessionRepository->commitTransaction();
-
         } catch (Throwable $e) {
             $this->sessionRepository->rollbackTransaction();
             throw new TransitionStateException($e->getMessage(), $e->getCode(), $e);
