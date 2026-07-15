@@ -24,6 +24,7 @@ final readonly class Handler
     {
         $newState = $requestData->newState;
         $chatId = $requestData->chatId;
+        $newSessionValue = $requestData->newSessionValue;
         $newStateInstance = $this->getStateClassInstance($newState);
 
         try {
@@ -32,7 +33,7 @@ final readonly class Handler
             $session->transitionToState($newState);
 
             if (! is_null($newStateInstance)) {
-                $newStateInstance->handle();
+                $newStateInstance->handle($session->getValue(), $newSessionValue);
             }
 
             $this->sessionRepository->save($session);

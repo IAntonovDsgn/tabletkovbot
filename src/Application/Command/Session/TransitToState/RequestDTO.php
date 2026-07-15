@@ -9,7 +9,7 @@ final readonly class RequestDTO
     public function __construct(
         public int $chatId,
         public StateEnum $newState,
-        public string $newValue = '',
+        public string $newSessionValue = '',
     ) {
     }
 }

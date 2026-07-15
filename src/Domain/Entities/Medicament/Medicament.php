@@ -10,7 +10,7 @@ class Medicament
     private readonly string $notificationTime;
 
     public function __construct(
-        private readonly string $name,
+        private string $name,
         private readonly int $chatId,
         ?DateTimeImmutable $notificationTime = null,
         private bool $isActive = true,
@@ -34,5 +34,10 @@ class Medicament
     public function isActive(): bool
     {
         return $this->isActive;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
     }
 }

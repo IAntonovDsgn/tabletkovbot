@@ -32,4 +32,9 @@ final class Session
         }
         $this->state = $newState;
     }
+
+    public function getValue(): string
+    {
+        return $this->value;
+    }
 }

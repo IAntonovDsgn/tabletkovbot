@@ -14,4 +14,8 @@ interface MedicamentRepositoryInterface
      * @return Medicament[]
      */
     public function findByChatId(int $chatId): array;
+
+    public function beginTransaction(): void;
+    public function commitTransaction(): void;
+    public function rollbackTransaction(): void;
 }
