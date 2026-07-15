@@ -7,8 +7,9 @@ use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\StateEnum;
 use App\Domain\Entities\Session\StateHandlerInterface;
+use App\Domain\Exceptions\InvalidValueException;
 use App\Domain\Exceptions\TransitionStateException;
-use Throwable;
+use App\Infrastructure\Facade\ServiceContainer\ServiceContainer;
 
 final readonly class Handler
 {
@@ -19,6 +20,7 @@ final readonly class Handler
 
     /**
      * @throws TransitionStateException
+     * @throws InvalidValueException
      */
     public function handle(RequestDTO $requestData): void
     {
@@ -38,16 +40,16 @@ final readonly class Handler
 
             $this->sessionRepository->save($session);
             $this->sessionRepository->commitTransaction();
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             $this->sessionRepository->rollbackTransaction();
-            throw new TransitionStateException($e->getMessage(), $e->getCode(), $e);
+            throw $e;
         }
     }
 
     private function getStateClassInstance(StateEnum $state): ?StateHandlerInterface
     {
         return match ($state) {
-            StateEnum::CHANGE_NAME_MEDICAMENT_ENTERED => new ChangeNameMedicamentEnteredStateHandler(),
+            StateEnum::CHANGE_NAME_MEDICAMENT_ENTERED => ServiceContainer::get(ChangeNameMedicamentEnteredStateHandler::class),
             default => null,
         };
     }
