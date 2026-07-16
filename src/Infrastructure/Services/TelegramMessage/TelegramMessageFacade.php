@@ -4,6 +4,7 @@ namespace App\Infrastructure\Services\TelegramMessage;
 
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageFacadeInterface;
+use App\Domain\Exceptions\SendMessageException;
 use App\Infrastructure\Facade\ServiceContainer\ServiceContainer;
 use DI\DependencyException;
 use DI\NotFoundException;
@@ -30,7 +31,7 @@ final readonly class TelegramMessageFacade implements MessageFacadeInterface
     }
 
     /**
-     * @throws TelegramMessageException
+     * @throws SendMessageException
      */
     public function sendMessage(Message $message): void
     {
@@ -40,12 +41,12 @@ final readonly class TelegramMessageFacade implements MessageFacadeInterface
                 'text' => $message->getText(),
             ]);
         } catch (TelegramSDKException $e) {
-            throw new TelegramMessageException($e->getMessage());
+            throw new SendMessageException($e->getMessage());
         }
     }
 
     /**
-     * @throws TelegramMessageException
+     * @throws SendMessageException
      */
     public function getUpdates(): array
     {
@@ -57,7 +58,7 @@ final readonly class TelegramMessageFacade implements MessageFacadeInterface
                 $result[] = $update->getMessage();
             }
         } catch (Exception $e) {
-            throw new TelegramMessageException($e->getMessage());
+            throw new SendMessageException($e->getMessage());
         }
 
         return $result;

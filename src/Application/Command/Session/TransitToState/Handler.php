@@ -8,7 +8,7 @@ use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\StateEnum;
 use App\Domain\Entities\Session\StateHandlerInterface;
 use App\Domain\Exceptions\InvalidValueException;
-use App\Domain\Exceptions\TransitionStateException;
+use App\Domain\Exceptions\TransitionStateNotAllowedException;
 use App\Infrastructure\Facade\ServiceContainer\ServiceContainer;
 
 final readonly class Handler
@@ -19,7 +19,7 @@ final readonly class Handler
     }
 
     /**
-     * @throws TransitionStateException
+     * @throws TransitionStateNotAllowedException
      * @throws InvalidValueException
      */
     public function handle(RequestDTO $requestData): void

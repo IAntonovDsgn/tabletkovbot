@@ -2,7 +2,7 @@
 
 namespace App\Domain\Entities\Session;
 
-use App\Domain\Exceptions\TransitionStateException;
+use App\Domain\Exceptions\TransitionStateNotAllowedException;
 
 final class Session
 {
@@ -23,12 +23,12 @@ final class Session
     }
 
     /**
-     * @throws TransitionStateException
+     * @throws TransitionStateNotAllowedException
      */
     public function transitionToState(StateEnum $newState): void
     {
         if (! $this->sessionStateMachine->isTransitionToStateAllowed($newState, $this->state)) {
-            throw new TransitionStateException('Transition state is not allowed');
+            throw new TransitionStateNotAllowedException('Transition state is not allowed');
         }
         $this->state = $newState;
     }
