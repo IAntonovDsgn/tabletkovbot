@@ -2,8 +2,8 @@
 
 namespace App\config;
 
-use App\Domain\Entities\Message\MessageFacadeInterface;
-use App\Infrastructure\Services\TelegramMessage\TelegramMessageFacade;
+use App\Domain\Entities\Message\MessageServiceInterface;
+use App\Infrastructure\Services\TelegramMessageService\TelegramMessageService;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
@@ -18,7 +18,7 @@ return [
         return require __DIR__ . '/telegram.php';
     },
 
-    MessageFacadeInterface::class => autowire(TelegramMessageFacade::class),
+    MessageServiceInterface::class => autowire(TelegramMessageService::class),
 
     LoggerInterface::class => function () {
         $logger = new Logger('app');

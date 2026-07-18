@@ -2,5 +2,5 @@
 
 namespace App\Domain\Exceptions;
 
-class NotFoundEntityException extends \Exception
+class NotFoundEntityException extends BaseDomainException
 {}

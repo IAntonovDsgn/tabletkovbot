@@ -2,17 +2,17 @@
 
 namespace App\Application\Query\Message\GetUpdates;
 
-use App\Domain\Entities\Message\Message;
-use App\Domain\Entities\Message\MessageFacadeInterface;
+use App\Domain\Entities\Message\MessageServiceInterface;
+use App\Domain\Entities\Message\MessageOutputDTO;
 
 final readonly class Handler
 {
     public function __construct(
-        private MessageFacadeInterface $messageFacade
+        private MessageServiceInterface $messageFacade
     ) {}
 
     /**
-     * @return Message[]
+     * @return MessageOutputDTO[]
      */
     public function handle(): array
     {

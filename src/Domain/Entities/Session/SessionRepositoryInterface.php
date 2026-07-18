@@ -4,7 +4,7 @@ namespace App\Domain\Entities\Session;
 
 interface SessionRepositoryInterface
 {
-    public function getByChatId(int $chatId): ?Session;
+    public function findByChatId(int $chatId): ?Session;
 
     public function beginTransaction(): void;
 

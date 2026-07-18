@@ -2,5 +2,5 @@
 
 namespace App\Domain\Exceptions;
 
-class SendMessageException extends \Exception
+class SendMessageException extends BaseDomainException
 {}

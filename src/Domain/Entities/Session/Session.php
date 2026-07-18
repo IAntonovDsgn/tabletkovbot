@@ -2,22 +2,24 @@
 
 namespace App\Domain\Entities\Session;
 
+use App\Domain\Entities\Session\State\EnumSessionState;
+use App\Domain\Entities\Session\State\StateTransitionRules;
 use App\Domain\Exceptions\TransitionStateNotAllowedException;
 
 final class Session
 {
-    private StateEnum $state;
-    private string $value = '';
-    private readonly SessionStateMachine $sessionStateMachine;
+    private StateTransitionRules $stateMachineTransitionRules;
 
     public function __construct(
         private readonly int $chatId,
+        private bool $hasNotification = true,
+        private ?string $payload = null,
+        private EnumSessionState $state = EnumSessionState::MENU,
     ) {
-        $this->state = StateEnum::MENU;
-        $this->sessionStateMachine = new SessionStateMachine();
+        $this->stateMachineTransitionRules = new StateTransitionRules();
     }
 
-    public function getState(): StateEnum
+    public function getState(): EnumSessionState
     {
         return $this->state;
     }
@@ -25,16 +27,37 @@ final class Session
     /**
      * @throws TransitionStateNotAllowedException
      */
-    public function transitionToState(StateEnum $newState): void
+    public function transitionToState(EnumSessionState $newState): void
     {
-        if (! $this->sessionStateMachine->isTransitionToStateAllowed($newState, $this->state)) {
+        if (! $this->stateMachineTransitionRules->isTransitionToStateAllowed($newState, $this->state)) {
             throw new TransitionStateNotAllowedException('Transition state is not allowed');
         }
         $this->state = $newState;
     }
 
-    public function getValue(): string
+    public function getPayload(): string
     {
-        return $this->value;
+        return $this->payload;
+    }
+
+    public function getChatId(): int
+    {
+        return $this->chatId;
+    }
+
+    public function resetState(): void
+    {
+        $this->state = EnumSessionState::MENU;
+        $this->payload = null;
+    }
+
+    public function enableNotifications(): void
+    {
+        $this->hasNotification = true;
+    }
+
+    public function disableNotifications(): void
+    {
+        $this->hasNotification = false;
     }
 }

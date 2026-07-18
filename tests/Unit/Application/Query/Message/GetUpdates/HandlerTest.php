@@ -1,14 +1,14 @@
 <?php
 
-use App\Domain\Entities\Message\MessageFacadeInterface;
+use App\Domain\Entities\Message\MessageServiceInterface;
 
 test('', function (int $countMessages) {
     $messages = [];
     for ($i = 0; $i < $countMessages; $i++) {
-        $messages[] = new \App\Domain\Entities\Message\Message($i+1, 'test message');
+        $messages[] = new \App\Domain\Entities\Message\MessageOutputDTO($i+1, 'test message');
     }
 
-    $messageFacade = Mockery::mock(MessageFacadeInterface::class);
+    $messageFacade = Mockery::mock(MessageServiceInterface::class);
     $messageFacade
         ->shouldReceive('getUpdates')
         ->andReturn($messages);

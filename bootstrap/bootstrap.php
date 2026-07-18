@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use App\Infrastructure\Facade\ServiceContainer\ServiceContainer;
+use App\Infrastructure\Facade\ServiceContainer\ContainerService;
 use DI\ContainerBuilder;
 use Symfony\Component\Dotenv\Dotenv;
 
@@ -18,4 +18,4 @@ $containerBuilder->useAutowiring(true);
 $containerBuilder->addDefinitions(require __DIR__ . '/../config/container.php');
 $container = $containerBuilder->build();
 
-ServiceContainer::set($container);
+ContainerService::set($container);

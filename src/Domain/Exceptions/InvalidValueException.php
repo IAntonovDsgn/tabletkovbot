@@ -2,5 +2,5 @@
 
 namespace App\Domain\Exceptions;
 
-class InvalidValueException extends \Exception
+class InvalidValueException extends BaseDomainException
 {}
