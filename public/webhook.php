@@ -2,8 +2,8 @@
 
 require __DIR__ . '/../bootstrap/bootstrap.php';
 
-use App\Domain\Entities\Message\MessageInputDTO;
-use App\Infrastructure\Facade\ServiceContainer\ContainerService;
+use App\Application\BotManager\MessageInputDTO;
+use App\Infrastructure\Services\ServiceContainer;
 use App\Presentation\Api\Controller;
 use Telegram\Bot\Laravel\Facades\Telegram;
 use Telegram\Bot\Objects\Message;
@@ -20,5 +20,5 @@ $incomingMessage = new MessageInputDTO(
 );
 
 /** @var Controller $controller */
-$controller = ContainerService::get(Controller::class);
+$controller = ServiceContainer::get(Controller::class);
 $controller->process($incomingMessage);

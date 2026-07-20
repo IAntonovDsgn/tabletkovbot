@@ -3,7 +3,7 @@
 namespace App\Presentation\Api;
 
 use App\Application\BotManager\Manager;
-use App\Domain\Entities\Message\MessageInputDTO;
+use App\Application\BotManager\MessageInputDTO;
 
 final readonly class Controller
 {

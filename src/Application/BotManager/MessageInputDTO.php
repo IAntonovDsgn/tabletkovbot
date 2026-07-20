@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Domain\Entities\Message;
+namespace App\Application\BotManager;
+
+use App\Domain\Entities\Message\EnumMessageButton;
 
 final readonly class MessageInputDTO
 {

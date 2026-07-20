@@ -7,7 +7,6 @@ use App\Application\Services\LogService\LogServiceInterface;
 use App\Application\Services\MessageService\MessageServiceInterface;
 use App\Domain\Entities\Message\EnumMessageButton;
 use App\Domain\Entities\Message\EnumOutgoingMessageKey;
-use App\Domain\Entities\Message\MessageInputDTO;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Exceptions\BaseDomainException;

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Infrastructure\Services\Container;
+namespace App\Infrastructure\Services;
 
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
 
-final class ContainerService
+final class ServiceContainer
 {
     private static ?Container $container = null;
 

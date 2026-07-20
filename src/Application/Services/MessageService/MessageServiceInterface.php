@@ -2,8 +2,8 @@
 
 namespace App\Application\Services\MessageService;
 
+use App\Application\BotManager\MessageInputDTO;
 use App\Domain\Entities\Message\EnumMessageButton;
-use App\Domain\Entities\Message\MessageInputDTO;
 
 interface MessageServiceInterface
 {
