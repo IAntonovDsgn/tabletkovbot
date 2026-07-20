@@ -28,19 +28,20 @@ final readonly class Manager
         try {
             // start unit of work
             $session = $this->sessionRepository->findByChatId($params->chatId) ?? new Session($params->chatId);
-            $handler = $this->factoryStateHandler->makeByState($params->newState);
+            $newState = $params->newState ?? $session->getAllowedNextState();
+            $session->transitionToState($newState);
+            $handler = $this->factoryStateHandler->makeByState($newState);
             $handlerResponseDTO = $handler->handle(
                 $params->chatId,
                 $params->value,
                 $session->getPayload()
             );
-            $session->transitionToState($params->newState);
             $this->sessionRepository->save($session);
             $this->messageService->sendMessage(
                 new Message(
                     $params->chatId,
                     $handlerResponseDTO->messageText,
-                    $handlerResponseDTO->buttons
+                    $handlerResponseDTO->buttons,
                 )
             );
             // commit unit of work

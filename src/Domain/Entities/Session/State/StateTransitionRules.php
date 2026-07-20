@@ -108,4 +108,13 @@ class StateTransitionRules
         }
         return $result;
     }
+
+
+    /**
+     * @return EnumState[]
+     */
+    public function getAllowedStates(EnumState $state): array
+    {
+        return self::ALLOWED_TRANSITIONS_FROM_TO[$state->value] ?? [];
+    }
 }

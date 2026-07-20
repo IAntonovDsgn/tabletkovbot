@@ -29,7 +29,7 @@ final class Session
      */
     public function transitionToState(EnumState $newState): void
     {
-        if (! $this->stateMachineTransitionRules->isTransitionToStateAllowed($newState, $this->state)) {
+        if (!$this->stateMachineTransitionRules->isTransitionToStateAllowed($newState, $this->state)) {
             throw new TransitionStateNotAllowedException('Transition state is not allowed');
         }
         $this->state = $newState;
@@ -59,5 +59,28 @@ final class Session
     public function disableNotifications(): void
     {
         $this->hasNotification = false;
+    }
+
+    /**
+     * @throws TransitionStateNotAllowedException
+     */
+    public function getAllowedNextState(): EnumState
+    {
+        $allowedStates = $this->stateMachineTransitionRules->getAllowedStates($this->state);
+
+        if (empty($allowedStates)) {
+            throw new TransitionStateNotAllowedException('Not found allowed states');
+        } elseif (count($allowedStates) === 1 && $allowedStates[0] === EnumState::MENU) {
+            $result = $allowedStates[0];
+        } else {
+            $statesWithoutMenu = array_diff($allowedStates, EnumState::MENU);
+            if (count($statesWithoutMenu) === 1) {
+                $result = $allowedStates[0];
+            } else {
+                throw new TransitionStateNotAllowedException('Count of allowed states is more than 1');
+            }
+        }
+
+        return $result;
     }
 }

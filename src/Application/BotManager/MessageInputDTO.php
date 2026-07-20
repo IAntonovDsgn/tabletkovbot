@@ -9,7 +9,7 @@ final readonly class MessageInputDTO
     public function __construct(
         public int $chatId,
         public ?string $value,
-        public EnumState $newState,
+        public ?EnumState $newState,
     ) {
     }
 }

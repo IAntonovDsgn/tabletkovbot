@@ -11,7 +11,8 @@ final readonly class HandlerResponseDTO
      * @param Button[] $buttons
      */
     public function __construct(
-       public ?EnumOutgoingText $messageText,
-       public array $buttons
-    ) {}
+        public ?EnumOutgoingText $messageText,
+        public array $buttons,
+    ) {
+    }
 }
