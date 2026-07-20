@@ -4,7 +4,7 @@ namespace App\Infrastructure\Services\TelegramMessageService;
 
 use App\Application\Services\MessageService\MessageServiceInterface;
 use App\Domain\Entities\Message\OutgoingMessageEnum;
-use App\Domain\Exceptions\SendMessageException;
+use App\Domain\Exceptions\SentToClient\SendMessageException;
 use App\Infrastructure\Facade\ServiceContainer\ContainerService;
 use DI\DependencyException;
 use DI\NotFoundException;

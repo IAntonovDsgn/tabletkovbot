@@ -8,9 +8,9 @@ use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\Button\Button;
 use App\Domain\Entities\Message\EnumOutgoingText;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\BaseDomainException;
-use App\Domain\Exceptions\InvalidValueException;
-use App\Domain\Exceptions\NotFoundEntityException;
+use App\Domain\Exceptions\SentToClient\BaseSentToClientException;
+use App\Domain\Exceptions\SentToClient\InvalidValueException;
+use App\Domain\Exceptions\SentToClient\NotFoundEntityException;
 
 final readonly class ChangeNameMedicamentEnteredHandler implements StateHandlerInterface
 {
@@ -20,7 +20,7 @@ final readonly class ChangeNameMedicamentEnteredHandler implements StateHandlerI
     }
 
     /**
-     * @throws BaseDomainException
+     * @throws BaseSentToClientException
      */
     public function handle(int $chatId, ?string $text, ?string $payload): HandlerResponseDTO
     {

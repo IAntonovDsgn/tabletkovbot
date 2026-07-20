@@ -4,7 +4,7 @@ namespace App\Domain\Entities\Session;
 
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Entities\Session\State\StateTransitionRules;
-use App\Domain\Exceptions\TransitionStateNotAllowedException;
+use App\Domain\Exceptions\NotSentToClient\TransitionStateNotAllowedException;
 
 final class Session
 {

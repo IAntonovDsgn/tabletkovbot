@@ -2,12 +2,12 @@
 
 namespace App\Application\BotManager;
 
-use App\Domain\Exceptions\BaseDomainException;
+use App\Domain\Exceptions\SentToClient\BaseSentToClientException;
 
 interface StateHandlerInterface
 {
     /**
-     * @throws BaseDomainException
+     * @throws BaseSentToClientException
      */
     public function handle(
         int $chatId,

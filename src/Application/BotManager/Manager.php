@@ -11,7 +11,7 @@ use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\BaseDomainException;
+use App\Domain\Exceptions\SentToClient\BaseSentToClientException;
 
 final readonly class Manager
 {
@@ -45,7 +45,7 @@ final readonly class Manager
                 )
             );
             // commit unit of work
-        } catch (BaseDomainException $e) {
+        } catch (BaseSentToClientException $e) {
             // rollback unit of work
             $this->errorHandler($params->chatId, $e->getMessage());
         } catch (\Exception $e) {
