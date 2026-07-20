@@ -2,7 +2,7 @@
 
 namespace App\Domain\Entities\Session\State;
 
-enum EnumSessionState: string {
+enum EnumState: string {
     case MENU = 'menu';
     case ADD_MEDICAMENT_SELECTED = 'add_medicament_selected';
     case MEDICAMENT_NAME_ENTERED = 'medicament_name_entered';

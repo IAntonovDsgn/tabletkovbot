@@ -2,7 +2,6 @@
 
 namespace App\Application\BotManager;
 
-use App\Domain\Entities\Message\EnumMessageButton;
 use App\Domain\Exceptions\BaseDomainException;
 
 interface StateHandlerInterface
@@ -11,8 +10,8 @@ interface StateHandlerInterface
      * @throws BaseDomainException
      */
     public function handle(
+        int $chatId,
         ?string $text,
-        ?EnumMessageButton $clickedButton,
         ?string $payload
     ): HandlerResponseDTO;
 }

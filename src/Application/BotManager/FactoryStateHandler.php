@@ -2,21 +2,23 @@
 
 namespace App\Application\BotManager;
 
-use App\Application\BotManager\StateHandlers\ChangeNameMedicamentEnteredStateHandler;
-use App\Domain\Entities\Session\State\EnumSessionState;
+use App\Application\BotManager\StateHandlers\AddMedicamentSelectedHandler;
+use App\Application\BotManager\StateHandlers\ChangeNameMedicamentEnteredHandler;
+use App\Domain\Entities\Session\State\EnumState;
 
 final readonly class FactoryStateHandler
 {
     public function __construct(
-        private ChangeNameMedicamentEnteredStateHandler $changeNameMedicamentEnteredStateHandler,
+        private ChangeNameMedicamentEnteredHandler $changeNameMedicamentEnteredStateHandler,
+        private AddMedicamentSelectedHandler $addMedicamentSelectedStateHandler,
     ) {
     }
 
-    public function makeByState(EnumSessionState $state): StateHandlerInterface
+    public function makeByState(EnumState $state): StateHandlerInterface
     {
         return match ($state) {
-            EnumSessionState::CHANGE_MEDICAMENT_NAME_ENTERED => $this->changeNameMedicamentEnteredStateHandler,
-
+            EnumState::CHANGE_MEDICAMENT_NAME_ENTERED => $this->changeNameMedicamentEnteredStateHandler,
+            EnumState::ADD_MEDICAMENT_SELECTED => $this->addMedicamentSelectedStateHandler,
         };
     }
 }

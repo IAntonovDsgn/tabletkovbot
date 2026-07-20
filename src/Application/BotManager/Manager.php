@@ -5,11 +5,12 @@ namespace App\Application\BotManager;
 use App\Application\Services\LogService\EnumLogTypes;
 use App\Application\Services\LogService\LogServiceInterface;
 use App\Application\Services\MessageService\MessageServiceInterface;
-use App\Domain\Entities\Message\EnumMessageButton;
+use App\Domain\Entities\Message\Button\Button;
 use App\Domain\Entities\Message\EnumOutgoingText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
+use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\BaseDomainException;
 
 final readonly class Manager
@@ -27,18 +28,18 @@ final readonly class Manager
         try {
             // start unit of work
             $session = $this->sessionRepository->findByChatId($params->chatId) ?? new Session($params->chatId);
-            $handler = $this->factoryStateHandler->makeByState($session->getState());
+            $handler = $this->factoryStateHandler->makeByState($params->newState);
             $handlerResponseDTO = $handler->handle(
+                $params->chatId,
                 $params->value,
-                $params->clickedButton,
                 $session->getPayload()
             );
-            $session->transitionToState($handlerResponseDTO->nextState);
+            $session->transitionToState($params->newState);
             $this->sessionRepository->save($session);
             $this->messageService->sendMessage(
                 new Message(
                     $params->chatId,
-                    $handlerResponseDTO->text,
+                    $handlerResponseDTO->messageText,
                     $handlerResponseDTO->buttons
                 )
             );
@@ -63,13 +64,13 @@ final readonly class Manager
                     $chatId,
                     $message ?? EnumOutgoingText::ERROR,
                     [
-                        EnumMessageButton::MAKE_INTAKE_MARK,
-                        EnumMessageButton::ADD_MEDICAMENT_BUTTON,
-                        EnumMessageButton::CHANGE_MEDICAMENT_BUTTON,
-                        EnumMessageButton::DELETE_MEDICAMENT,
-                        EnumMessageButton::DOWNLOAD_REPORT,
-                        EnumMessageButton::NOTIFICATIONS,
-                    ]
+                        new Button(Button::MAKE_INTAKE_MARK_BUTTON_TITLE, EnumState::MAKE_INTAKE_MARK_SELECTED),
+                        new Button(Button::ADD_MEDICAMENT_BUTTON_TITLE, EnumState::ADD_MEDICAMENT_SELECTED),
+                        new Button(Button::CHANGE_MEDICAMENT_BUTTON_TITLE, EnumState::CHANGE_MEDICAMENT_SELECTED),
+                        new Button(Button::DELETE_MEDICAMENT_BUTTON_TITLE, EnumState::DELETE_MEDICAMENT_SELECTED),
+                        new Button(Button::DOWNLOAD_REPORT_BUTTON_TITLE, EnumState::DOWNLOAD_REPORT_SELECTED),
+                        new Button(Button::NOTIFICATIONS_BUTTON_TITLE, EnumState::NOTIFICATIONS_SELECTED),
+                    ],
                 )
             );
         } catch (\Exception $e) {

@@ -2,7 +2,7 @@
 
 namespace App\Domain\Entities\Session;
 
-use App\Domain\Entities\Session\State\EnumSessionState;
+use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Entities\Session\State\StateTransitionRules;
 use App\Domain\Exceptions\TransitionStateNotAllowedException;
 
@@ -14,12 +14,12 @@ final class Session
         private readonly int $chatId,
         private bool $hasNotification = true,
         private ?string $payload = null,
-        private EnumSessionState $state = EnumSessionState::MENU,
+        private EnumState $state = EnumState::MENU,
     ) {
         $this->stateMachineTransitionRules = new StateTransitionRules();
     }
 
-    public function getState(): EnumSessionState
+    public function getState(): EnumState
     {
         return $this->state;
     }
@@ -27,7 +27,7 @@ final class Session
     /**
      * @throws TransitionStateNotAllowedException
      */
-    public function transitionToState(EnumSessionState $newState): void
+    public function transitionToState(EnumState $newState): void
     {
         if (! $this->stateMachineTransitionRules->isTransitionToStateAllowed($newState, $this->state)) {
             throw new TransitionStateNotAllowedException('Transition state is not allowed');
@@ -47,7 +47,7 @@ final class Session
 
     public function resetState(): void
     {
-        $this->state = EnumSessionState::MENU;
+        $this->state = EnumState::MENU;
         $this->payload = null;
     }
 

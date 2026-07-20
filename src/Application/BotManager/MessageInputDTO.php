@@ -2,13 +2,14 @@
 
 namespace App\Application\BotManager;
 
-use App\Domain\Entities\Message\EnumMessageButton;
+use App\Domain\Entities\Session\State\EnumState;
 
 final readonly class MessageInputDTO
 {
     public function __construct(
         public int $chatId,
         public ?string $value,
-        public ?EnumMessageButton $clickedButton,
-    ) {}
+        public EnumState $newState,
+    ) {
+    }
 }

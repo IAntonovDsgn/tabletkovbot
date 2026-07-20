@@ -2,18 +2,16 @@
 
 namespace App\Application\BotManager;
 
-use App\Domain\Entities\Message\EnumMessageButton;
+use App\Domain\Entities\Message\Button\Button;
 use App\Domain\Entities\Message\EnumOutgoingText;
-use App\Domain\Entities\Session\State\EnumSessionState;
 
 final readonly class HandlerResponseDTO
 {
     /**
-     * @param EnumMessageButton[] $buttons
+     * @param Button[] $buttons
      */
     public function __construct(
-       public ?EnumOutgoingText $text,
-       public array $buttons,
-       public EnumSessionState $nextState,
+       public ?EnumOutgoingText $messageText,
+       public array $buttons
     ) {}
 }

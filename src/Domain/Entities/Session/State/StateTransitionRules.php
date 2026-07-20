@@ -5,101 +5,101 @@ namespace App\Domain\Entities\Session\State;
 class StateTransitionRules
 {
     private const array ALLOWED_TRANSITIONS_FROM_TO = [
-        EnumSessionState::MENU->value => [
-            EnumSessionState::ADD_MEDICAMENT_SELECTED,
-            EnumSessionState::CHANGE_MEDICAMENT_SELECTED,
-            EnumSessionState::DELETE_MEDICAMENT_SELECTED,
-            EnumSessionState::DOWNLOAD_REPORT_SELECTED,
-            EnumSessionState::NOTIFICATIONS_SELECTED,
-            EnumSessionState::MAKE_INTAKE_MARK_SELECTED,
-            EnumSessionState::NOTIFIED,
+        EnumState::MENU->value => [
+            EnumState::ADD_MEDICAMENT_SELECTED,
+            EnumState::CHANGE_MEDICAMENT_SELECTED,
+            EnumState::DELETE_MEDICAMENT_SELECTED,
+            EnumState::DOWNLOAD_REPORT_SELECTED,
+            EnumState::NOTIFICATIONS_SELECTED,
+            EnumState::MAKE_INTAKE_MARK_SELECTED,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::ADD_MEDICAMENT_SELECTED->value => [
-            EnumSessionState::MENU,
-            EnumSessionState::MEDICAMENT_NAME_ENTERED,
-            EnumSessionState::NOTIFIED,
+        EnumState::ADD_MEDICAMENT_SELECTED->value => [
+            EnumState::MENU,
+            EnumState::MEDICAMENT_NAME_ENTERED,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::MEDICAMENT_NAME_ENTERED->value => [
-            EnumSessionState::MEDICAMENT_NOTIFICATION_TIME_ENTERED,
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::MEDICAMENT_NAME_ENTERED->value => [
+            EnumState::MEDICAMENT_NOTIFICATION_TIME_ENTERED,
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::MEDICAMENT_NOTIFICATION_TIME_ENTERED->value => [
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::MEDICAMENT_NOTIFICATION_TIME_ENTERED->value => [
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::CHANGE_MEDICAMENT_SELECTED->value => [
-            EnumSessionState::CHANGE_MEDICAMENT_SELECTED_MEDICAMENT,
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::CHANGE_MEDICAMENT_SELECTED->value => [
+            EnumState::CHANGE_MEDICAMENT_SELECTED_MEDICAMENT,
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::CHANGE_MEDICAMENT_SELECTED_MEDICAMENT->value => [
-            EnumSessionState::CHANGE_MEDICAMENT_NAME_SELECTED,
-            EnumSessionState::CHANGE_NOTIFICATION_TIME_SELECTED,
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::CHANGE_MEDICAMENT_SELECTED_MEDICAMENT->value => [
+            EnumState::CHANGE_MEDICAMENT_NAME_SELECTED,
+            EnumState::CHANGE_NOTIFICATION_TIME_SELECTED,
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::CHANGE_MEDICAMENT_NAME_SELECTED->value => [
-            EnumSessionState::CHANGE_MEDICAMENT_NAME_ENTERED,
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::CHANGE_MEDICAMENT_NAME_SELECTED->value => [
+            EnumState::CHANGE_MEDICAMENT_NAME_ENTERED,
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::CHANGE_NOTIFICATION_TIME_SELECTED->value => [
-            EnumSessionState::CHANGE_NOTIFICATION_TIME_ENTERED,
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::CHANGE_NOTIFICATION_TIME_SELECTED->value => [
+            EnumState::CHANGE_NOTIFICATION_TIME_ENTERED,
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::CHANGE_MEDICAMENT_NAME_ENTERED->value => [
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::CHANGE_MEDICAMENT_NAME_ENTERED->value => [
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::CHANGE_NOTIFICATION_TIME_ENTERED->value => [
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::CHANGE_NOTIFICATION_TIME_ENTERED->value => [
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::DELETE_MEDICAMENT_SELECTED->value => [
-            EnumSessionState::DELETE_MEDICAMENT_SELECTED_MEDICAMENT,
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::DELETE_MEDICAMENT_SELECTED->value => [
+            EnumState::DELETE_MEDICAMENT_SELECTED_MEDICAMENT,
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::DELETE_MEDICAMENT_SELECTED_MEDICAMENT->value => [
-            EnumSessionState::DELETE_MEDICAMENT_CONFIRMED,
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::DELETE_MEDICAMENT_SELECTED_MEDICAMENT->value => [
+            EnumState::DELETE_MEDICAMENT_CONFIRMED,
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::DOWNLOAD_REPORT_SELECTED->value => [
-            EnumSessionState::DOWNLOAD_REPORT_DATES_SELECTED,
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::DOWNLOAD_REPORT_SELECTED->value => [
+            EnumState::DOWNLOAD_REPORT_DATES_SELECTED,
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::DOWNLOAD_REPORT_DATES_SELECTED->value => [
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::DOWNLOAD_REPORT_DATES_SELECTED->value => [
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::NOTIFICATIONS_SELECTED->value => [
-            EnumSessionState::NOTIFICATION_MODE_SELECTED,
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::NOTIFICATIONS_SELECTED->value => [
+            EnumState::NOTIFICATION_MODE_SELECTED,
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::MAKE_INTAKE_MARK_SELECTED->value => [
-            EnumSessionState::MAKE_INTAKE_MARK_MEDICAMENT_SELECTED,
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::MAKE_INTAKE_MARK_SELECTED->value => [
+            EnumState::MAKE_INTAKE_MARK_MEDICAMENT_SELECTED,
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::MAKE_INTAKE_MARK_MEDICAMENT_SELECTED->value => [
-            EnumSessionState::MENU,
-            EnumSessionState::NOTIFIED,
+        EnumState::MAKE_INTAKE_MARK_MEDICAMENT_SELECTED->value => [
+            EnumState::MENU,
+            EnumState::NOTIFIED,
         ],
-        EnumSessionState::NOTIFIED->value => [
-            EnumSessionState::INTAKE_MARK_HAS_MADE,
-            EnumSessionState::MENU
+        EnumState::NOTIFIED->value => [
+            EnumState::INTAKE_MARK_HAS_MADE,
+            EnumState::MENU
         ],
-        EnumSessionState::INTAKE_MARK_HAS_MADE->value => [
-            EnumSessionState::MENU,
+        EnumState::INTAKE_MARK_HAS_MADE->value => [
+            EnumState::MENU,
         ]
     ];
 
-    public function isTransitionToStateAllowed(EnumSessionState $newState, EnumSessionState $oldState): bool
+    public function isTransitionToStateAllowed(EnumState $newState, EnumState $oldState): bool
     {
         $result = false;
         if (in_array($newState, self::ALLOWED_TRANSITIONS_FROM_TO[$oldState->value], true))
