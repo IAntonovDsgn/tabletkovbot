@@ -6,7 +6,8 @@ use App\Application\Services\LogService\EnumLogTypes;
 use App\Application\Services\LogService\LogServiceInterface;
 use App\Application\Services\MessageService\MessageServiceInterface;
 use App\Domain\Entities\Message\EnumMessageButton;
-use App\Domain\Entities\Message\EnumOutgoingMessageKey;
+use App\Domain\Entities\Message\EnumOutgoingText;
+use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Exceptions\BaseDomainException;
@@ -35,9 +36,11 @@ final readonly class Manager
             $session->transitionToState($handlerResponseDTO->nextState);
             $this->sessionRepository->save($session);
             $this->messageService->sendMessage(
-                $params->chatId,
-                $handlerResponseDTO->text,
-                $handlerResponseDTO->buttons
+                new Message(
+                    $params->chatId,
+                    $handlerResponseDTO->text,
+                    $handlerResponseDTO->buttons
+                )
             );
             // commit unit of work
         } catch (BaseDomainException $e) {
@@ -56,20 +59,21 @@ final readonly class Manager
             $session = $this->sessionRepository->findByChatId($chatId);
             $session->resetState();
             $this->messageService->sendMessage(
-                $chatId,
-                $message ?? EnumOutgoingMessageKey::ERROR->value,
-                [
-                    EnumMessageButton::MAKE_INTAKE_MARK,
-                    EnumMessageButton::ADD_MEDICAMENT_BUTTON,
-                    EnumMessageButton::CHANGE_MEDICAMENT_BUTTON,
-                    EnumMessageButton::DELETE_MEDICAMENT,
-                    EnumMessageButton::DOWNLOAD_REPORT,
-                    EnumMessageButton::NOTIFICATIONS,
-                ]
+                new Message(
+                    $chatId,
+                    $message ?? EnumOutgoingText::ERROR,
+                    [
+                        EnumMessageButton::MAKE_INTAKE_MARK,
+                        EnumMessageButton::ADD_MEDICAMENT_BUTTON,
+                        EnumMessageButton::CHANGE_MEDICAMENT_BUTTON,
+                        EnumMessageButton::DELETE_MEDICAMENT,
+                        EnumMessageButton::DOWNLOAD_REPORT,
+                        EnumMessageButton::NOTIFICATIONS,
+                    ]
+                )
             );
         } catch (\Exception $e) {
             $this->logService->addRecord(EnumLogTypes::ERROR->value, [$e->getMessage()]);
         }
-
     }
 }

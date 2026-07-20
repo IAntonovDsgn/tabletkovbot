@@ -3,14 +3,11 @@
 namespace App\Application\Services\MessageService;
 
 use App\Application\BotManager\MessageInputDTO;
-use App\Domain\Entities\Message\EnumMessageButton;
+use App\Domain\Entities\Message\Message;
 
 interface MessageServiceInterface
 {
-    /**
-     * @param EnumMessageButton[] $buttons
-     */
-    public function sendMessage(int $chatId, ?string $message, array $buttons): void;
+    public function sendMessage(Message $message): void;
 
     /**
      * @return MessageInputDTO[]

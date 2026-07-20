@@ -10,5 +10,9 @@ interface StateHandlerInterface
     /**
      * @throws BaseDomainException
      */
-    public function handle(?string $text, ?EnumMessageButton $clickedButton, ?string $payload): HandlerResponseDTO;
+    public function handle(
+        ?string $text,
+        ?EnumMessageButton $clickedButton,
+        ?string $payload
+    ): HandlerResponseDTO;
 }
