@@ -2,7 +2,7 @@
 
 namespace App\config;
 
-use App\Domain\Entities\Message\MessageServiceInterface;
+use App\Application\Services\MessageService\MessageServiceInterface;
 use App\Infrastructure\Services\TelegramMessageService\TelegramMessageService;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;

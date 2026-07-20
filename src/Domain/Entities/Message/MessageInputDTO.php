@@ -7,6 +7,6 @@ final readonly class MessageInputDTO
     public function __construct(
         public int $chatId,
         public ?string $value,
-        public ?EnumMessageButtonType $clickedButton,
+        public ?EnumMessageButton $clickedButton,
     ) {}
 }

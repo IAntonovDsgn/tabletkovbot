@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Services\LogService;
+namespace App\Application\Services\LogService;
  enum EnumLogTypes: string {
      case ERROR = 'error';
  }

@@ -1,6 +1,6 @@
 <?php
 
-use App\Domain\Entities\Message\MessageServiceInterface;
+use App\Application\Services\MessageService\MessageServiceInterface;
 
 test('', function (int $countMessages) {
     $messages = [];

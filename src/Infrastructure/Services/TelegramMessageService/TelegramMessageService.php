@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Services\TelegramMessageService;
 
-use App\Domain\Entities\Message\MessageServiceInterface;
+use App\Application\Services\MessageService\MessageServiceInterface;
 use App\Domain\Entities\Message\OutgoingMessageEnum;
 use App\Domain\Exceptions\SendMessageException;
 use App\Infrastructure\Facade\ServiceContainer\ContainerService;

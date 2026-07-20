@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Services\LogService;
 
-use App\Domain\Services\LogService\LogServiceInterface;
+use App\Application\Services\LogService\LogServiceInterface;
 use Psr\Log\LoggerInterface;
 
 /**

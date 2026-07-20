@@ -2,7 +2,7 @@
 
 namespace App\Domain\Entities\Message;
 
-enum EnumMessageButtonType: string
+enum EnumMessageButton: string
 {
     case ADD_MEDICAMENT_BUTTON = 'Добавить медикамент';
     case CHANGE_MEDICAMENT_BUTTON = 'Изменить медикамент';

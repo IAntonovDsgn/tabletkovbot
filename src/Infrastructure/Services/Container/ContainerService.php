@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Infrastructure\Facade\ServiceContainer;
+namespace App\Infrastructure\Services\Container;
 
 use DI\Container;
 use DI\DependencyException;

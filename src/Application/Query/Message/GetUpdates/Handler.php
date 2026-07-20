@@ -2,13 +2,13 @@
 
 namespace App\Application\Query\Message\GetUpdates;
 
-use App\Domain\Entities\Message\MessageServiceInterface;
+use App\Application\Services\MessageService\MessageServiceInterface;
 use App\Domain\Entities\Message\MessageOutputDTO;
 
 final readonly class Handler
 {
     public function __construct(
-        private MessageServiceInterface $messageFacade
+        private MessageServiceInterface $messageService
     ) {}
 
     /**
@@ -16,6 +16,6 @@ final readonly class Handler
      */
     public function handle(): array
     {
-        return $this->messageFacade->getUpdates();
+        return $this->messageService->getUpdates();
     }
 }
