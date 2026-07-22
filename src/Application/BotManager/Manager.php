@@ -11,7 +11,7 @@ use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\SentToClient\BaseSentToClientException;
+use App\Domain\Exceptions\SendToClient\BaseSendToClientException;
 
 final readonly class Manager
 {
@@ -23,10 +23,10 @@ final readonly class Manager
     ) {
     }
 
-    public function process(MessageInputDTO $params): void
+    public function process(RequestDTO $params): void
     {
         try {
-            // start unit of work
+            // TODO: start unit of work
             $session = $this->sessionRepository->findByChatId($params->chatId) ?? new Session($params->chatId);
             $newState = $params->newState ?? $session->getAllowedNextState();
             $session->transitionToState($newState);
@@ -34,8 +34,11 @@ final readonly class Manager
             $handlerResponseDTO = $handler->handle(
                 $params->chatId,
                 $params->value,
-                $session->getPayload()
+                $session->getPayload(),
+                $params->clickedButtonTitle,
+
             );
+            $handlerResponseDTO->newSessionPayload && $session->setPayload($handlerResponseDTO->newSessionPayload);
             $this->sessionRepository->save($session);
             $this->messageService->sendMessage(
                 new Message(
@@ -44,12 +47,12 @@ final readonly class Manager
                     $handlerResponseDTO->buttons,
                 )
             );
-            // commit unit of work
-        } catch (BaseSentToClientException $e) {
-            // rollback unit of work
+            // TODO: commit unit of work
+        } catch (BaseSendToClientException $e) {
+            // TODO: rollback unit of work
             $this->errorHandler($params->chatId, $e->getMessage());
         } catch (\Exception $e) {
-            // rollback unit of work
+            // TODO: rollback unit of work
             $this->logService->addRecord(EnumLogTypes::ERROR->value, [$e->getMessage()]);
             $this->errorHandler($params->chatId);
         }

@@ -4,7 +4,7 @@ namespace App\Domain\Entities\Session;
 
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Entities\Session\State\StateTransitionRules;
-use App\Domain\Exceptions\NotSentToClient\TransitionStateNotAllowedException;
+use App\Domain\Exceptions\NotSendToClient\TransitionStateNotAllowedException;
 
 final class Session
 {
@@ -14,7 +14,7 @@ final class Session
         private readonly int $chatId,
         private bool $hasNotification = true,
         private ?string $payload = null,
-        private EnumState $state = EnumState::MENU,
+        private EnumState $state = EnumState::MENU
     ) {
         $this->stateMachineTransitionRules = new StateTransitionRules();
     }
@@ -22,6 +22,11 @@ final class Session
     public function getState(): EnumState
     {
         return $this->state;
+    }
+
+    public function setPayload(?string $payload): void
+    {
+        $this->payload = $payload;
     }
 
     /**

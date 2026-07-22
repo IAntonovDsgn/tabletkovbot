@@ -2,7 +2,7 @@
 
 require __DIR__ . '/../bootstrap/bootstrap.php';
 
-use App\Application\BotManager\MessageInputDTO;
+use App\Application\BotManager\RequestDTO;
 use App\Infrastructure\Services\ServiceContainer;
 use App\Presentation\Api\Controller;
 use Telegram\Bot\Laravel\Facades\Telegram;
@@ -13,10 +13,9 @@ $messages = Telegram::getWebhookUpdate()->getMessage();
 /** @var Message $message */
 $message = end($messages);
 
-$incomingMessage = new MessageInputDTO(
+$incomingMessage = new RequestDTO(
     $message->chat->id,
-    $message->sender_tag,
-    $message->text,
+
 );
 
 /** @var Controller $controller */

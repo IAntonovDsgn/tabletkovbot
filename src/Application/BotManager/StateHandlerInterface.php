@@ -2,16 +2,17 @@
 
 namespace App\Application\BotManager;
 
-use App\Domain\Exceptions\SentToClient\BaseSentToClientException;
+use App\Domain\Exceptions\SendToClient\BaseSendToClientException;
 
 interface StateHandlerInterface
 {
     /**
-     * @throws BaseSentToClientException
+     * @throws BaseSendToClientException
      */
     public function handle(
         int $chatId,
         ?string $text,
-        ?string $payload
-    ): HandlerResponseDTO;
+        ?string $payload,
+        ?string $clickedButtonTitle
+    ): HandlerOutputDTO;
 }

@@ -2,17 +2,17 @@
 
 namespace App\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\HandlerResponseDTO;
+use App\Application\BotManager\HandlerOutputDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\Button\Button;
 use App\Domain\Entities\Message\EnumOutgoingText;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\SentToClient\BaseSentToClientException;
-use App\Domain\Exceptions\SentToClient\InvalidValueException;
-use App\Domain\Exceptions\SentToClient\NotFoundEntityException;
+use App\Domain\Exceptions\SendToClient\BaseSendToClientException;
+use App\Domain\Exceptions\SendToClient\InvalidValueException;
+use App\Domain\Exceptions\NotSendToClient\NotFoundEntityException;
 
-final readonly class ChangeNameMedicamentEnteredHandler implements StateHandlerInterface
+final readonly class StateChangeNameMedicamentEnteredHandler implements StateHandlerInterface
 {
     public function __construct(
         private MedicamentRepositoryInterface $medicamentRepository,
@@ -20,11 +20,11 @@ final readonly class ChangeNameMedicamentEnteredHandler implements StateHandlerI
     }
 
     /**
-     * @throws BaseSentToClientException
+     * @throws BaseSendToClientException
      */
-    public function handle(int $chatId, ?string $text, ?string $payload): HandlerResponseDTO
+    public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): HandlerOutputDTO
     {
-        if (is_null($payload)) {
+        if (is_null($text)) {
             throw new InvalidValueException(EnumOutgoingText::MEDICAMENT_EMPTY_NAME_ERROR->value);
         }
 
@@ -38,7 +38,7 @@ final readonly class ChangeNameMedicamentEnteredHandler implements StateHandlerI
         $medicament->setName($text);
         $this->medicamentRepository->save($medicament);
 
-        return new HandlerResponseDTO(
+        return new HandlerOutputDTO(
             EnumOutgoingText::MEDICAMENT_RENAMED_SUCCESS,
             [
                 new Button(Button::MAKE_INTAKE_MARK_BUTTON_TITLE, EnumState::MAKE_INTAKE_MARK_SELECTED),

@@ -6,7 +6,8 @@ use DateTimeImmutable;
 
 class Medicament
 {
-    const string TIME_FORMAT = 'H:i:s';
+    const string TIME_FORMAT = 'H:i';
+    const string DATE_TIME_ZONE = 'Asia/Yekaterinburg';
     private readonly string $notificationTime;
 
     public function __construct(
@@ -19,6 +20,11 @@ class Medicament
         if (! is_null($notificationTime)) {
             $this->notificationTime = $notificationTime->format(self::TIME_FORMAT);
         }
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
     }
 
     public function setNotificationTime(DateTimeImmutable $time): void

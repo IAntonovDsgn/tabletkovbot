@@ -3,7 +3,7 @@
 namespace App\Presentation\Api;
 
 use App\Application\BotManager\Manager;
-use App\Application\BotManager\MessageInputDTO;
+use App\Application\BotManager\RequestDTO;
 
 final readonly class Controller
 {
@@ -12,7 +12,7 @@ final readonly class Controller
     )
     {}
 
-    public function process(MessageInputDTO $request): void
+    public function process(RequestDTO $request): void
     {
         $this->manager->process($request);
     }

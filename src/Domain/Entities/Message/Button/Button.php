@@ -12,6 +12,8 @@ class Button
     const string DOWNLOAD_REPORT_BUTTON_TITLE = 'Скачать отчет';
     const string NOTIFICATIONS_BUTTON_TITLE = 'Уведомления';
     const string MAKE_INTAKE_MARK_BUTTON_TITLE = 'Принять медикамент';
+    const string CHANGE_NAME = 'Изменить имя';
+    const string CHANGE_NOTIFICATION_TIME = 'Изменить время уведомления';
 
     public function __construct(
         private readonly string $title,

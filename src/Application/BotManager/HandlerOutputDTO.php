@@ -5,7 +5,7 @@ namespace App\Application\BotManager;
 use App\Domain\Entities\Message\Button\Button;
 use App\Domain\Entities\Message\EnumOutgoingText;
 
-final readonly class HandlerResponseDTO
+final readonly class HandlerOutputDTO
 {
     /**
      * @param Button[] $buttons
@@ -13,6 +13,7 @@ final readonly class HandlerResponseDTO
     public function __construct(
         public ?EnumOutgoingText $messageText,
         public array $buttons,
+        public ?string $newSessionPayload = null,
     ) {
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Domain\Entities\Message;
 
 use App\Domain\Entities\Message\Button\Button;
-use App\Domain\Entities\Session\State\EnumState;
 
 final readonly class Message
 {
