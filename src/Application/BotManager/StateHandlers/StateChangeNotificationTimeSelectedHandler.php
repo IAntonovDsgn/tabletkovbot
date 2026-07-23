@@ -8,12 +8,12 @@ use App\Domain\Entities\Message\Button\Button;
 use App\Domain\Entities\Message\EnumOutgoingText;
 use App\Domain\Entities\Session\State\EnumState;
 
-final class StateAddMedicamentSelectedHandler implements StateHandlerInterface
+class StateChangeNotificationTimeSelectedHandler implements StateHandlerInterface
 {
     public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
     {
         return new StateHandlerDTO(
-            EnumOutgoingText::ENTER_NEW_NAME,
+            EnumOutgoingText::ENTER_NOTIFICATION_TIME,
             [
                 new Button(Button::MENU, EnumState::MENU)
             ]

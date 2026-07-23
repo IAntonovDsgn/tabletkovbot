@@ -14,6 +14,8 @@ class Button
     const string MAKE_INTAKE_MARK_BUTTON_TITLE = 'Принять медикамент';
     const string CHANGE_NAME = 'Изменить имя';
     const string CHANGE_NOTIFICATION_TIME = 'Изменить время уведомления';
+    const string MENU = 'Меню';
+    const string CONFIRM = 'Подтвердить';
 
     public function __construct(
         private readonly string $title,

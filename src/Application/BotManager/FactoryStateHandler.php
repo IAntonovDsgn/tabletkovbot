@@ -7,9 +7,13 @@ use App\Application\BotManager\StateHandlers\StateChangeMedicamentNameSelectedHa
 use App\Application\BotManager\StateHandlers\StateChangeMedicamentSelectedHandler;
 use App\Application\BotManager\StateHandlers\StateChangeMedicamentSelectedMedicamentHandler;
 use App\Application\BotManager\StateHandlers\StateChangeNameMedicamentEnteredHandler;
+use App\Application\BotManager\StateHandlers\StateChangeNotificationTimeSelectedHandler;
+use App\Application\BotManager\StateHandlers\StateDeleteMedicamentConfirmedHandler;
+use App\Application\BotManager\StateHandlers\StateDeleteMedicamentSelectedHandler;
 use App\Application\BotManager\StateHandlers\StateMedicamentNameEnteredHandler;
 use App\Application\BotManager\StateHandlers\StateMedicamentNotificationTimeEnteredHandler;
 use App\Application\BotManager\StateHandlers\StateMenuHandler;
+use App\Application\BotManager\StateHandlers\StateSelectedMedicamentForDeleteHandler;
 use App\Domain\Entities\Session\State\EnumState;
 
 final readonly class FactoryStateHandler
@@ -23,6 +27,10 @@ final readonly class FactoryStateHandler
         private StateMedicamentNotificationTimeEnteredHandler $medicamentNotificationTimeEnteredHandler,
         private StateChangeMedicamentSelectedMedicamentHandler $changeMedicamentSelectedMedicamentHandler,
         private StateChangeMedicamentNameSelectedHandler $changeMedicamentNameSelectedHandler,
+        private StateChangeNotificationTimeSelectedHandler $changeNotificationTimeSelectedHandler,
+        private StateDeleteMedicamentSelectedHandler $deleteMedicamentSelectedHandler,
+        private StateSelectedMedicamentForDeleteHandler $selectedMedicamentForDeleteHandler,
+        private StateDeleteMedicamentConfirmedHandler $deleteMedicamentConfirmedHandler,
     ) {
     }
 
@@ -35,8 +43,12 @@ final readonly class FactoryStateHandler
             EnumState::CHANGE_MEDICAMENT_NAME_ENTERED => $this->changeNameMedicamentEnteredHandler,
             EnumState::CHANGE_MEDICAMENT_SELECTED => $this->changeMedicamentSelectedHandler,
             EnumState::MEDICAMENT_NOTIFICATION_TIME_ENTERED => $this->medicamentNotificationTimeEnteredHandler,
-            EnumState::CHANGE_MEDICAMENT_SELECTED_MEDICAMENT => $this->changeMedicamentSelectedMedicamentHandler,
+            EnumState::SELECTED_MEDICAMENT_FOR_CHANGE => $this->changeMedicamentSelectedMedicamentHandler,
             EnumState::CHANGE_MEDICAMENT_NAME_SELECTED => $this->changeMedicamentNameSelectedHandler,
+            EnumState::CHANGE_NOTIFICATION_TIME_SELECTED => $this->changeNotificationTimeSelectedHandler,
+            EnumState::DELETE_MEDICAMENT_SELECTED => $this->deleteMedicamentSelectedHandler,
+            EnumState::SELECTED_MEDICAMENT_FOR_DELETE => $this->selectedMedicamentForDeleteHandler,
+            EnumState::DELETE_MEDICAMENT_CONFIRMED => $this->deleteMedicamentConfirmedHandler,
         };
     }
 }

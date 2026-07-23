@@ -10,7 +10,7 @@ use App\Domain\Entities\Message\EnumOutgoingText;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\NotSendToClient\NotFoundEntityException;
 
-final readonly class StateChangeMedicamentSelectedMedicamentHandler implements StateHandlerInterface
+final readonly class StateDeleteMedicamentSelectedHandler implements StateHandlerInterface
 {
     public function __construct(
         private MedicamentRepositoryInterface $medicamentRepository,
@@ -22,26 +22,22 @@ final readonly class StateChangeMedicamentSelectedMedicamentHandler implements S
      */
     public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
     {
-        $medicamentId = null;
         $medicaments = $this->medicamentRepository->findByChatId($chatId);
-        foreach ($medicaments as $medicament) {
-            if ($medicament->getName() === $clickedButtonTitle) {
-                $medicamentId = $medicament->getId();
-            }
-        }
+        $buttons = [];
 
-        if (is_null($medicamentId)) {
+        if (empty($medicaments)) {
             throw new NotFoundEntityException(EnumOutgoingText::MEDICAMENT_NOT_FOUND->value);
         }
 
-        return new StateHandlerDTO(
-            EnumOutgoingText::WHAT_YOU_WANT_TO_CHANGE,
-            [
-                new Button(Button::CHANGE_NAME, EnumState::CHANGE_MEDICAMENT_NAME_SELECTED),
-                new Button(Button::CHANGE_NOTIFICATION_TIME, EnumState::CHANGE_NOTIFICATION_TIME_SELECTED),
-                new Button(Button::MENU, EnumState::MENU)
-            ],
-            $medicamentId
-        );
+        foreach ($medicaments as $medicament) {
+            $buttons[] = new Button(
+                $medicament->getName(),
+                EnumState::CHANGE_MEDICAMENT_NAME_SELECTED,
+            );
+        }
+
+        $buttons[] = new Button(Button::MENU, EnumState::MENU);
+
+        return new StateHandlerDTO(EnumOutgoingText::CHOOSE_MEDICAMENT, $buttons);
     }
 }

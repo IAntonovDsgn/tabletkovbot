@@ -2,7 +2,7 @@
 
 namespace App\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\HandlerOutputDTO;
+use App\Application\BotManager\StateHandlerDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
@@ -27,14 +27,13 @@ final readonly class StateMedicamentNotificationTimeEnteredHandler implements St
      * @throws InvalidValueException
      * @throws NotFoundEntityException
      */
-    public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): HandlerOutputDTO
+    public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
     {
         $notificationTime = DateTimeImmutable::createFromFormat(
             Medicament::TIME_FORMAT,
             $text,
             new DateTimeZone(Medicament::DATE_TIME_ZONE)
-        )
-            ?? throw new InvalidValueException(EnumOutgoingText::FORMAT_TIME_ERROR->value);
+        ) ?? throw new InvalidValueException(EnumOutgoingText::FORMAT_TIME_ERROR->value);
 
         $session = $this->sessionRepository->findByChatId($chatId);
         $medicamentId = $session->getPayload();
@@ -46,7 +45,7 @@ final readonly class StateMedicamentNotificationTimeEnteredHandler implements St
 
         $medicament->setNotificationTime($notificationTime);
         $this->medicamentRepository->save($medicament);
-        return new HandlerOutputDTO(
+        return new StateHandlerDTO(
             EnumOutgoingText::MEDICAMENT_ADDED_SUCCESS,
             [
                 new Button(Button::MAKE_INTAKE_MARK_BUTTON_TITLE, EnumState::MAKE_INTAKE_MARK_SELECTED),

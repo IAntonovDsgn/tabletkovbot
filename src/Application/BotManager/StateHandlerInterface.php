@@ -14,5 +14,5 @@ interface StateHandlerInterface
         ?string $text,
         ?string $payload,
         ?string $clickedButtonTitle
-    ): HandlerOutputDTO;
+    ): StateHandlerDTO;
 }

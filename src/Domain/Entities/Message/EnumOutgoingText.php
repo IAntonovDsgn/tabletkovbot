@@ -14,4 +14,6 @@ enum EnumOutgoingText: string {
     case FORMAT_TIME_ERROR = 'Введен неверный формат времени. Пожалуйста, введите время в формате hh:mm';
     case MEDICAMENT_ADDED_SUCCESS = 'Медикамент сохранен! Чем еще я могу помочь?';
     case WHAT_YOU_WANT_TO_CHANGE = 'Что вы хотите изменить?';
+    case ARE_YOU_CONFIRM_DELETE_MEDICAMENT = 'Вы уверены, что хотите удалить медикамент?';
+    case MEDICAMENT_DELETED = 'Медикамент успешно удален. Чем еще я могу помочь?';
 }

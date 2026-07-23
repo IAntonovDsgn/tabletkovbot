@@ -2,7 +2,7 @@
 
 namespace App\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\HandlerOutputDTO;
+use App\Application\BotManager\StateHandlerDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\Button\Button;
@@ -17,10 +17,13 @@ final readonly class StateChangeMedicamentSelectedHandler implements StateHandle
     ) {
     }
 
-    public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): HandlerOutputDTO
+    /**
+     * @throws NotFoundEntityException
+     */
+    public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
     {
-        $buttons = [];
         $medicaments = $this->medicamentRepository->findByChatId($chatId);
+        $buttons = [];
 
         if (empty($medicaments)) {
             throw new NotFoundEntityException(EnumOutgoingText::MEDICAMENT_NOT_FOUND->value);
@@ -33,6 +36,8 @@ final readonly class StateChangeMedicamentSelectedHandler implements StateHandle
             );
         }
 
-        return new HandlerOutputDTO(EnumOutgoingText::CHOOSE_MEDICAMENT, $buttons);
+        $buttons[] = new Button(Button::MENU, EnumState::MENU);
+
+        return new StateHandlerDTO(EnumOutgoingText::CHOOSE_MEDICAMENT, $buttons);
     }
 }

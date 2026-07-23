@@ -2,15 +2,14 @@
 
 namespace App\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\HandlerOutputDTO;
+use App\Application\BotManager\StateHandlerDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\Button\Button;
 use App\Domain\Entities\Message\EnumOutgoingText;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\SendToClient\BaseSendToClientException;
-use App\Domain\Exceptions\SendToClient\InvalidValueException;
 use App\Domain\Exceptions\NotSendToClient\NotFoundEntityException;
+use App\Domain\Exceptions\SendToClient\InvalidValueException;
 
 final readonly class StateChangeNameMedicamentEnteredHandler implements StateHandlerInterface
 {
@@ -19,10 +18,7 @@ final readonly class StateChangeNameMedicamentEnteredHandler implements StateHan
     ) {
     }
 
-    /**
-     * @throws BaseSendToClientException
-     */
-    public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): HandlerOutputDTO
+    public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
     {
         if (is_null($text)) {
             throw new InvalidValueException(EnumOutgoingText::MEDICAMENT_EMPTY_NAME_ERROR->value);
@@ -38,7 +34,7 @@ final readonly class StateChangeNameMedicamentEnteredHandler implements StateHan
         $medicament->setName($text);
         $this->medicamentRepository->save($medicament);
 
-        return new HandlerOutputDTO(
+        return new StateHandlerDTO(
             EnumOutgoingText::MEDICAMENT_RENAMED_SUCCESS,
             [
                 new Button(Button::MAKE_INTAKE_MARK_BUTTON_TITLE, EnumState::MAKE_INTAKE_MARK_SELECTED),

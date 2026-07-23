@@ -29,11 +29,11 @@ class StateTransitionRules
             EnumState::NOTIFIED,
         ],
         EnumState::CHANGE_MEDICAMENT_SELECTED->value => [
-            EnumState::CHANGE_MEDICAMENT_SELECTED_MEDICAMENT,
+            EnumState::SELECTED_MEDICAMENT_FOR_CHANGE,
             EnumState::MENU,
             EnumState::NOTIFIED,
         ],
-        EnumState::CHANGE_MEDICAMENT_SELECTED_MEDICAMENT->value => [
+        EnumState::SELECTED_MEDICAMENT_FOR_CHANGE->value => [
             EnumState::CHANGE_MEDICAMENT_NAME_SELECTED,
             EnumState::CHANGE_NOTIFICATION_TIME_SELECTED,
             EnumState::MENU,
@@ -45,7 +45,7 @@ class StateTransitionRules
             EnumState::NOTIFIED,
         ],
         EnumState::CHANGE_NOTIFICATION_TIME_SELECTED->value => [
-            EnumState::CHANGE_NOTIFICATION_TIME_ENTERED,
+            EnumState::MEDICAMENT_NOTIFICATION_TIME_ENTERED,
             EnumState::MENU,
             EnumState::NOTIFIED,
         ],
@@ -53,16 +53,12 @@ class StateTransitionRules
             EnumState::MENU,
             EnumState::NOTIFIED,
         ],
-        EnumState::CHANGE_NOTIFICATION_TIME_ENTERED->value => [
-            EnumState::MENU,
-            EnumState::NOTIFIED,
-        ],
         EnumState::DELETE_MEDICAMENT_SELECTED->value => [
-            EnumState::DELETE_MEDICAMENT_SELECTED_MEDICAMENT,
+            EnumState::SELECTED_MEDICAMENT_FOR_CHANGE,
             EnumState::MENU,
             EnumState::NOTIFIED,
         ],
-        EnumState::DELETE_MEDICAMENT_SELECTED_MEDICAMENT->value => [
+        EnumState::SELECTED_MEDICAMENT_FOR_DELETE->value => [
             EnumState::DELETE_MEDICAMENT_CONFIRMED,
             EnumState::MENU,
             EnumState::NOTIFIED,
