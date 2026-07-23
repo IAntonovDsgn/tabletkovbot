@@ -11,7 +11,7 @@ final readonly class Message
      */
     public function __construct(
         private int $chatId,
-        private ?EnumOutgoingText $text,
+        private ?EnumMessageText $text,
         private array $buttons,
     ) {
     }

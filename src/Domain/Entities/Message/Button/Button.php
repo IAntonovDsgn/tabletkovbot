@@ -16,6 +16,8 @@ class Button
     const string CHANGE_NOTIFICATION_TIME = 'Изменить время уведомления';
     const string MENU = 'Меню';
     const string CONFIRM = 'Подтвердить';
+    const string DISABLE_NOTIFICATIONS = 'Отключить напоминания';
+    const string ENABLE_NOTIFICATIONS = 'Включить напоминания';
 
     public function __construct(
         private readonly string $title,

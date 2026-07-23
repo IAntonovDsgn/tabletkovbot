@@ -8,14 +8,13 @@ use App\Domain\Entities\Message\Button\Button;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\State\EnumState;
 
-final readonly class StateSelectedMedicamentForDeleteHandler implements StateHandlerInterface
+final readonly class StateDownloadReportSelectedHandler implements StateHandlerInterface
 {
     public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
     {
         return new StateHandlerDTO(
-            EnumMessageText::ARE_YOU_CONFIRM_DELETE_MEDICAMENT,
+            EnumMessageText::ENTER_DATE,
             [
-                new Button(Button::CONFIRM, EnumState::DELETE_MEDICAMENT_CONFIRMED),
                 new Button(Button::MENU, EnumState::MENU)
             ]
         );

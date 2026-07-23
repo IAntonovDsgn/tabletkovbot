@@ -6,7 +6,7 @@ use App\Application\Services\LogService\EnumLogTypes;
 use App\Application\Services\LogService\LogServiceInterface;
 use App\Application\Services\MessageService\MessageServiceInterface;
 use App\Domain\Entities\Message\Button\Button;
-use App\Domain\Entities\Message\EnumOutgoingText;
+use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
@@ -66,7 +66,7 @@ final readonly class Manager
             $this->messageService->sendMessage(
                 new Message(
                     $chatId,
-                    $message ?? EnumOutgoingText::ERROR,
+                    $message ?? EnumMessageText::ERROR,
                     [
                         new Button(Button::MAKE_INTAKE_MARK_BUTTON_TITLE, EnumState::MAKE_INTAKE_MARK_SELECTED),
                         new Button(Button::ADD_MEDICAMENT_BUTTON_TITLE, EnumState::ADD_MEDICAMENT_SELECTED),

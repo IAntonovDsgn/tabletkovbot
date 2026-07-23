@@ -5,7 +5,7 @@ namespace App\Application\BotManager\StateHandlers;
 use App\Application\BotManager\StateHandlerDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\Message\Button\Button;
-use App\Domain\Entities\Message\EnumOutgoingText;
+use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\State\EnumState;
 
 final readonly class StateMenuHandler implements StateHandlerInterface
@@ -13,7 +13,7 @@ final readonly class StateMenuHandler implements StateHandlerInterface
     public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
     {
         return new StateHandlerDTO(
-            EnumOutgoingText::MENU,
+            EnumMessageText::MENU,
             [
                 new Button(Button::MAKE_INTAKE_MARK_BUTTON_TITLE, EnumState::MAKE_INTAKE_MARK_SELECTED),
                 new Button(Button::ADD_MEDICAMENT_BUTTON_TITLE, EnumState::ADD_MEDICAMENT_SELECTED),

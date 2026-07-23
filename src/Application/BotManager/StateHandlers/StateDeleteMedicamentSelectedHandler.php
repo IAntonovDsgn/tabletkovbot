@@ -6,7 +6,7 @@ use App\Application\BotManager\StateHandlerDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\Button\Button;
-use App\Domain\Entities\Message\EnumOutgoingText;
+use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\NotSendToClient\NotFoundEntityException;
 
@@ -26,7 +26,7 @@ final readonly class StateDeleteMedicamentSelectedHandler implements StateHandle
         $buttons = [];
 
         if (empty($medicaments)) {
-            throw new NotFoundEntityException(EnumOutgoingText::MEDICAMENT_NOT_FOUND->value);
+            throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
 
         foreach ($medicaments as $medicament) {
@@ -38,6 +38,6 @@ final readonly class StateDeleteMedicamentSelectedHandler implements StateHandle
 
         $buttons[] = new Button(Button::MENU, EnumState::MENU);
 
-        return new StateHandlerDTO(EnumOutgoingText::CHOOSE_MEDICAMENT, $buttons);
+        return new StateHandlerDTO(EnumMessageText::CHOOSE_MEDICAMENT, $buttons);
     }
 }

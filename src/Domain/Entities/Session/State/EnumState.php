@@ -16,7 +16,7 @@ enum EnumState: string {
     case SELECTED_MEDICAMENT_FOR_DELETE = 'selected_medicament_for_delete';
     case DELETE_MEDICAMENT_CONFIRMED = 'delete_medicament_confirmed';
     case DOWNLOAD_REPORT_SELECTED = 'download_report_selected';
-    case DOWNLOAD_REPORT_DATES_SELECTED = 'download_report_dates_selected';
+    case DOWNLOAD_REPORT_START_DATE_ENTERED = 'download_report_start_date_entered';
     case NOTIFICATIONS_SELECTED = 'notifications_selected';
     case NOTIFICATION_MODE_SELECTED = 'notification_mode_selected';
     case MAKE_INTAKE_MARK_SELECTED = 'make_intake_mark_selected';

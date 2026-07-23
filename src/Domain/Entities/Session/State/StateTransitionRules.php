@@ -64,11 +64,11 @@ class StateTransitionRules
             EnumState::NOTIFIED,
         ],
         EnumState::DOWNLOAD_REPORT_SELECTED->value => [
-            EnumState::DOWNLOAD_REPORT_DATES_SELECTED,
+            EnumState::DOWNLOAD_REPORT_START_DATE_ENTERED,
             EnumState::MENU,
             EnumState::NOTIFIED,
         ],
-        EnumState::DOWNLOAD_REPORT_DATES_SELECTED->value => [
+        EnumState::DOWNLOAD_REPORT_START_DATE_ENTERED->value => [
             EnumState::MENU,
             EnumState::NOTIFIED,
         ],

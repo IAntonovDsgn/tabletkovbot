@@ -6,7 +6,7 @@ use App\Application\BotManager\StateHandlerDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\Button\Button;
-use App\Domain\Entities\Message\EnumOutgoingText;
+use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\NotSendToClient\NotFoundEntityException;
 use App\Domain\Exceptions\SendToClient\InvalidValueException;
@@ -21,21 +21,21 @@ final readonly class StateChangeNameMedicamentEnteredHandler implements StateHan
     public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
     {
         if (is_null($text)) {
-            throw new InvalidValueException(EnumOutgoingText::MEDICAMENT_EMPTY_NAME_ERROR->value);
+            throw new InvalidValueException(EnumMessageText::MEDICAMENT_EMPTY_NAME_ERROR->value);
         }
 
         $medicamentId = intval($payload);
         $medicament = $this->medicamentRepository->findById($medicamentId);
 
         if (is_null($medicament)) {
-            throw new NotFoundEntityException(EnumOutgoingText::MEDICAMENT_NOT_FOUND->value);
+            throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
 
         $medicament->setName($text);
         $this->medicamentRepository->save($medicament);
 
         return new StateHandlerDTO(
-            EnumOutgoingText::MEDICAMENT_RENAMED_SUCCESS,
+            EnumMessageText::MEDICAMENT_RENAMED_SUCCESS,
             [
                 new Button(Button::MAKE_INTAKE_MARK_BUTTON_TITLE, EnumState::MAKE_INTAKE_MARK_SELECTED),
                 new Button(Button::ADD_MEDICAMENT_BUTTON_TITLE, EnumState::ADD_MEDICAMENT_SELECTED),

@@ -6,7 +6,7 @@ use App\Application\BotManager\StateHandlerDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\Button\Button;
-use App\Domain\Entities\Message\EnumOutgoingText;
+use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\NotSendToClient\NotFoundEntityException;
 
@@ -31,11 +31,11 @@ final readonly class StateChangeMedicamentSelectedMedicamentHandler implements S
         }
 
         if (is_null($medicamentId)) {
-            throw new NotFoundEntityException(EnumOutgoingText::MEDICAMENT_NOT_FOUND->value);
+            throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
 
         return new StateHandlerDTO(
-            EnumOutgoingText::WHAT_YOU_WANT_TO_CHANGE,
+            EnumMessageText::WHAT_YOU_WANT_TO_CHANGE,
             [
                 new Button(Button::CHANGE_NAME, EnumState::CHANGE_MEDICAMENT_NAME_SELECTED),
                 new Button(Button::CHANGE_NOTIFICATION_TIME, EnumState::CHANGE_NOTIFICATION_TIME_SELECTED),

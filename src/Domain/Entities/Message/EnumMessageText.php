@@ -2,10 +2,10 @@
 
 namespace  App\Domain\Entities\Message;
 
-enum EnumOutgoingText: string {
+enum EnumMessageText: string {
     case CHOOSE_MEDICAMENT = 'Выберите медикамент';
     case ENTER_NEW_NAME = 'Введите новое имя медикамента';
-    case ENTER_NOTIFICATION_TIME = 'Введите время напоминания в формате hh:mm';
+    case ENTER_TIME = 'Введите время в формате hh:mm';
     case MEDICAMENT_EMPTY_NAME_ERROR = 'Имя медикамента не может быть пустым, попробуйте снова';
     case MEDICAMENT_NOT_FOUND = 'Медикамент не найден, попробуйте снова';
     case MEDICAMENT_RENAMED_SUCCESS = 'Имя медикамента успешно изменено. Чем еще я могу помочь?';
@@ -16,4 +16,11 @@ enum EnumOutgoingText: string {
     case WHAT_YOU_WANT_TO_CHANGE = 'Что вы хотите изменить?';
     case ARE_YOU_CONFIRM_DELETE_MEDICAMENT = 'Вы уверены, что хотите удалить медикамент?';
     case MEDICAMENT_DELETED = 'Медикамент успешно удален. Чем еще я могу помочь?';
+    case ENTER_DATE = 'Введите дату начала начала отчёта в формате dd.mm.yyyy';
+    case FORMAT_DATE_ERROR = 'Введен неверный формат даты. Пожалуйста, введите дату в формате dd.mm.yyyy';
+    case INTAKE_MARKS_NOT_FOUND = 'За выбранный период не найдены отметки о приеме медикаментов';
+    case REPORT_READY = 'Отчет сформирован! Чем еще я могу помочь?';
+    case NOTIFICATIONS_ENABLE = 'Напоминания о приеме медикаментов включены. Хотите отключить?';
+    case NOTIFICATIONS_DISABLE = 'Напоминания о приеме медикаментов отключены. Хотите включить?';
+    case SETTINGS_SAVED = 'Настройки сохранены! Чем еще я могу помочь?';
 }

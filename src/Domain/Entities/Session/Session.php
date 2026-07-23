@@ -12,7 +12,7 @@ final class Session
 
     public function __construct(
         private readonly int $chatId,
-        private bool $hasNotification = true,
+        private bool $isNotificationEnable = true,
         private ?string $payload = null,
         private EnumState $state = EnumState::MENU
     ) {
@@ -58,12 +58,17 @@ final class Session
 
     public function enableNotifications(): void
     {
-        $this->hasNotification = true;
+        $this->isNotificationEnable = true;
     }
 
     public function disableNotifications(): void
     {
-        $this->hasNotification = false;
+        $this->isNotificationEnable = false;
+    }
+
+    public function isNotificationEnabled(): bool
+    {
+        return $this->isNotificationEnable;
     }
 
     /**
