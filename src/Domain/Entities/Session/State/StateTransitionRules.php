@@ -78,11 +78,7 @@ class StateTransitionRules
             EnumState::NOTIFIED,
         ],
         EnumState::MAKE_INTAKE_MARK_SELECTED->value => [
-            EnumState::MAKE_INTAKE_MARK_MEDICAMENT_SELECTED,
-            EnumState::MENU,
-            EnumState::NOTIFIED,
-        ],
-        EnumState::MAKE_INTAKE_MARK_MEDICAMENT_SELECTED->value => [
+            EnumState::INTAKE_MARK_HAS_MADE,
             EnumState::MENU,
             EnumState::NOTIFIED,
         ],

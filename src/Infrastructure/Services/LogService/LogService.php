@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
  * @method static void debug(string $message, array $context = [])
  * @method static void log(string $level, string $message, array $context = [])
  */
-final readonly class LogServiceService implements LogServiceInterface
+final readonly class LogService implements LogServiceInterface
 {
     public function __construct(
         private LoggerInterface $logger,

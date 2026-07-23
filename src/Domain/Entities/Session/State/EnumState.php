@@ -20,7 +20,6 @@ enum EnumState: string {
     case NOTIFICATIONS_SELECTED = 'notifications_selected';
     case NOTIFICATION_MODE_SELECTED = 'notification_mode_selected';
     case MAKE_INTAKE_MARK_SELECTED = 'make_intake_mark_selected';
-    case MAKE_INTAKE_MARK_MEDICAMENT_SELECTED = 'make_intake_mark_medicament_selected';
-    case INTAKE_MARK_HAS_MADE = 'intake_mark_have_made';
+    case INTAKE_MARK_HAS_MADE = 'intake_mark_has_made';
     case NOTIFIED = 'notified';
 }

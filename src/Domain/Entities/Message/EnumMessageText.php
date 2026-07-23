@@ -23,4 +23,5 @@ enum EnumMessageText: string {
     case NOTIFICATIONS_ENABLE = 'Напоминания о приеме медикаментов включены. Хотите отключить?';
     case NOTIFICATIONS_DISABLE = 'Напоминания о приеме медикаментов отключены. Хотите включить?';
     case SETTINGS_SAVED = 'Настройки сохранены! Чем еще я могу помочь?';
+    case INTAKE_MARK_SAVED = 'Отметка о приеме сохранена! Чем еще я могу помочь?';
 }

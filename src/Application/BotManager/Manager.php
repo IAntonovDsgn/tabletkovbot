@@ -16,7 +16,7 @@ use App\Domain\Exceptions\SendToClient\BaseSendToClientException;
 final readonly class Manager
 {
     public function __construct(
-        private FactoryStateHandler $factoryStateHandler,
+        private StateHandlerFactory $factoryStateHandler,
         private SessionRepositoryInterface $sessionRepository,
         private LogServiceInterface $logService,
         private MessageServiceInterface $messageService,
