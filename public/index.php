@@ -1,22 +1,12 @@
 <?php
 
-use App\Application\BotManager\RequestDTO;
-use App\Presentation\Api\Controller;
-use Telegram\Bot\Laravel\Facades\Telegram;
-use Telegram\Bot\Objects\Message;
+require __DIR__ . '/../vendor/autoload.php';
 
-/** @var \DI\Container $container */
+use App\Infrastructure\Http\Router;
+use DI\Container;
+
+/** @var Container $container */
 $container = require __DIR__ . '/../bootstrap/bootstrap.php';
 
-$messages = Telegram::getWebhookUpdate()->getMessage();
-
-/** @var Message $message */
-$message = end($messages);
-
-$incomingMessage = new RequestDTO(
-    $message->chat->id,
-);
-
-/** @var Controller $controller */
-$controller = $container->get(Controller::class);
-$controller->process($incomingMessage);
+$router = new Router($container);
+$router->run();
