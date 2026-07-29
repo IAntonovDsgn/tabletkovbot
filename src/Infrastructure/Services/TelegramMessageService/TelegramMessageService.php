@@ -5,9 +5,6 @@ namespace App\Infrastructure\Services\TelegramMessageService;
 use App\Application\Services\MessageService\MessageServiceInterface;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Exceptions\NotSendToClient\SendMessageException;
-use App\Infrastructure\Services\ServiceContainer;
-use DI\DependencyException;
-use DI\NotFoundException;
 use Exception;
 use GuzzleHttp\Client;
 use Telegram\Bot\Api;
@@ -19,14 +16,10 @@ final readonly class TelegramMessageService implements MessageServiceInterface
     private Client $httpClient;
     private string $token;
 
-    /**
-     * @throws DependencyException
-     * @throws NotFoundException
-     */
     public function __construct(
         private Api $telegramApi,
+        private array $telegramConfig,
     ) {
-        $telegramConfig = ServiceContainer::get('telegram.config');
         $this->token = $telegramConfig['token'];
         $this->httpClient = new Client(['base_uri' => $telegramConfig['base_url']]);
     }

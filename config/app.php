@@ -10,15 +10,18 @@ use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Telegram\Bot\Api;
-
 use function DI\autowire;
+use function DI\get;
 
 return [
     'telegram.config' => function () {
         return require __DIR__ . '/telegram.php';
     },
 
-    MessageServiceInterface::class => autowire(TelegramMessageService::class),
+    MessageServiceInterface::class => get(TelegramMessageService::class),
+
+    TelegramMessageService::class => autowire()
+        ->constructorParameter('telegramConfig', get('telegram.config')),
 
     LoggerInterface::class => function () {
         $logger = new Logger('app');
@@ -30,6 +33,6 @@ return [
 
     Api::class => function (ContainerInterface $c) {
         $config = $c->get('telegram.config');
-        return new \Telegram\Bot\Api($config['token']);
+        return new Api($config['token']);
     },
 ];
