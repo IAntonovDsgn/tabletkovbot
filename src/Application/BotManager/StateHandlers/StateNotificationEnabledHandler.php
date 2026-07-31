@@ -17,7 +17,7 @@ final readonly class StateNotificationEnabledHandler implements StateHandlerInte
     ) {
     }
 
-    public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
+    public function handle(int $chatId, ?string $text, ?string $buttonPayload, ?string $clickedButtonTitle): StateHandlerDTO
     {
         $session = $this->sessionRepository->findByChatId($chatId);
         $session->enableNotifications();

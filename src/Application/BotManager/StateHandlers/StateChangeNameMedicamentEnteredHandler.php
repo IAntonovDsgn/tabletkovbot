@@ -18,13 +18,13 @@ final readonly class StateChangeNameMedicamentEnteredHandler implements StateHan
     ) {
     }
 
-    public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
+    public function handle(int $chatId, ?string $text, ?string $buttonPayload, ?string $clickedButtonTitle): StateHandlerDTO
     {
         if (is_null($text)) {
             throw new InvalidValueException(EnumMessageText::MEDICAMENT_EMPTY_NAME_ERROR->value);
         }
 
-        $medicamentId = intval($payload);
+        $medicamentId = intval($buttonPayload);
         $medicament = $this->medicamentRepository->findById($medicamentId);
 
         if (is_null($medicament)) {

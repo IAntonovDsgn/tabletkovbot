@@ -20,9 +20,9 @@ final readonly class StateDeleteMedicamentConfirmedHandler implements StateHandl
     /**
      * @throws NotFoundEntityException
      */
-    public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
+    public function handle(int $chatId, ?string $text, ?string $buttonPayload, ?string $clickedButtonTitle): StateHandlerDTO
     {
-        $medicament = $this->medicamentRepository->findById($payload);
+        $medicament = $this->medicamentRepository->findById($buttonPayload);
 
         if (is_null($medicament)) {
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);

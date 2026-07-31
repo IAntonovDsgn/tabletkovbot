@@ -27,7 +27,7 @@ final readonly class StateMedicamentNotificationTimeEnteredHandler implements St
      * @throws InvalidValueException
      * @throws NotFoundEntityException
      */
-    public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
+    public function handle(int $chatId, ?string $text, ?string $buttonPayload, ?string $clickedButtonTitle): StateHandlerDTO
     {
         $notificationTime = DateTimeImmutable::createFromFormat(
             Medicament::TIME_FORMAT,

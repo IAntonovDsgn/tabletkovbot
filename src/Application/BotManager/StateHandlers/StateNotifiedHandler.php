@@ -23,7 +23,7 @@ final readonly class StateNotifiedHandler implements StateHandlerInterface
     /**
      * @throws SendMessageException
      */
-    public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
+    public function handle(int $chatId, ?string $text, ?string $buttonPayload, ?string $clickedButtonTitle): StateHandlerDTO
     {
         $medicament = $this->medicamentRepository->findById($text);
 

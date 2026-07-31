@@ -10,7 +10,7 @@ use App\Domain\Entities\Session\State\EnumState;
 
 final readonly class StateMenuHandler implements StateHandlerInterface
 {
-    public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
+    public function handle(int $chatId, ?string $text, ?string $buttonPayload, ?string $clickedButtonTitle): StateHandlerDTO
     {
         return new StateHandlerDTO(
             EnumMessageText::MENU,

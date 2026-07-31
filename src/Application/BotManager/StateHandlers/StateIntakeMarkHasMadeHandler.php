@@ -21,7 +21,7 @@ final readonly class StateIntakeMarkHasMadeHandler implements StateHandlerInterf
     /**
      * @throws NotFoundEntityException
      */
-    public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
+    public function handle(int $chatId, ?string $text, ?string $buttonPayload, ?string $clickedButtonTitle): StateHandlerDTO
     {
         $intakeMark = null;
         $medicaments = $this->medicamentRepository->findByChatId($chatId);
