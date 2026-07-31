@@ -2,7 +2,7 @@
 
 namespace App\Presentation\Api;
 
-use App\Application\BotManager\RequestDTO;
+use Illuminate\Support\Facades\Log;
 use Psr\Log\LoggerInterface;
 use Telegram\Bot\Api;
 use OpenApi\Attributes as OA;
@@ -41,7 +41,7 @@ final readonly class WebhookController
     )]
     #[OA\Response(
         response: 200,
-        description: 'Успешная обработка (или пропуск апдейта, если это не message)'
+        description: 'Успешная обработка'
     )]
     #[OA\Response(
         response: 500,
@@ -57,11 +57,12 @@ final readonly class WebhookController
             }
 
             $message = $update->getMessage();
+            Log::error($message);
 
-            $incomingMessage = new RequestDTO(
-                $message->getChat()->getId(),
-            // можно добавить текст и другие нужные поля
-            );
+//            $incomingMessage = new RequestDTO(
+//                $message->getChat()->getId(),
+//            // можно добавить текст и другие нужные поля
+//            );
         } catch (\Throwable $e) {
             $this->logger->error('Ошибка при обработке запроса', ['exception' => $e]);
             http_response_code(500);
