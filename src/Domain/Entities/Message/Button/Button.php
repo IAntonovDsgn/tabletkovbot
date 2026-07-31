@@ -19,9 +19,12 @@ class Button
     const string DISABLE_NOTIFICATIONS = 'Отключить напоминания';
     const string ENABLE_NOTIFICATIONS = 'Включить напоминания';
 
+    const string SEPARATOR = '|';
+
     public function __construct(
         private readonly string $title,
         private readonly EnumState $newState,
+        private readonly ?string $additionalPayload = null,
     ) {
     }
 
@@ -33,5 +36,10 @@ class Button
     public function getNewState(): string
     {
         return $this->newState->value;
+    }
+
+    public function getAdditionalPayload(): ?string
+    {
+        return $this->additionalPayload;
     }
 }

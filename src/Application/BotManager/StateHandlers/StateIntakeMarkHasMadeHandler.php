@@ -2,7 +2,7 @@
 
 namespace App\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\StateHandlerDTO;
+use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
@@ -21,7 +21,7 @@ final readonly class StateIntakeMarkHasMadeHandler implements StateHandlerInterf
     /**
      * @throws NotFoundEntityException
      */
-    public function handle(int $chatId, ?string $text, ?string $buttonPayload, ?string $clickedButtonTitle): StateHandlerDTO
+    public function handle(int $chatId, ?string $text, ?string $sessionPayload, ?string $buttonPayload): StateHandlerResponseDTO
     {
         $intakeMark = null;
         $medicaments = $this->medicamentRepository->findByChatId($chatId);
@@ -30,7 +30,7 @@ final readonly class StateIntakeMarkHasMadeHandler implements StateHandlerInterf
         }
 
         foreach ($medicaments as $medicament) {
-            if ($medicament->getName() === $clickedButtonTitle) {
+            if ($medicament->getName() === $buttonPayload) {
                 $intakeMark = new IntakeMark(
                     $chatId,
                     $medicament->getId()
@@ -42,7 +42,7 @@ final readonly class StateIntakeMarkHasMadeHandler implements StateHandlerInterf
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
 
-        return new StateHandlerDTO(
+        return new StateHandlerResponseDTO(
             EnumMessageText::INTAKE_MARK_SAVED,
             [
                 new Button(Button::MAKE_INTAKE_MARK_BUTTON_TITLE, EnumState::MAKE_INTAKE_MARK_SELECTED),

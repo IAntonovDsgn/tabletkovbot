@@ -2,7 +2,7 @@
 
 namespace App\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\StateHandlerDTO;
+use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\Message\Button\Button;
 use App\Domain\Entities\Message\EnumMessageText;
@@ -16,13 +16,13 @@ final readonly class StateNotificationDisabledHandler implements StateHandlerInt
     ) {
     }
 
-    public function handle(int $chatId, ?string $text, ?string $buttonPayload, ?string $clickedButtonTitle): StateHandlerDTO
+    public function handle(int $chatId, ?string $text, ?string $sessionPayload, ?string $buttonPayload): StateHandlerResponseDTO
     {
         $session = $this->sessionRepository->findByChatId($chatId);
         $session->disableNotifications();
         $this->sessionRepository->save($session);
 
-        return new StateHandlerDTO(
+        return new StateHandlerResponseDTO(
             EnumMessageText::SETTINGS_SAVED,
             [
                 new Button(Button::MAKE_INTAKE_MARK_BUTTON_TITLE, EnumState::MAKE_INTAKE_MARK_SELECTED),

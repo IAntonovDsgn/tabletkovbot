@@ -2,7 +2,7 @@
 
 namespace App\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\StateHandlerDTO;
+use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
@@ -18,7 +18,7 @@ final readonly class StateMedicamentNameEnteredHandler implements StateHandlerIn
     ) {
     }
 
-    public function handle(int $chatId, ?string $text, ?string $buttonPayload, ?string $clickedButtonTitle): StateHandlerDTO
+    public function handle(int $chatId, ?string $text, ?string $sessionPayload, ?string $buttonPayload): StateHandlerResponseDTO
     {
         if (is_null($text)) {
             throw new InvalidValueException(EnumMessageText::MEDICAMENT_EMPTY_NAME_ERROR->value);
@@ -34,7 +34,7 @@ final readonly class StateMedicamentNameEnteredHandler implements StateHandlerIn
 
         $medicament = new Medicament($text, $chatId, id: ++$lastMedicamentId);
         $this->medicamentRepository->save($medicament);
-        return new StateHandlerDTO(
+        return new StateHandlerResponseDTO(
             EnumMessageText::ENTER_TIME,
             [
                 new Button(Button::MENU, EnumState::MENU)

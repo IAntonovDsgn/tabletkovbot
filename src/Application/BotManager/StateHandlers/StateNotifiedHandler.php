@@ -2,7 +2,7 @@
 
 namespace App\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\StateHandlerDTO;
+use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
@@ -23,7 +23,7 @@ final readonly class StateNotifiedHandler implements StateHandlerInterface
     /**
      * @throws SendMessageException
      */
-    public function handle(int $chatId, ?string $text, ?string $buttonPayload, ?string $clickedButtonTitle): StateHandlerDTO
+    public function handle(int $chatId, ?string $text, ?string $sessionPayload, ?string $buttonPayload): StateHandlerResponseDTO
     {
         $medicament = $this->medicamentRepository->findById($text);
 
@@ -38,7 +38,7 @@ final readonly class StateNotifiedHandler implements StateHandlerInterface
 
         $this->intakeMarkRepository->save($intakeMark);
 
-        return new StateHandlerDTO(
+        return new StateHandlerResponseDTO(
             EnumMessageText::INTAKE_MARK_SAVED,
             [
                 new Button(Button::MAKE_INTAKE_MARK_BUTTON_TITLE, EnumState::MAKE_INTAKE_MARK_SELECTED),

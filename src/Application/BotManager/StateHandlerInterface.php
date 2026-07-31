@@ -12,7 +12,7 @@ interface StateHandlerInterface
     public function handle(
         int $chatId,
         ?string $text,
-        ?string $buttonPayload,
-        ?string $clickedButtonTitle
-    ): StateHandlerDTO;
+        ?string $sessionPayload,
+        ?string $buttonPayload
+    ): StateHandlerResponseDTO;
 }

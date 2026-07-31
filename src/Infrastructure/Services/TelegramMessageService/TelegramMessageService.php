@@ -3,6 +3,7 @@
 namespace App\Infrastructure\Services\TelegramMessageService;
 
 use App\Application\Services\MessageService\MessageServiceInterface;
+use App\Domain\Entities\Message\Button\Button;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Exceptions\NotSendToClient\SendMessageException;
 use Exception;
@@ -32,7 +33,14 @@ final readonly class TelegramMessageService implements MessageServiceInterface
         if (!empty($message->getButtons())) {
             $keyboards = Keyboard::make()->inline();
             foreach ($message->getButtons() as $button) {
-                $keyboards->row(['text' => $button->getTitle(), 'callback_data' => $button->getNewState()]);
+                $callbackData = implode(
+                    Button::SEPARATOR,
+                    [
+                        $button->getNewState(),
+                        $button->getAdditionalPayload()
+                    ]
+                );
+                $keyboards->row(['text' => $button->getTitle(), 'callback_data' => $callbackData]);
             }
         }
 

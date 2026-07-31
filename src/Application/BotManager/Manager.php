@@ -32,14 +32,17 @@ final readonly class Manager
         try {
             // TODO: start unit of work
             $session = $this->sessionRepository->findByChatId($params->chatId) ?? new Session($params->chatId);
-            $newState = $params->newState ?? $session->getAllowedNextState();
+            $buttonData = explode(Button::SEPARATOR, $params->newState);
+            $newState = $buttonData[0] ?? null;
+            $buttonPayload = $buttonData[1] ?? null;
+            $newState = $newState ?? $session->getAllowedNextState();
             $session->transitionToState($newState);
             $handler = $this->factoryStateHandler->makeByState($newState);
             $handlerResponseDTO = $handler->handle(
                 $params->chatId,
                 $params->text,
                 $session->getPayload(),
-                $params->clickedButtonTitle,
+                $buttonPayload,
 
             );
             $handlerResponseDTO->newSessionPayload && $session->setPayload($handlerResponseDTO->newSessionPayload);

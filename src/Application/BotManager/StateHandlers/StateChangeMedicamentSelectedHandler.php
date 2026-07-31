@@ -2,7 +2,7 @@
 
 namespace App\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\StateHandlerDTO;
+use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\Button\Button;
@@ -20,7 +20,7 @@ final readonly class StateChangeMedicamentSelectedHandler implements StateHandle
     /**
      * @throws NotFoundEntityException
      */
-    public function handle(int $chatId, ?string $text, ?string $buttonPayload, ?string $clickedButtonTitle): StateHandlerDTO
+    public function handle(int $chatId, ?string $text, ?string $sessionPayload, ?string $buttonPayload): StateHandlerResponseDTO
     {
         $medicaments = $this->medicamentRepository->findByChatId($chatId);
         $buttons = [];
@@ -33,11 +33,12 @@ final readonly class StateChangeMedicamentSelectedHandler implements StateHandle
             $buttons[] = new Button(
                 $medicament->getName(),
                 EnumState::CHANGE_MEDICAMENT_NAME_SELECTED,
+                $medicament->getName(),
             );
         }
 
         $buttons[] = new Button(Button::MENU, EnumState::MENU);
 
-        return new StateHandlerDTO(EnumMessageText::CHOOSE_MEDICAMENT, $buttons);
+        return new StateHandlerResponseDTO(EnumMessageText::CHOOSE_MEDICAMENT, $buttons);
     }
 }

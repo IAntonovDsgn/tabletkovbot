@@ -2,7 +2,7 @@
 
 namespace App\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\StateHandlerDTO;
+use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Message\Button\Button;
@@ -20,14 +20,14 @@ final readonly class StateDownloadReportStartDateEnteredHandler implements State
     ) {
     }
 
-    public function handle(int $chatId, ?string $text, ?string $buttonPayload, ?string $clickedButtonTitle): StateHandlerDTO
+    public function handle(int $chatId, ?string $text, ?string $sessionPayload, ?string $buttonPayload): StateHandlerResponseDTO
     {
         $startDate = DateTimeImmutable::createFromFormat(Report::DATE_FORMAT, $text)
             ?? throw new InvalidValueException(EnumMessageText::FORMAT_DATE_ERROR->value);
 
         $intakeMarks = $this->intakeMarkRepository->findByChatId($chatId);
         if (empty($intakeMarks)) {
-            $result = new StateHandlerDTO(
+            $result = new StateHandlerResponseDTO(
                 EnumMessageText::INTAKE_MARKS_NOT_FOUND,
                 [
                     new Button(Button::MAKE_INTAKE_MARK_BUTTON_TITLE, EnumState::MAKE_INTAKE_MARK_SELECTED),
@@ -40,7 +40,7 @@ final readonly class StateDownloadReportStartDateEnteredHandler implements State
             );
         } else {
             $report = new Report($startDate, $intakeMarks);
-            $result = new StateHandlerDTO(
+            $result = new StateHandlerResponseDTO(
                 EnumMessageText::REPORT_READY,
                 [
                     new Button(Button::MAKE_INTAKE_MARK_BUTTON_TITLE, EnumState::MAKE_INTAKE_MARK_SELECTED),

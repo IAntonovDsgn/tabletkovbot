@@ -2,7 +2,7 @@
 
 namespace App\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\StateHandlerDTO;
+use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\Button\Button;
@@ -20,9 +20,9 @@ final readonly class StateDeleteMedicamentConfirmedHandler implements StateHandl
     /**
      * @throws NotFoundEntityException
      */
-    public function handle(int $chatId, ?string $text, ?string $buttonPayload, ?string $clickedButtonTitle): StateHandlerDTO
+    public function handle(int $chatId, ?string $text, ?string $sessionPayload, ?string $buttonPayload): StateHandlerResponseDTO
     {
-        $medicament = $this->medicamentRepository->findById($buttonPayload);
+        $medicament = $this->medicamentRepository->findById($sessionPayload);
 
         if (is_null($medicament)) {
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
@@ -30,7 +30,7 @@ final readonly class StateDeleteMedicamentConfirmedHandler implements StateHandl
 
         $medicament->deactivate();
         $this->medicamentRepository->save($medicament);
-        return new StateHandlerDTO(
+        return new StateHandlerResponseDTO(
             EnumMessageText::MEDICAMENT_DELETED,
             [
                 new Button(Button::MAKE_INTAKE_MARK_BUTTON_TITLE, EnumState::MAKE_INTAKE_MARK_SELECTED),
