@@ -1,6 +1,5 @@
 <?php
 
-use Monolog\Formatter\JsonFormatter;
 use Monolog\Level;
 use Psr\Log\LoggerInterface;
 use Monolog\Logger as MonologLogger;
@@ -16,10 +15,7 @@ return [
         $path = $c->get('log.path');
 
         $monolog = new MonologLogger($channel);
-
         $handler = new StreamHandler($path, Level::Debug);
-        $handler->setFormatter(new JsonFormatter());
-
         $monolog->pushHandler($handler);
         return $monolog;
     },
