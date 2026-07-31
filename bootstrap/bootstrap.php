@@ -18,8 +18,7 @@ if (isset($_ENV['APP_TIMEZONE'])) {
 
 $containerBuilder = new ContainerBuilder();
 $containerBuilder->useAutowiring(true);
-$containerBuilder->addDefinitions(require __DIR__ . '/../config/telegram.php');
-$containerBuilder->addDefinitions(require __DIR__ . '/../config/logging.php');
+$containerBuilder->addDefinitions(require 'appServiceProvider.php');
 $appContainer = $containerBuilder->build();
 
 $logger = $appContainer->get(LoggerInterface::class);

@@ -2,9 +2,11 @@
 
 namespace App\Infrastructure\Http;
 
+use App\Presentation\Api\SwaggerController;
+use App\Presentation\Api\WebhookController;
 use DI\Container;
 use FastRoute\Dispatcher;
-
+use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
 
 final readonly class Router
@@ -14,9 +16,16 @@ final readonly class Router
     ) {
     }
 
+    private function routes(RouteCollector $routes): void
+    {
+        $routes->addRoute('POST', '/webhook', [WebhookController::class, 'indexAction']);
+        $routes->addRoute('GET', '/swagger-json', [SwaggerController::class, 'getJson']);
+        $routes->addRoute('GET', '/docs', [SwaggerController::class, 'ui']);
+    }
+
     public function run(): void
     {
-        $dispatcher = simpleDispatcher(require __DIR__ . '/../../../config/routes.php');
+        $dispatcher = simpleDispatcher($this->routes(...));
         $httpMethod = $_SERVER['REQUEST_METHOD'];
         $uri = rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
@@ -35,9 +44,7 @@ final readonly class Router
             case Dispatcher::FOUND:
                 $handler = $routeInfo[1];
                 $vars = $routeInfo[2];
-
                 [$class, $method] = $handler;
-
                 $controller = $this->container->get($class);
                 $controller->$method($vars);
                 break;
