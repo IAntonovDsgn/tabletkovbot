@@ -8,7 +8,7 @@ final readonly class RequestDTO
 {
     public function __construct(
         public int $chatId,
-        public ?string $value,
+        public ?string $text,
         public ?EnumState $newState,
         public ?string $clickedButtonTitle,
     ) {

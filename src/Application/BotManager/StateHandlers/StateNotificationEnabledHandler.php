@@ -8,9 +8,8 @@ use App\Domain\Entities\Message\Button\Button;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\NotSendToClient\NotFoundEntityException;
 
-final readonly class StateNotificationModeSelectedHandler implements StateHandlerInterface
+final readonly class StateNotificationEnabledHandler implements StateHandlerInterface
 {
 
     public function __construct(
@@ -18,22 +17,12 @@ final readonly class StateNotificationModeSelectedHandler implements StateHandle
     ) {
     }
 
-    /**
-     * @throws NotFoundEntityException
-     */
     public function handle(int $chatId, ?string $text, ?string $payload, ?string $clickedButtonTitle): StateHandlerDTO
     {
         $session = $this->sessionRepository->findByChatId($chatId);
-
-        if ($clickedButtonTitle === Button::ENABLE_NOTIFICATIONS) {
-            $session->enableNotifications();
-        } elseif ($clickedButtonTitle === Button::DISABLE_NOTIFICATIONS) {
-            $session->disableNotifications();
-        } else {
-            throw new NotFoundEntityException('Не передан button title');
-        }
-
+        $session->enableNotifications();
         $this->sessionRepository->save($session);
+
         return new StateHandlerDTO(
             EnumMessageText::SETTINGS_SAVED,
             [

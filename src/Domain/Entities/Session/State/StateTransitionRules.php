@@ -73,7 +73,16 @@ class StateTransitionRules
             EnumState::NOTIFIED,
         ],
         EnumState::NOTIFICATIONS_SELECTED->value => [
-            EnumState::NOTIFICATION_MODE_SELECTED,
+            EnumState::NOTIFICATION_ENABLED,
+            EnumState::NOTIFICATION_DISABLED,
+            EnumState::MENU,
+            EnumState::NOTIFIED,
+        ],
+        EnumState::NOTIFICATION_ENABLED->value => [
+            EnumState::MENU,
+            EnumState::NOTIFIED,
+        ],
+        EnumState::NOTIFICATION_DISABLED->value => [
             EnumState::MENU,
             EnumState::NOTIFIED,
         ],

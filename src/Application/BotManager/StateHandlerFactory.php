@@ -17,7 +17,8 @@ use App\Application\BotManager\StateHandlers\StateMakeIntakeMarkSelectedHandler;
 use App\Application\BotManager\StateHandlers\StateMedicamentNameEnteredHandler;
 use App\Application\BotManager\StateHandlers\StateMedicamentNotificationTimeEnteredHandler;
 use App\Application\BotManager\StateHandlers\StateMenuHandler;
-use App\Application\BotManager\StateHandlers\StateNotificationModeSelectedHandler;
+use App\Application\BotManager\StateHandlers\StateNotificationDisabledHandler;
+use App\Application\BotManager\StateHandlers\StateNotificationEnabledHandler;
 use App\Application\BotManager\StateHandlers\StateNotificationsSelectedHandler;
 use App\Application\BotManager\StateHandlers\StateNotifiedHandler;
 use App\Application\BotManager\StateHandlers\StateSelectedMedicamentForDeleteHandler;
@@ -41,7 +42,8 @@ final readonly class StateHandlerFactory
         private StateDownloadReportSelectedHandler $downloadReportSelectedHandler,
         private StateDownloadReportStartDateEnteredHandler $downloadReportStartDateEnteredHandler,
         private StateNotificationsSelectedHandler $notificationsSelectedHandler,
-        private StateNotificationModeSelectedHandler $notificationModeSelectedHandler,
+        private StateNotificationEnabledHandler $notificationEnabledHandler,
+        private StateNotificationDisabledHandler $notificationDisabledHandler,
         private StateMakeIntakeMarkSelectedHandler $makeIntakeMarkSelectedHandler,
         private StateIntakeMarkHasMadeHandler $intakeMarkHasMadeHandler,
         private StateNotifiedHandler $notifiedHandler,
@@ -66,7 +68,8 @@ final readonly class StateHandlerFactory
             EnumState::DOWNLOAD_REPORT_SELECTED => $this->downloadReportSelectedHandler,
             EnumState::DOWNLOAD_REPORT_START_DATE_ENTERED => $this->downloadReportStartDateEnteredHandler,
             EnumState::NOTIFICATIONS_SELECTED => $this->notificationsSelectedHandler,
-            EnumState::NOTIFICATION_MODE_SELECTED => $this->notificationModeSelectedHandler,
+            EnumState::NOTIFICATION_ENABLED => $this->notificationEnabledHandler,
+            EnumState::NOTIFICATION_DISABLED => $this->notificationDisabledHandler,
             EnumState::MAKE_INTAKE_MARK_SELECTED => $this->makeIntakeMarkSelectedHandler,
             EnumState::INTAKE_MARK_HAS_MADE => $this->intakeMarkHasMadeHandler,
             EnumState::NOTIFIED => $this->notifiedHandler,

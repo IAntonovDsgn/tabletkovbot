@@ -2,10 +2,11 @@
 
 namespace App\Presentation\Api;
 
+use App\Application\BotManager\RequestDTO;
+use Exception;
 use Illuminate\Support\Facades\Log;
-use Psr\Log\LoggerInterface;
-use Telegram\Bot\Api;
 use OpenApi\Attributes as OA;
+use Telegram\Bot\Api;
 
 #[OA\Info(
     version: "1.0.0",
@@ -14,10 +15,8 @@ use OpenApi\Attributes as OA;
 )]
 final readonly class WebhookController
 {
-    public function __construct(
-        private Api $telegramApi,
-        private LoggerInterface $logger
-    ) {
+    public function __construct(private Api $telegramApi)
+    {
     }
 
     #[OA\Post(
@@ -52,19 +51,25 @@ final readonly class WebhookController
         try {
             $update = $this->telegramApi->getWebhookUpdate();
 
-            if (!$update->has('message')) {
-                return;
+            if ($update->has('callback_query')) {
+                $callbackQuery = $update->getCallbackQuery();
+
+                $this->telegramApi->answerCallbackQuery([
+                    'callback_query_id' => $callbackQuery->getId()
+                ]);
+
+                $chatId = $callbackQuery->getMessage()->getChat()->getId();
+                $newState = $callbackQuery->getData();
+
+                $requestDTO = new RequestDTO($chatId, null, $newState);
             }
 
-            $message = $update->getMessage();
-            Log::error($message);
-
-//            $incomingMessage = new RequestDTO(
-//                $message->getChat()->getId(),
-//            // можно добавить текст и другие нужные поля
-//            );
-        } catch (\Throwable $e) {
-            $this->logger->error('Ошибка при обработке запроса', ['exception' => $e]);
+            if (!$update->has('message')) {
+                $message = $update->getMessage();
+                Log::error('Message: ' . $message);
+            }
+        } catch (Exception $e) {
+            Log::error($e->getMessage());
             http_response_code(500);
         }
     }

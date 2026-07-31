@@ -1,5 +1,6 @@
 <?php
 
+use Monolog\Formatter\LineFormatter;
 use Monolog\Level;
 use Psr\Log\LoggerInterface;
 use Monolog\Logger as MonologLogger;
@@ -16,6 +17,8 @@ return [
 
         $monolog = new MonologLogger($channel);
         $handler = new StreamHandler($path, Level::Debug);
+        $formatter = new LineFormatter(null, null, true, true);
+        $handler->setFormatter($formatter);
         $monolog->pushHandler($handler);
         return $monolog;
     },

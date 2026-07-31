@@ -18,7 +18,8 @@ enum EnumState: string {
     case DOWNLOAD_REPORT_SELECTED = 'download_report_selected';
     case DOWNLOAD_REPORT_START_DATE_ENTERED = 'download_report_start_date_entered';
     case NOTIFICATIONS_SELECTED = 'notifications_selected';
-    case NOTIFICATION_MODE_SELECTED = 'notification_mode_selected';
+    case NOTIFICATION_ENABLED = 'notification_enabled';
+    case NOTIFICATION_DISABLED = 'notification_disabled';
     case MAKE_INTAKE_MARK_SELECTED = 'make_intake_mark_selected';
     case INTAKE_MARK_HAS_MADE = 'intake_mark_has_made';
     case NOTIFIED = 'notified';
