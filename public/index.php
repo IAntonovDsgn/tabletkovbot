@@ -5,8 +5,9 @@ require __DIR__ . '/../vendor/autoload.php';
 use App\Infrastructure\Http\Router;
 use DI\Container;
 
-/** @var Container $container */
+/**
+ * @var Container $container
+ */
 $container = require __DIR__ . '/../bootstrap/bootstrap.php';
 
-$router = new Router($container);
-$router->run();
+new Router($container)();

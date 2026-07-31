@@ -46,7 +46,7 @@ final readonly class WebhookController
         response: 500,
         description: 'Внутренняя ошибка при обработке запроса'
     )]
-    public function indexAction(): void
+    public function handle(): void
     {
         try {
             $update = $this->telegramApi->getWebhookUpdate();

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Exceptions\NotSendToClient;
+namespace App\Domain\Exceptions\Interior;
 
 class NotFoundEntityException extends \Exception
 {}

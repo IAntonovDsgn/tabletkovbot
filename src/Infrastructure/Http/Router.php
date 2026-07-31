@@ -18,12 +18,12 @@ final readonly class Router
 
     private function routes(RouteCollector $routes): void
     {
-        $routes->addRoute('POST', '/webhook', [WebhookController::class, 'indexAction']);
+        $routes->addRoute('POST', '/webhook', [WebhookController::class, 'handle']);
         $routes->addRoute('GET', '/swagger-json', [SwaggerController::class, 'getJson']);
         $routes->addRoute('GET', '/docs', [SwaggerController::class, 'ui']);
     }
 
-    public function run(): void
+    public function __invoke(): void
     {
         $dispatcher = simpleDispatcher($this->routes(...));
         $httpMethod = $_SERVER['REQUEST_METHOD'];

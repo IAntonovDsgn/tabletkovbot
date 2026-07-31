@@ -9,8 +9,7 @@ use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\NotSendToClient\TransitionStateNotAllowedException;
-use App\Domain\Exceptions\SendToClient\BaseSendToClientException;
+use App\Domain\Exceptions\Interior\TransitionStateNotAllowedException;
 use Exception;
 
 final readonly class Manager
@@ -24,7 +23,6 @@ final readonly class Manager
 
     /**
      * @throws Exception
-     * @throws BaseSendToClientException
      * @throws TransitionStateNotAllowedException
      */
     public function process(RequestDTO $params): void
@@ -32,10 +30,17 @@ final readonly class Manager
         try {
             // TODO: start unit of work
             $session = $this->sessionRepository->findByChatId($params->chatId) ?? new Session($params->chatId);
-            $buttonData = explode(Button::SEPARATOR, $params->newState);
-            $newState = $buttonData[0] ?? null;
-            $buttonPayload = $buttonData[1] ?? null;
-            $newState = $newState ?? $session->getAllowedNextState();
+            $requestPayload = explode(Button::SEPARATOR, $params->payload);
+
+            if (count($requestPayload) < 1) {
+                throw new TransitionStateNotAllowedException('Not found request payload');
+            } elseif (EnumState::tryFrom($requestPayload[0]) !== null) {
+                throw new TransitionStateNotAllowedException('Not found state in request payload');
+            } else {
+                $newState = EnumState::tryFrom($requestPayload[0]);
+            }
+
+            $buttonPayload = $requestPayload[1] ?? null;
             $session->transitionToState($newState);
             $handler = $this->factoryStateHandler->makeByState($newState);
             $handlerResponseDTO = $handler->handle(
@@ -43,7 +48,6 @@ final readonly class Manager
                 $params->text,
                 $session->getPayload(),
                 $buttonPayload,
-
             );
             $handlerResponseDTO->newSessionPayload && $session->setPayload($handlerResponseDTO->newSessionPayload);
             $this->sessionRepository->save($session);
@@ -55,7 +59,7 @@ final readonly class Manager
                 )
             );
             // TODO: commit unit of work
-        } catch (BaseSendToClientException $e) {
+        } catch (TransitionStateNotAllowedException $e) {
             // TODO: rollback unit of work
             $this->errorHandler($params->chatId, $e->getMessage());
             throw $e;

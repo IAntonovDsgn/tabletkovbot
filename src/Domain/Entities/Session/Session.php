@@ -4,7 +4,7 @@ namespace App\Domain\Entities\Session;
 
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Entities\Session\State\StateTransitionRules;
-use App\Domain\Exceptions\NotSendToClient\TransitionStateNotAllowedException;
+use App\Domain\Exceptions\Interior\TransitionStateNotAllowedException;
 
 final class Session
 {
@@ -85,7 +85,7 @@ final class Session
         } else {
             $statesWithoutMenu = array_diff($allowedStates, EnumState::MENU);
             if (count($statesWithoutMenu) === 1) {
-                $result = $allowedStates[0];
+
             } else {
                 throw new TransitionStateNotAllowedException('Count of allowed states is more than 1');
             }

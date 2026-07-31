@@ -10,7 +10,7 @@ use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\Button\Button;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\NotSendToClient\SendMessageException;
+use App\Domain\Exceptions\Interior\SendMessageException;
 
 final readonly class StateNotifiedHandler implements StateHandlerInterface
 {

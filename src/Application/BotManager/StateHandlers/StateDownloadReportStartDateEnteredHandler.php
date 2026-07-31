@@ -9,7 +9,7 @@ use App\Domain\Entities\Message\Button\Button;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Report\Report;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\SendToClient\InvalidValueException;
+use App\Domain\Exceptions\External\InvalidValueException;
 use DateTimeImmutable;
 
 final readonly class StateDownloadReportStartDateEnteredHandler implements StateHandlerInterface

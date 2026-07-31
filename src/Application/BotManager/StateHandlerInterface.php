@@ -2,7 +2,7 @@
 
 namespace App\Application\BotManager;
 
-use App\Domain\Exceptions\SendToClient\BaseSendToClientException;
+use App\Domain\Exceptions\External\BaseSendToClientException;
 
 interface StateHandlerInterface
 {

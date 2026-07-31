@@ -5,7 +5,7 @@ namespace App\Infrastructure\Services\TelegramMessageService;
 use App\Application\Services\MessageService\MessageServiceInterface;
 use App\Domain\Entities\Message\Button\Button;
 use App\Domain\Entities\Message\Message;
-use App\Domain\Exceptions\NotSendToClient\SendMessageException;
+use App\Domain\Exceptions\Interior\SendMessageException;
 use Exception;
 use GuzzleHttp\Client;
 use Telegram\Bot\Api;
