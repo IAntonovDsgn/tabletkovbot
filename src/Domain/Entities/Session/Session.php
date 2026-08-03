@@ -72,25 +72,10 @@ final class Session
     }
 
     /**
-     * @throws TransitionStateNotAllowedException
+     * @return EnumState[]
      */
-    public function getAllowedNextState(): EnumState
+    public function getAllowedNextStates(): array
     {
-        $allowedStates = $this->stateMachineTransitionRules->getAllowedStates($this->state);
-
-        if (empty($allowedStates)) {
-            throw new TransitionStateNotAllowedException('Not found allowed states');
-        } elseif (count($allowedStates) === 1 && $allowedStates[0] === EnumState::MENU) {
-            $result = $allowedStates[0];
-        } else {
-            $statesWithoutMenu = array_diff($allowedStates, EnumState::MENU);
-            if (count($statesWithoutMenu) === 1) {
-
-            } else {
-                throw new TransitionStateNotAllowedException('Count of allowed states is more than 1');
-            }
-        }
-
-        return $result;
+        return $this->stateMachineTransitionRules->getAllowedStates($this->state);
     }
 }

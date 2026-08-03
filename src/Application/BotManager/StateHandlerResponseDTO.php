@@ -2,7 +2,7 @@
 
 namespace App\Application\BotManager;
 
-use App\Domain\Entities\Message\Button\Button;
+use App\Domain\Entities\Message\Button;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Report\Report;
 

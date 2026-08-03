@@ -2,8 +2,6 @@
 
 namespace App\Domain\Entities\Message;
 
-use App\Domain\Entities\Message\Button\Button;
-
 final readonly class Message
 {
     /**

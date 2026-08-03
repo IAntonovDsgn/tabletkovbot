@@ -3,14 +3,15 @@
 namespace App\Application\BotManager;
 
 use App\Application\Services\MessageService\MessageServiceInterface;
-use App\Domain\Entities\Message\Button\Button;
+use App\Domain\Entities\Message\Button;
 use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Entities\Message\KeyboardFactory;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Exceptions\External\InvalidValueException;
 use App\Domain\Exceptions\Interior\TransitionStateNotAllowedException;
-use Exception;
 
 final readonly class Manager
 {
@@ -18,11 +19,11 @@ final readonly class Manager
         private StateHandlerFactory $factoryStateHandler,
         private SessionRepositoryInterface $sessionRepository,
         private MessageServiceInterface $messageService,
+        private KeyboardFactory $keyboardFactory,
     ) {
     }
 
     /**
-     * @throws Exception
      * @throws TransitionStateNotAllowedException
      */
     public function process(RequestDTO $params): void
@@ -31,38 +32,31 @@ final readonly class Manager
             // TODO: start unit of work
             $session = $this->sessionRepository->findByChatId($params->chatId) ?? new Session($params->chatId);
             $requestPayloadArr = explode(Button::PAYLOAD_SEPARATOR, $params->payload);
-            $newState = $this->getNewState($requestPayloadArr);
-            $stateHandler = $this->factoryStateHandler->makeByState($newState);
-            $buttonPayload = $requestPayloadArr[1] ?? null;
+            $nextState = $this->getNextState($requestPayloadArr, $params->chatId);
+            $stateHandler = $this->factoryStateHandler->makeByState($nextState);
 
-            $session->transitionToState($newState);
+            $session->transitionToState($nextState);
             $handlerResponseDTO = $stateHandler->handle(
                 $params->chatId,
                 $params->text,
                 $session->getPayload(),
-                $buttonPayload,
+                $requestPayloadArr[1] ?? null,
             );
 
-            $handlerResponseDTO->newSessionPayload && $session->setPayload($handlerResponseDTO->newSessionPayload);
+            if ($handlerResponseDTO->newSessionPayload) {
+                $session->setPayload($handlerResponseDTO->newSessionPayload);
+            }
+
             $this->sessionRepository->save($session);
             $this->messageService->sendMessage(
                 new Message($params->chatId, $handlerResponseDTO->messageText, $handlerResponseDTO->buttons)
             );
             // TODO: commit unit of work
-        } catch (TransitionStateNotAllowedException $e) {
-            // TODO: rollback unit of work
+        } catch (InvalidValueException $e) {
             $this->errorHandler($params->chatId, $e->getMessage());
-            throw $e;
-        } catch (Exception $e) {
-            // TODO: rollback unit of work
-            $this->errorHandler($params->chatId);
-            throw $e;
         }
     }
 
-    /**
-     * @throws Exception
-     */
     private function errorHandler(int $chatId, ?string $message = null): void
     {
         $session = $this->sessionRepository->findByChatId($chatId);
@@ -70,15 +64,7 @@ final readonly class Manager
         $this->messageService->sendMessage(
             new Message(
                 $chatId,
-                $message ?? EnumMessageText::ERROR,
-                [
-                    new Button(Button::MAKE_INTAKE_MARK_BUTTON_TITLE, EnumState::MAKE_INTAKE_MARK_SELECTED),
-                    new Button(Button::ADD_MEDICAMENT_BUTTON_TITLE, EnumState::ADD_MEDICAMENT_SELECTED),
-                    new Button(Button::CHANGE_MEDICAMENT_BUTTON_TITLE, EnumState::CHANGE_MEDICAMENT_SELECTED),
-                    new Button(Button::DELETE_MEDICAMENT_BUTTON_TITLE, EnumState::DELETE_MEDICAMENT_SELECTED),
-                    new Button(Button::DOWNLOAD_REPORT_BUTTON_TITLE, EnumState::DOWNLOAD_REPORT_SELECTED),
-                    new Button(Button::NOTIFICATIONS_BUTTON_TITLE, EnumState::NOTIFICATIONS_SELECTED),
-                ],
+                $message ?? EnumMessageText::ERROR, $this->keyboardFactory->makeMenuKeyboard()
             )
         );
     }
@@ -86,15 +72,23 @@ final readonly class Manager
     /**
      * @throws TransitionStateNotAllowedException
      */
-    private function getNewState(array $requestPayload): EnumState
+    private function getNextState(array $requestPayload, int $chatId): EnumState
     {
-        if (count($requestPayload) < 1) {
-            throw new TransitionStateNotAllowedException('Not found request payload');
-        } elseif (EnumState::tryFrom($requestPayload[0]) !== null) {
-            throw new TransitionStateNotAllowedException('Not found state in request payload');
-        } else {
-            $newState = EnumState::tryFrom($requestPayload[0]);
+        if (!empty($requestPayload)) {
+            return EnumState::tryFrom($requestPayload[0])
+                ?? throw new TransitionStateNotAllowedException('Not found state in request payload');
         }
-        return $newState;
+
+        $session = $this->sessionRepository->findByChatId($chatId);
+        $filteredStates = array_values(array_filter(
+            $session->getAllowedNextStates(),
+            fn(EnumState $state) => $state !== EnumState::NOTIFIED && $state !== EnumState::MENU
+        ));
+
+        return match (count($filteredStates)) {
+            0 => EnumState::MENU,
+            1 => $filteredStates[0],
+            default => throw new TransitionStateNotAllowedException('Cannot define next state'),
+        };
     }
 }

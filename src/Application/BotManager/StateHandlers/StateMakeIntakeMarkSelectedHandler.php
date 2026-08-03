@@ -2,10 +2,10 @@
 
 namespace App\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Application\BotManager\StateHandlerInterface;
+use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
-use App\Domain\Entities\Message\Button\Button;
+use App\Domain\Entities\Message\Button;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\Interior\NotFoundEntityException;
@@ -20,8 +20,12 @@ final readonly class StateMakeIntakeMarkSelectedHandler implements StateHandlerI
     /**
      * @throws NotFoundEntityException
      */
-    public function handle(int $chatId, ?string $text, ?string $sessionPayload, ?string $buttonPayload): StateHandlerResponseDTO
-    {
+    public function handle(
+        int $chatId,
+        ?string $text,
+        ?string $sessionPayload,
+        ?string $buttonPayload
+    ): StateHandlerResponseDTO {
         $medicaments = $this->medicamentRepository->findByChatId($chatId);
         $buttons = [];
 

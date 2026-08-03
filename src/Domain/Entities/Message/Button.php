@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Entities\Message\Button;
+namespace App\Domain\Entities\Message;
 
 use App\Domain\Entities\Session\State\EnumState;
 
