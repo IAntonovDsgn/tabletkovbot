@@ -2,13 +2,8 @@
 
 namespace App\Application\BotManager;
 
-use App\Domain\Exceptions\External\BaseSendToClientException;
-
 interface StateHandlerInterface
 {
-    /**
-     * @throws BaseSendToClientException
-     */
     public function handle(
         int $chatId,
         ?string $text,

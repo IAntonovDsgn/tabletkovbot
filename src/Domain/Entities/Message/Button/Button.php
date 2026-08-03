@@ -19,7 +19,7 @@ class Button
     const string DISABLE_NOTIFICATIONS = 'Отключить напоминания';
     const string ENABLE_NOTIFICATIONS = 'Включить напоминания';
 
-    const string SEPARATOR = '|';
+    const string PAYLOAD_SEPARATOR = '|';
 
     public function __construct(
         private readonly string $title,

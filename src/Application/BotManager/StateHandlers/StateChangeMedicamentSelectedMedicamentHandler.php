@@ -25,7 +25,7 @@ final readonly class StateChangeMedicamentSelectedMedicamentHandler implements S
         $medicamentId = null;
         $medicaments = $this->medicamentRepository->findByChatId($chatId);
         foreach ($medicaments as $medicament) {
-            if ($medicament->getName() === $buttonPayload) {
+            if ($medicament->getId() === $buttonPayload) {
                 $medicamentId = $medicament->getId();
             }
         }

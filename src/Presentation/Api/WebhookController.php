@@ -2,11 +2,13 @@
 
 namespace App\Presentation\Api;
 
+use App\Application\BotManager\Manager;
 use App\Application\BotManager\RequestDTO;
-use Exception;
-use Illuminate\Support\Facades\Log;
+use App\Domain\Exceptions\Interior\TransitionStateNotAllowedException;
 use OpenApi\Attributes as OA;
 use Telegram\Bot\Api;
+use Telegram\Bot\Exceptions\CouldNotUploadInputFile;
+use Telegram\Bot\Exceptions\TelegramSDKException;
 
 #[OA\Info(
     version: "1.0.0",
@@ -15,10 +17,16 @@ use Telegram\Bot\Api;
 )]
 final readonly class WebhookController
 {
-    public function __construct(private Api $telegramApi)
-    {
+    public function __construct(
+        private Api $telegramApi,
+//        private Manager $manager
+    ) {
     }
 
+    /**
+     * @throws TransitionStateNotAllowedException
+     * @throws TelegramSDKException
+     */
     #[OA\Post(
         path: '/webhook',
         summary: 'Входящий вебхук от серверов Telegram',
@@ -48,29 +56,24 @@ final readonly class WebhookController
     )]
     public function handle(): void
     {
-        try {
-            $update = $this->telegramApi->getWebhookUpdate();
+        $update = $this->telegramApi->getWebhookUpdate();
 
-            if ($update->has('callback_query')) {
-                $callbackQuery = $update->getCallbackQuery();
-
-                $this->telegramApi->answerCallbackQuery([
-                    'callback_query_id' => $callbackQuery->getId()
-                ]);
-
-                $chatId = $callbackQuery->getMessage()->getChat()->getId();
-                $newState = $callbackQuery->getData();
-
-                $requestDTO = new RequestDTO($chatId, null, $newState);
-            }
-
-            if (!$update->has('message')) {
-                $message = $update->getMessage();
-                Log::error('Message: ' . $message);
-            }
-        } catch (Exception $e) {
-            Log::error($e->getMessage());
-            http_response_code(500);
+        if ($update->has('callback_query')) {
+            $callbackQuery = $update->getCallbackQuery();
+            $this->telegramApi->answerCallbackQuery([
+                'callback_query_id' => $callbackQuery->getId()
+            ]);
+            $chatId = $callbackQuery->getMessage()->getChat()->getId();
+            $payload = $callbackQuery->getData();
+            $requestDTO = new RequestDTO($chatId, null, $payload);
+        } elseif ($update->has('message')) {
+            $message = $update->getMessage();
+            $chatId = $message->getChat()->getId();
+            $requestDTO = new RequestDTO($chatId, $message->getText());
+        } else {
+            throw new CouldNotUploadInputFile();
         }
+
+//        $this->manager->process($requestDTO);
     }
 }

@@ -43,10 +43,9 @@ final readonly class Router
 
             case Dispatcher::FOUND:
                 $handler = $routeInfo[1];
-                $vars = $routeInfo[2];
                 [$class, $method] = $handler;
                 $controller = $this->container->get($class);
-                $controller->$method($vars);
+                $controller->$method();
                 break;
         }
     }

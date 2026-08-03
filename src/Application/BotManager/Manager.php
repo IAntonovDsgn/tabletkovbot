@@ -30,33 +30,23 @@ final readonly class Manager
         try {
             // TODO: start unit of work
             $session = $this->sessionRepository->findByChatId($params->chatId) ?? new Session($params->chatId);
-            $requestPayload = explode(Button::SEPARATOR, $params->payload);
+            $requestPayloadArr = explode(Button::PAYLOAD_SEPARATOR, $params->payload);
+            $newState = $this->getNewState($requestPayloadArr);
+            $stateHandler = $this->factoryStateHandler->makeByState($newState);
+            $buttonPayload = $requestPayloadArr[1] ?? null;
 
-            if (count($requestPayload) < 1) {
-                throw new TransitionStateNotAllowedException('Not found request payload');
-            } elseif (EnumState::tryFrom($requestPayload[0]) !== null) {
-                throw new TransitionStateNotAllowedException('Not found state in request payload');
-            } else {
-                $newState = EnumState::tryFrom($requestPayload[0]);
-            }
-
-            $buttonPayload = $requestPayload[1] ?? null;
             $session->transitionToState($newState);
-            $handler = $this->factoryStateHandler->makeByState($newState);
-            $handlerResponseDTO = $handler->handle(
+            $handlerResponseDTO = $stateHandler->handle(
                 $params->chatId,
                 $params->text,
                 $session->getPayload(),
                 $buttonPayload,
             );
+
             $handlerResponseDTO->newSessionPayload && $session->setPayload($handlerResponseDTO->newSessionPayload);
             $this->sessionRepository->save($session);
             $this->messageService->sendMessage(
-                new Message(
-                    $params->chatId,
-                    $handlerResponseDTO->messageText,
-                    $handlerResponseDTO->buttons,
-                )
+                new Message($params->chatId, $handlerResponseDTO->messageText, $handlerResponseDTO->buttons)
             );
             // TODO: commit unit of work
         } catch (TransitionStateNotAllowedException $e) {
@@ -91,5 +81,20 @@ final readonly class Manager
                 ],
             )
         );
+    }
+
+    /**
+     * @throws TransitionStateNotAllowedException
+     */
+    private function getNewState(array $requestPayload): EnumState
+    {
+        if (count($requestPayload) < 1) {
+            throw new TransitionStateNotAllowedException('Not found request payload');
+        } elseif (EnumState::tryFrom($requestPayload[0]) !== null) {
+            throw new TransitionStateNotAllowedException('Not found state in request payload');
+        } else {
+            $newState = EnumState::tryFrom($requestPayload[0]);
+        }
+        return $newState;
     }
 }

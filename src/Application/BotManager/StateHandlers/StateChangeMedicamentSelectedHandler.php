@@ -33,7 +33,7 @@ final readonly class StateChangeMedicamentSelectedHandler implements StateHandle
             $buttons[] = new Button(
                 $medicament->getName(),
                 EnumState::CHANGE_MEDICAMENT_NAME_SELECTED,
-                $medicament->getName(),
+                $medicament->getId(),
             );
         }
 

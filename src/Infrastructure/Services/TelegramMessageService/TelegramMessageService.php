@@ -34,7 +34,7 @@ final readonly class TelegramMessageService implements MessageServiceInterface
             $keyboards = Keyboard::make()->inline();
             foreach ($message->getButtons() as $button) {
                 $callbackData = implode(
-                    Button::SEPARATOR,
+                    Button::PAYLOAD_SEPARATOR,
                     [
                         $button->getNewState(),
                         $button->getAdditionalPayload()

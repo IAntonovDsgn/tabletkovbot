@@ -18,6 +18,10 @@ final readonly class StateChangeNameMedicamentEnteredHandler implements StateHan
     ) {
     }
 
+    /**
+     * @throws InvalidValueException
+     * @throws NotFoundEntityException
+     */
     public function handle(int $chatId, ?string $text, ?string $sessionPayload, ?string $buttonPayload): StateHandlerResponseDTO
     {
         if (is_null($text)) {
