@@ -32,6 +32,11 @@ class Medicament
         $this->notificationTime = $time->format(self::TIME_FORMAT);
     }
 
+    public function getNotificationTime(): ?DateTimeImmutable
+    {
+        return $this->notificationTime;
+    }
+
     public function deactivate(): void
     {
         $this->isActive = false;
@@ -50,5 +55,10 @@ class Medicament
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getChatId(): int
+    {
+        return $this->chatId;
     }
 }

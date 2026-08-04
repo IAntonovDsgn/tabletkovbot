@@ -17,7 +17,7 @@ final class Version20260804122747 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $table = $schema->createTable(IntakeMarkRepository::TABLE_INTAKE_MARKS_NAME);
+        $table = $schema->createTable(IntakeMarkRepository::INTAKE_MARKS_TABLE_NAME);
 
         $table->addColumn(IntakeMarkRepository::ID_COLUMN_NAME, 'bigint', [
             'unsigned' => true,
@@ -50,6 +50,6 @@ final class Version20260804122747 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        $schema->dropTable(IntakeMarkRepository::TABLE_INTAKE_MARKS_NAME);
+        $schema->dropTable(IntakeMarkRepository::INTAKE_MARKS_TABLE_NAME);
     }
 }

@@ -11,7 +11,7 @@ use Doctrine\DBAL\Exception;
 
 final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterface
 {
-    const string TABLE_INTAKE_MARKS_NAME = 'intake_marks';
+    const string INTAKE_MARKS_TABLE_NAME = 'intake_marks';
     const string CHAT_ID_COLUMN_NAME = 'chat_id';
     const string MEDICAMENT_ID_COLUMN_NAME = 'medicament_id';
     const string IS_ACTIVE_COLUMN_NAME = 'is_active';
@@ -37,12 +37,12 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
 
         if ($intakeMark->getId() !== null) {
             $this->connection->update(
-                self::TABLE_INTAKE_MARKS_NAME,
+                self::INTAKE_MARKS_TABLE_NAME,
                 $data,
                 [self::ID_COLUMN_NAME => $intakeMark->getId()]
             );
         } else {
-            $this->connection->insert(self::TABLE_INTAKE_MARKS_NAME, $data);
+            $this->connection->insert(self::INTAKE_MARKS_TABLE_NAME, $data);
         }
     }
 
@@ -55,7 +55,7 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
         $queryBuilder = $this->connection->createQueryBuilder();
 
         $queryBuilder->select('*')
-            ->from(self::TABLE_INTAKE_MARKS_NAME)
+            ->from(self::INTAKE_MARKS_TABLE_NAME)
             ->where(self::ID_COLUMN_NAME.' = :id')
             ->setParameter('id', $id);
 
@@ -80,7 +80,7 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
         $queryBuilder = $this->connection->createQueryBuilder();
 
         $queryBuilder->select('*')
-            ->from(self::TABLE_INTAKE_MARKS_NAME)
+            ->from(self::INTAKE_MARKS_TABLE_NAME)
             ->where(self::CHAT_ID_COLUMN_NAME.' = :chat_id')
             ->setParameter('chat_id', $chatId);
 
