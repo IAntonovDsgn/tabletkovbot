@@ -1,29 +1,48 @@
 <?php
 
+use App\Application\Persistence\OutboxRepositoryInterface;
+use App\Application\Persistence\UnitOfWorkInterface;
 use App\Application\Services\MessageService\MessageServiceInterface;
-use App\Infrastructure\Services\TelegramMessageService\TelegramMessageService;
+use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
+use App\Domain\Entities\Session\SessionRepositoryInterface;
+use App\Infrastructure\Persistence\Dbal\MedicamentRepository;
+use App\Infrastructure\Persistence\Dbal\OutboxRepository;
+use App\Infrastructure\Persistence\Dbal\SessionRepository;
+use App\Infrastructure\Database\Dbal\Repository\UnitOfWork;
+use App\Infrastructure\TelegramMessageService\TelegramMessageService;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DriverManager;
 use Monolog\Formatter\LineFormatter;
-use Monolog\Level;
-use Psr\Log\LoggerInterface;
-use Monolog\Logger as MonologLogger;
 use Monolog\Handler\StreamHandler;
+use Monolog\Level;
+use Monolog\Logger as MonologLogger;
+use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use Telegram\Bot\Api;
+
 use function DI\autowire;
 use function DI\get;
 
 return [
-     /*==========================================
-                    ЛОГИРОВАНИЕ
-     ==========================================*/
+
+    /*==========================================
+        Log
+    ==========================================*/
     LoggerInterface::class => function () {
-        $config = require __DIR__.'/../config/logging.php';
-        $path = $config['path'] ?? __DIR__.'/../storage/logs/app.log';
+        $config = require __DIR__ . '/../config/logging.php';
+        $path = $config['path'] ?? __DIR__ . '/../storage/logs/app.log';
         $channel = $config['channel'] ?? 'app';
 
         $monolog = new MonologLogger($channel);
         $handler = new StreamHandler($path, Level::Debug);
 
-        $formatter = new LineFormatter(null, null, true, true);
+        $formatter = new LineFormatter(
+            null,
+            null,
+            true,
+            true
+        );
+
         $handler->setFormatter($formatter);
         $monolog->pushHandler($handler);
 
@@ -32,9 +51,9 @@ return [
 
     'log' => \DI\get(LoggerInterface::class),
 
-     /*==========================================
-                     ТЕЛЕГРАМ
-     ==========================================*/
+    /*==========================================
+        Telegram
+    ==========================================*/
     MessageServiceInterface::class => get(TelegramMessageService::class),
 
     TelegramMessageService::class => autowire()
@@ -46,5 +65,19 @@ return [
     Api::class => function () {
         $config = require __DIR__ . '/../config/telegram.php';
         return new Api($config['token']);
-    }
+    },
+
+    /*==========================================
+        Database
+     ==========================================*/
+    Connection::class => function (ContainerInterface $c) {
+        $config = require __DIR__ . '/../config/database.php';
+        return DriverManager::getConnection($config);
+    },
+
+    UnitOfWorkInterface::class => autowire(UnitOfWork::class),
+    OutboxRepositoryInterface::class => autowire(OutboxRepository::class),
+    SessionRepositoryInterface::class => autowire(SessionRepository::class),
+    IntakeMarkRepositoryInterface::class => autowire(MedicamentRepository::class),
+    MedicamentRepository::class => autowire(MedicamentRepository::class),
 ];

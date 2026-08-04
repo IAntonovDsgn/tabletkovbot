@@ -5,12 +5,13 @@ namespace App\Domain\Entities\Message;
 final readonly class Message
 {
     /**
-     * @param Button[] $buttons
+     * @param MessageButton[] $buttons
      */
     public function __construct(
         private int $chatId,
         private ?EnumMessageText $text,
         private array $buttons,
+        private ?int $id = null,
     ) {
     }
 
@@ -25,7 +26,7 @@ final readonly class Message
     }
 
     /**
-     * @return Button[]
+     * @return MessageButton[]
      */
     public function getButtons(): array
     {

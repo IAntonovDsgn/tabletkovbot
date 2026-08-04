@@ -24,12 +24,12 @@ echo "[*] Starting containers..."
 docker-compose up -d
 
 echo "[*] Waiting for PHP container to be ready..."
-until docker-compose exec -T php php -v >/dev/null 2>&1; do
+until docker-compose exec -T app app -v >/dev/null 2>&1; do
     sleep 1
 done
 
 echo "[*] Installing Composer dependencies (including --dev)..."
-docker-compose exec -T php composer install --dev --optimize-autoloader
+docker-compose exec -T app composer install --dev --optimize-autoloader
 
 
 echo "=== Setup Complete ==="

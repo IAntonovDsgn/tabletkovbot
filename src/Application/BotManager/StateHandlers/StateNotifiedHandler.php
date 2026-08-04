@@ -4,11 +4,11 @@ namespace App\Application\BotManager\StateHandlers;
 
 use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
+use App\Application\Services\Keyboard\KeyboardFactory;
 use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
-use App\Domain\Entities\Message\KeyboardFactory;
 use App\Domain\Exceptions\Interior\SendMessageException;
 
 final readonly class StateNotifiedHandler implements StateHandlerInterface

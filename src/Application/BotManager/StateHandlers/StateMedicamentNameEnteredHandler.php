@@ -6,7 +6,7 @@ use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
-use App\Domain\Entities\Message\Button;
+use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\External\InvalidValueException;
@@ -44,7 +44,7 @@ final readonly class StateMedicamentNameEnteredHandler implements StateHandlerIn
         return new StateHandlerResponseDTO(
             EnumMessageText::ENTER_TIME,
             [
-                new Button(Button::MENU, EnumState::MENU)
+                new MessageButton(MessageButton::MENU, EnumState::MENU)
             ],
             $lastMedicamentId
         );

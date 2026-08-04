@@ -1,28 +1,28 @@
 <?php
 
-namespace App\Infrastructure\Services\TelegramMessageService;
+namespace App\Infrastructure\TelegramMessageService;
 
 use App\Application\Services\MessageService\MessageServiceInterface;
-use App\Domain\Entities\Message\Button;
+use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Exceptions\Interior\SendMessageException;
 use Exception;
-use GuzzleHttp\Client;
-use Telegram\Bot\Api;
+use GuzzleHttp\Client as HttpClient;
+use Telegram\Bot\Api as TelegramBotApi;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 use Telegram\Bot\Keyboard\Keyboard;
 
 final readonly class TelegramMessageService implements MessageServiceInterface
 {
-    private Client $httpClient;
+    private HttpClient $httpClient;
     private string $token;
 
     public function __construct(
-        private Api $telegramApi,
-        private array $telegramConfig,
+        private TelegramBotApi $telegramApi,
+
     ) {
-        $this->token = $telegramConfig['token'];
-        $this->httpClient = new Client(['base_uri' => $telegramConfig['base_url']]);
+        $this->token =
+        $this->httpClient = new HttpClient(['base_uri' => $telegramConfig['base_url']]);
     }
 
     /**
@@ -34,7 +34,7 @@ final readonly class TelegramMessageService implements MessageServiceInterface
             $keyboards = Keyboard::make()->inline();
             foreach ($message->getButtons() as $button) {
                 $callbackData = implode(
-                    Button::PAYLOAD_SEPARATOR,
+                    MessageButton::PAYLOAD_SEPARATOR,
                     [
                         $button->getNewState(),
                         $button->getAdditionalPayload()

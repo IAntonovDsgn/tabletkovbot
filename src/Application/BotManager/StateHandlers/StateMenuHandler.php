@@ -4,8 +4,8 @@ namespace App\Application\BotManager\StateHandlers;
 
 use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
+use App\Application\Services\Keyboard\KeyboardFactory;
 use App\Domain\Entities\Message\EnumMessageText;
-use App\Domain\Entities\Message\KeyboardFactory;
 
 final readonly class StateMenuHandler implements StateHandlerInterface
 {

@@ -4,7 +4,7 @@ namespace App\Domain\Entities\Message;
 
 use App\Domain\Entities\Session\State\EnumState;
 
-class Button
+class MessageButton
 {
     const string ADD_MEDICAMENT_BUTTON_TITLE = 'Добавить медикамент';
     const string CHANGE_MEDICAMENT_BUTTON_TITLE = 'Изменить медикамент';
@@ -18,7 +18,6 @@ class Button
     const string CONFIRM = 'Подтвердить';
     const string DISABLE_NOTIFICATIONS = 'Отключить напоминания';
     const string ENABLE_NOTIFICATIONS = 'Включить напоминания';
-
     const string PAYLOAD_SEPARATOR = '|';
 
     public function __construct(

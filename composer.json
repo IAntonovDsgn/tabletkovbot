@@ -13,7 +13,9 @@
     "guzzlehttp/guzzle": "^7.13",
     "zircote/swagger-php": "^6.5",
     "nikic/fast-route": "^1.3",
-    "illuminate/container": "^13.23"
+    "illuminate/container": "^13.23",
+    "ext-pdo": "*",
+    "doctrine/migrations": "^3.9"
   },
   "require-dev": {
     "pestphp/pest": "^4.7",

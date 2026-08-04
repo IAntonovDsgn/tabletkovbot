@@ -5,7 +5,7 @@ namespace App\Application\BotManager\StateHandlers;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
-use App\Domain\Entities\Message\Button;
+use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\Interior\NotFoundEntityException;
@@ -34,14 +34,14 @@ final readonly class StateChangeMedicamentSelectedHandler implements StateHandle
         }
 
         foreach ($medicaments as $medicament) {
-            $buttons[] = new Button(
+            $buttons[] = new MessageButton(
                 $medicament->getName(),
                 EnumState::CHANGE_MEDICAMENT_NAME_SELECTED,
                 $medicament->getId(),
             );
         }
 
-        $buttons[] = new Button(Button::MENU, EnumState::MENU);
+        $buttons[] = new MessageButton(MessageButton::MENU, EnumState::MENU);
 
         return new StateHandlerResponseDTO(EnumMessageText::CHOOSE_MEDICAMENT, $buttons);
     }

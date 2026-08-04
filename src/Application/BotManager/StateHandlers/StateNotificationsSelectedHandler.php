@@ -4,7 +4,7 @@ namespace App\Application\BotManager\StateHandlers;
 
 use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
-use App\Domain\Entities\Message\Button;
+use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
@@ -29,14 +29,14 @@ final readonly class StateNotificationsSelectedHandler implements StateHandlerIn
             $result = new StateHandlerResponseDTO(
                 EnumMessageText::NOTIFICATIONS_ENABLE,
                 [
-                    new Button(Button::DISABLE_NOTIFICATIONS, EnumState::NOTIFICATION_DISABLED)
+                    new MessageButton(MessageButton::DISABLE_NOTIFICATIONS, EnumState::NOTIFICATION_DISABLED)
                 ]
             );
         } else {
             $result = new StateHandlerResponseDTO(
                 EnumMessageText::NOTIFICATIONS_DISABLE,
                 [
-                    new Button(Button::ENABLE_NOTIFICATIONS, EnumState::NOTIFICATION_ENABLED)
+                    new MessageButton(MessageButton::ENABLE_NOTIFICATIONS, EnumState::NOTIFICATION_ENABLED)
                 ]
             );
         }

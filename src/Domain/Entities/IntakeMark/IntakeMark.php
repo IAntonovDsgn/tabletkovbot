@@ -42,4 +42,24 @@ class IntakeMark
 
         return $result;
     }
+
+    public function getChatId(): int
+    {
+        return $this->chatId;
+    }
+
+    public function getMedicamentId(): int
+    {
+        return $this->medicamentId;
+    }
+
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 }
