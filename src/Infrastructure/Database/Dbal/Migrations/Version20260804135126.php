@@ -21,6 +21,7 @@ final class Version20260804135126 extends AbstractMigration
 
         $table->addColumn(SessionRepository::CHAT_ID_COLUMN_NAME, 'bigint', [
             'notnull' => true,
+            'unsigned' => true,
         ]);
 
         $table->addColumn(SessionRepository::STATE_COLUMN_NAME, 'string', [

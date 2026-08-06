@@ -9,7 +9,7 @@ interface OutboxRepositoryInterface
     public function save(Message $message): void;
 
     /** @return Message[] */
-    public function getPending(int $limit): array;
+    public function getPendingMessages(int $limit): array;
 
     public function markAsSent(int $id): void;
 }
