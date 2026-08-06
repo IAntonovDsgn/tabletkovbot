@@ -8,7 +8,7 @@ use App\Domain\Exceptions\Interior\TransitionStateNotAllowedException;
 use OpenApi\Attributes as OA;
 use Telegram\Bot\Api;
 use Telegram\Bot\Exceptions\CouldNotUploadInputFile;
-use Telegram\Bot\Exceptions\TelegramSDKException;
+use Throwable;
 
 #[OA\Info(
     version: "1.0.0",
@@ -19,13 +19,14 @@ final readonly class WebhookController
 {
     public function __construct(
         private Api $telegramApi,
-//        private Manager $manager
+        private Manager $manager
     ) {
     }
 
     /**
      * @throws TransitionStateNotAllowedException
-     * @throws TelegramSDKException
+     * @throws CouldNotUploadInputFile
+     * @throws Throwable
      */
     #[OA\Post(
         path: '/webhook',
@@ -74,6 +75,6 @@ final readonly class WebhookController
             throw new CouldNotUploadInputFile();
         }
 
-//        $this->manager->process($requestDTO);
+        $this->manager->process($requestDTO);
     }
 }

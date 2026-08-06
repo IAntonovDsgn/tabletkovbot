@@ -4,7 +4,9 @@ use App\Application\Persistence\OutboxRepositoryInterface;
 use App\Application\Persistence\UnitOfWorkInterface;
 use App\Application\Services\MessageService\MessageServiceInterface;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
+use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
+use App\Infrastructure\Database\Dbal\Repository\IntakeMarkRepository;
 use App\Infrastructure\Database\Dbal\Repository\MedicamentRepository;
 use App\Infrastructure\Database\Dbal\Repository\OutboxRepository;
 use App\Infrastructure\Database\Dbal\Repository\SessionRepository;
@@ -32,20 +34,16 @@ return [
         $config = require __DIR__ . '/../config/logging.php';
         $path = $config['path'] ?? __DIR__ . '/../storage/logs/app.log';
         $channel = $config['channel'] ?? 'app';
-
         $monolog = new MonologLogger($channel);
         $handler = new StreamHandler($path, Level::Debug);
-
         $formatter = new LineFormatter(
             null,
             null,
             true,
             true
         );
-
         $handler->setFormatter($formatter);
         $monolog->pushHandler($handler);
-
         return $monolog;
     },
 
@@ -55,13 +53,11 @@ return [
         Telegram
     ==========================================*/
     MessageServiceInterface::class => get(TelegramMessageService::class),
-
     TelegramMessageService::class => autowire()
         ->constructorParameter(
             'telegramConfig',
             require __DIR__ . '/../config/telegram.php'
         ),
-
     Api::class => function () {
         $config = require __DIR__ . '/../config/telegram.php';
         return new Api($config['token']);
@@ -78,6 +74,6 @@ return [
     UnitOfWorkInterface::class => autowire(UnitOfWork::class),
     OutboxRepositoryInterface::class => autowire(OutboxRepository::class),
     SessionRepositoryInterface::class => autowire(SessionRepository::class),
-    IntakeMarkRepositoryInterface::class => autowire(MedicamentRepository::class),
-    MedicamentRepository::class => autowire(MedicamentRepository::class),
+    IntakeMarkRepositoryInterface::class => autowire(IntakeMarkRepository::class),
+    MedicamentRepositoryInterface::class => autowire(MedicamentRepository::class),
 ];

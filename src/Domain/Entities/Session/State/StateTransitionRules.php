@@ -13,6 +13,7 @@ class StateTransitionRules
             EnumState::NOTIFICATIONS_SELECTED,
             EnumState::MAKE_INTAKE_MARK_SELECTED,
             EnumState::NOTIFIED,
+            EnumState::MENU,
         ],
         EnumState::ADD_MEDICAMENT_SELECTED->value => [
             EnumState::MENU,

@@ -4,6 +4,7 @@ namespace App\Infrastructure\Database\Dbal\Repository;
 
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
+use App\Domain\Entities\Session\State\EnumState;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -54,7 +55,7 @@ final readonly class SessionRepository implements SessionRepositoryInterface
                 self::CHAT_ID_COLUMN_NAME => $session->getChatId(),
                 self::PAYLOAD_COLUMN_NAME => $session->getPayload(),
                 self::IS_NOTIFICATION_ENABLED_COLUMN_NAME => $session->isNotificationEnabled(),
-                self::STATE_COLUMN_NAME => $session->getState(),
+                self::STATE_COLUMN_NAME => $session->getState()->value,
             ]
         );
     }
@@ -65,7 +66,7 @@ final readonly class SessionRepository implements SessionRepositoryInterface
             (int) $row[self::CHAT_ID_COLUMN_NAME],
             (bool) $row[self::IS_NOTIFICATION_ENABLED_COLUMN_NAME],
             $row[self::PAYLOAD_COLUMN_NAME],
-            $row[self::STATE_COLUMN_NAME],
+            EnumState::tryFrom($row[self::STATE_COLUMN_NAME]),
         );
     }
 }

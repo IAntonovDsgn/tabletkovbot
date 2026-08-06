@@ -4,7 +4,6 @@ namespace App\Application\BotManager;
 
 use App\Application\Persistence\UnitOfWorkInterface;
 use App\Application\Services\Keyboard\KeyboardFactory;
-use App\Application\Services\MessageService\MessageServiceInterface;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
@@ -15,6 +14,7 @@ use App\Domain\Exceptions\External\InvalidValueException;
 use App\Domain\Exceptions\Interior\TransitionStateNotAllowedException;
 use App\Infrastructure\Database\Dbal\Repository\OutboxRepository;
 use Doctrine\DBAL\Exception;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 final readonly class Manager
@@ -36,10 +36,11 @@ final readonly class Manager
     {
         try {
             $this->unitOfWork->begin();
-
             $session = $this->sessionRepository->findByChatId($params->chatId) ?? new Session($params->chatId);
-            $requestPayloadArr = explode(MessageButton::PAYLOAD_SEPARATOR, $params->payload);
-            $nextState = $this->getNextState($requestPayloadArr, $params->chatId);
+            $requestPayloadArr = $params->payload
+                ? explode(MessageButton::PAYLOAD_SEPARATOR, $params->payload)
+                : [];
+            $nextState = $this->getNextState($requestPayloadArr, $session);
             $stateHandler = $this->factoryStateHandler->makeByState($nextState);
             $session->transitionToState($nextState);
             $handlerResponseDTO = $stateHandler->handle(
@@ -86,23 +87,24 @@ final readonly class Manager
     /**
      * @throws TransitionStateNotAllowedException
      */
-    private function getNextState(array $requestPayload, int $chatId): EnumState
+    private function getNextState(array $requestPayload, Session $session): EnumState
     {
         if (!empty($requestPayload)) {
             return EnumState::tryFrom($requestPayload[0])
                 ?? throw new TransitionStateNotAllowedException('Not found state in request payload');
         }
 
-        $session = $this->sessionRepository->findByChatId($chatId);
         $filteredStates = array_values(array_filter(
             $session->getAllowedNextStates(),
             fn(EnumState $state) => $state !== EnumState::NOTIFIED && $state !== EnumState::MENU
         ));
 
-        return match (count($filteredStates)) {
-            0 => EnumState::MENU,
-            1 => $filteredStates[0],
-            default => throw new TransitionStateNotAllowedException('Cannot define next state'),
-        };
+        if (count($filteredStates) === 1) {
+            $result = $filteredStates[0];
+        } else {
+            $result = EnumState::MENU;
+        }
+
+        return $result;
     }
 }

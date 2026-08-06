@@ -8,8 +8,9 @@ use Doctrine\DBAL\Exception;
 
 final readonly class UnitOfWork implements UnitOfWorkInterface
 {
-    public function __construct(private Connection $connection)
-    {
+    public function __construct(
+        private Connection $connection
+    ) {
     }
 
     /**
