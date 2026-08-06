@@ -13,6 +13,8 @@ use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\External\InvalidValueException;
 use App\Domain\Exceptions\Interior\TransitionStateNotAllowedException;
+use App\Infrastructure\Database\Dbal\Repository\OutboxRepository;
+use Doctrine\DBAL\Exception;
 use Throwable;
 
 final readonly class Manager
@@ -20,7 +22,7 @@ final readonly class Manager
     public function __construct(
         private StateHandlerFactory $factoryStateHandler,
         private SessionRepositoryInterface $sessionRepository,
-        private MessageServiceInterface $messageService,
+        private OutboxRepository $outboxRepository,
         private KeyboardFactory $keyboardFactory,
         private UnitOfWorkInterface $unitOfWork,
     ) {
@@ -54,7 +56,7 @@ final readonly class Manager
 
             $this->unitOfWork->commit();
 
-            $this->messageService->sendMessage(
+            $this->outboxRepository->save(
                 new Message($params->chatId, $handlerResponseDTO->messageText, $handlerResponseDTO->buttons)
             );
         } catch (InvalidValueException $e) {
@@ -66,11 +68,14 @@ final readonly class Manager
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function errorHandler(int $chatId, ?string $message = null): void
     {
         $session = $this->sessionRepository->findByChatId($chatId);
         $session->resetState();
-        $this->messageService->sendMessage(
+        $this->outboxRepository->save(
             new Message(
                 $chatId,
                 $message ?? EnumMessageText::ERROR, $this->keyboardFactory->makeMenuKeyboard()
