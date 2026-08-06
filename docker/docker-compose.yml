@@ -57,9 +57,26 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: "${COMPOSE_PROJECT_NAME}-rabbitmq"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
 volumes:
-  redis_data:
   db_data:
+  rabbitmq_data:
 
 networks:
   app-network:
