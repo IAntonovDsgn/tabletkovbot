@@ -5,8 +5,9 @@ namespace App\Infrastructure\Database\Dbal\Repository;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 
-class SessionRepository implements SessionRepositoryInterface
+final readonly class SessionRepository implements SessionRepositoryInterface
 {
     const string SESSION_TABLE_NAME = 'sessions';
     const string CHAT_ID_COLUMN_NAME = 'chat_id';
@@ -19,13 +20,52 @@ class SessionRepository implements SessionRepositoryInterface
     ) {
     }
 
+    /**
+     * @throws Exception
+     */
     public function findByChatId(int $chatId): ?Session
     {
-        // TODO: Implement findByChatId() method.
+        $queryBuilder = $this->connection->createQueryBuilder();
+
+        $queryBuilder->select('*')
+            ->from(self::SESSION_TABLE_NAME)
+            ->where(self::CHAT_ID_COLUMN_NAME . ' = :chatId')
+            ->setParameter('chatId', $chatId);
+
+        $row  = $queryBuilder->executeQuery()->fetchAssociative();
+
+        if ($row === false) {
+            $result = null;
+        } else {
+            $result = $this->hydrate($row);
+        }
+
+        return $result;
     }
 
+    /**
+     * @throws Exception
+     */
     public function save(Session $session): void
     {
-        // TODO: Implement save() method.
+        $this->connection->insert(
+            self::SESSION_TABLE_NAME,
+            [
+                self::CHAT_ID_COLUMN_NAME => $session->getChatId(),
+                self::PAYLOAD_COLUMN_NAME => $session->getPayload(),
+                self::IS_NOTIFICATION_ENABLED_COLUMN_NAME => $session->isNotificationEnabled(),
+                self::STATE_COLUMN_NAME => $session->getState(),
+            ]
+        );
+    }
+
+    private function hydrate(array $row): Session
+    {
+        return new Session(
+            (int) $row[self::CHAT_ID_COLUMN_NAME],
+            (bool) $row[self::IS_NOTIFICATION_ENABLED_COLUMN_NAME],
+            $row[self::PAYLOAD_COLUMN_NAME],
+            $row[self::STATE_COLUMN_NAME],
+        );
     }
 }

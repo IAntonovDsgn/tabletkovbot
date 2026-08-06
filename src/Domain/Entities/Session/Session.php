@@ -40,7 +40,7 @@ final class Session
         $this->state = $newState;
     }
 
-    public function getPayload(): string
+    public function getPayload(): ?string
     {
         return $this->payload;
     }
