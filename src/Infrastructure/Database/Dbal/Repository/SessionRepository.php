@@ -44,20 +44,45 @@ final readonly class SessionRepository implements SessionRepositoryInterface
         return $result;
     }
 
+
     /**
      * @throws Exception
      */
     public function save(Session $session): void
     {
-        $this->connection->insert(
-            self::SESSION_TABLE_NAME,
-            [
-                self::CHAT_ID_COLUMN_NAME => $session->getChatId(),
-                self::PAYLOAD_COLUMN_NAME => $session->getPayload(),
-                self::IS_NOTIFICATION_ENABLED_COLUMN_NAME => $session->isNotificationEnabled(),
-                self::STATE_COLUMN_NAME => $session->getState()->value,
-            ]
-        );
+        $queryBuilder = $this->connection->createQueryBuilder();
+
+        $existingSession = $queryBuilder->select('*')
+            ->from(self::SESSION_TABLE_NAME)
+            ->where(self::CHAT_ID_COLUMN_NAME . ' = :chatId')
+            ->setParameter('chatId', $session->getChatId())
+            ->executeQuery()->fetchAssociative();
+
+        if ($existingSession === false) {
+            $this->connection->insert(
+                self::SESSION_TABLE_NAME,
+                [
+                    self::CHAT_ID_COLUMN_NAME => $session->getChatId(),
+                    self::PAYLOAD_COLUMN_NAME => $session->getPayload(),
+                    self::IS_NOTIFICATION_ENABLED_COLUMN_NAME => $session->isNotificationEnabled(),
+                    self::STATE_COLUMN_NAME => $session->getState()->value,
+                ]
+            );
+        } else {
+            $this->connection->update(
+                self::SESSION_TABLE_NAME,
+                [
+                    self::PAYLOAD_COLUMN_NAME => $session->getPayload(),
+                    self::IS_NOTIFICATION_ENABLED_COLUMN_NAME => $session->isNotificationEnabled(),
+                    self::STATE_COLUMN_NAME => $session->getState()->value,
+                ],
+                [
+                    self::CHAT_ID_COLUMN_NAME => $session->getChatId(),
+                ]
+            );
+        }
+
+
     }
 
     private function hydrate(array $row): Session
