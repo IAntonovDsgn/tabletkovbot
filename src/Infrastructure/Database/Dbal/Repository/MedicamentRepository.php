@@ -28,7 +28,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
     /**
      * @throws Exception
      */
-    public function save(Medicament $medicament): void
+    public function save(Medicament $medicament): int
     {
         $data = [
             self::NAME_COLUMN_NAME => $medicament->getName(),
@@ -43,9 +43,11 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
                 $data,
                 [self::ID_COLUMN_NAME => $medicament->getId()]
             );
+            return $medicament->getId();
+        } else {
+            $this->connection->insert(self::MEDICAMENT_TABLE_NAME, $data);
+            return (int)$this->connection->lastInsertId();
         }
-
-        $this->connection->insert(self::MEDICAMENT_TABLE_NAME, $data);
     }
 
     /**
