@@ -6,6 +6,7 @@ use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Application\Services\Keyboard\KeyboardFactory;
 use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 
 final readonly class StateNotificationEnabledHandler implements StateHandlerInterface
@@ -23,7 +24,7 @@ final readonly class StateNotificationEnabledHandler implements StateHandlerInte
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
-        $session = $this->sessionRepository->findByChatId($chatId);
+        $session = $this->sessionRepository->findByChatId($chatId) ?? new Session($chatId);
         $session->enableNotifications();
         $this->sessionRepository->save($session);
 

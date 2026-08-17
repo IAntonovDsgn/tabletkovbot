@@ -26,8 +26,14 @@ final readonly class StateDownloadReportStartDateEnteredHandler implements State
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
-        $startDate = DateTimeImmutable::createFromFormat(Report::DATE_FORMAT, $text)
-            ?? throw new InvalidValueException(EnumMessageText::FORMAT_DATE_ERROR->value);
+        if ($text === null) {
+            throw new InvalidValueException(EnumMessageText::FORMAT_DATE_ERROR->value);
+        }
+
+        $startDate = DateTimeImmutable::createFromFormat('!' . Report::DATE_FORMAT, $text);
+        if ($startDate === false) {
+            throw new InvalidValueException(EnumMessageText::FORMAT_DATE_ERROR->value);
+        }
 
         $intakeMarks = $this->intakeMarkRepository->findByChatId($chatId);
         if (empty($intakeMarks)) {

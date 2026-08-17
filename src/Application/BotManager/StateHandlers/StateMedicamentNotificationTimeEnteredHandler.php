@@ -8,7 +8,6 @@ use App\Application\Services\Keyboard\KeyboardFactory;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
-use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Exceptions\External\InvalidValueException;
 use App\Domain\Exceptions\Interior\NotFoundEntityException;
 use DateTimeImmutable;
@@ -18,7 +17,6 @@ final readonly class StateMedicamentNotificationTimeEnteredHandler implements St
 {
     public function __construct(
         private MedicamentRepositoryInterface $medicamentRepository,
-        private SessionRepositoryInterface $sessionRepository,
         private KeyboardFactory $keyboardFactory,
     ) {
     }
@@ -33,17 +31,21 @@ final readonly class StateMedicamentNotificationTimeEnteredHandler implements St
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
+        if ($text === null) {
+            throw new InvalidValueException(EnumMessageText::FORMAT_TIME_ERROR->value);
+        }
+
         $notificationTime = DateTimeImmutable::createFromFormat(
-            Medicament::TIME_FORMAT,
+            '!' . Medicament::TIME_FORMAT,
             $text,
             new DateTimeZone(Medicament::DATE_TIME_ZONE)
-        ) ?? throw new InvalidValueException(EnumMessageText::FORMAT_TIME_ERROR->value);
+        );
+        if ($notificationTime === false) {
+            throw new InvalidValueException(EnumMessageText::FORMAT_TIME_ERROR->value);
+        }
 
-        $session = $this->sessionRepository->findByChatId($chatId);
-        $medicamentId = $session->getPayload();
-        $medicament = $this->medicamentRepository->findById($medicamentId);
-
-        if (is_null($medicament)) {
+        $medicament = $this->medicamentRepository->findById((int) $sessionPayload);
+        if (is_null($medicament) || $medicament->getChatId() !== $chatId) {
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
 

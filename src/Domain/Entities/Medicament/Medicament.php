@@ -8,7 +8,7 @@ class Medicament
 {
     const string TIME_FORMAT = 'H:i';
     const string DATE_TIME_ZONE = 'Asia/Yekaterinburg';
-    private readonly string $notificationTime;
+    private ?DateTimeImmutable $notificationTime = null;
 
     public function __construct(
         private string $name,
@@ -17,9 +17,7 @@ class Medicament
         private bool $isActive = true,
         private readonly ?int $id = null,
     ) {
-        if (! is_null($notificationTime)) {
-            $this->notificationTime = $notificationTime->format(self::TIME_FORMAT);
-        }
+        $this->notificationTime = $notificationTime;
     }
 
     public function getId(): ?int
@@ -29,7 +27,7 @@ class Medicament
 
     public function setNotificationTime(DateTimeImmutable $time): void
     {
-        $this->notificationTime = $time->format(self::TIME_FORMAT);
+        $this->notificationTime = $time;
     }
 
     public function getNotificationTime(): ?DateTimeImmutable

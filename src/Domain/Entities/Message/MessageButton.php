@@ -3,8 +3,9 @@
 namespace App\Domain\Entities\Message;
 
 use App\Domain\Entities\Session\State\EnumState;
+use JsonSerializable;
 
-class MessageButton
+class MessageButton implements JsonSerializable
 {
     const string ADD_MEDICAMENT_BUTTON_TITLE = 'Добавить медикамент';
     const string CHANGE_MEDICAMENT_BUTTON_TITLE = 'Изменить медикамент';
@@ -40,5 +41,17 @@ class MessageButton
     public function getAdditionalPayload(): ?string
     {
         return $this->additionalPayload;
+    }
+
+    /**
+     * @return array{title: string, new_state: string, additional_payload: string|null}
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'title' => $this->title,
+            'new_state' => $this->newState->value,
+            'additional_payload' => $this->additionalPayload,
+        ];
     }
 }

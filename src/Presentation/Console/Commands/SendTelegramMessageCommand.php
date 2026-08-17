@@ -2,6 +2,8 @@
 
 namespace App\Presentation\Console\Commands;
 
+use App\Application\Services\MessageService\MessageServiceInterface;
+use App\Domain\Entities\Message\Message;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,30 +13,34 @@ use Throwable;
 class SendTelegramMessageCommand extends Command
 {
     public function __construct(
-        private readonly \App\Application\Command\Message\SendMessage\Handler $sendMessageHandler,
+        private readonly MessageServiceInterface $messageService,
     ) {
         parent::__construct();
     }
+
     protected function configure(): void
     {
-        $this->setName('app:tg-bot-send-message');
-        $this->addArgument('message', InputArgument::REQUIRED);
+        $this->setName('app:send-telegram-message');
         $this->addArgument('chat_id', InputArgument::REQUIRED);
-        $this->addArgument('reply_to_message_id', InputArgument::OPTIONAL);
-        $this->addArgument('parse_mode', InputArgument::OPTIONAL);
+        $this->addArgument('message', InputArgument::REQUIRED);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $message = $input->getArgument('message');
-        $chatId = $input->getArgument('chat_id');
+        $chatIdArg = $input->getArgument('chat_id');
+        if (!is_string($chatIdArg) || !is_numeric($chatIdArg)) {
+            $output->writeln('<error>chat_id must be numeric</error>');
+            return self::FAILURE;
+        }
 
-        $replyToMessageId = is_int($input->hasArgument('reply_to_message_id'))
-            ? $input->getArgument('reply_to_message_id')
-            : null;
+        $message = $input->getArgument('message');
+        if (!is_string($message)) {
+            $output->writeln('<error>message must be a string</error>');
+            return self::FAILURE;
+        }
 
         try {
-            $this->sendMessageHandler->handle($chatId, $message, $replyToMessageId);
+            $this->messageService->sendMessage(new Message((int) $chatIdArg, $message, []));
             return self::SUCCESS;
         } catch (Throwable $e) {
             $output->writeln("<error>Failed to send message: " . $e->getMessage() . "</error>");

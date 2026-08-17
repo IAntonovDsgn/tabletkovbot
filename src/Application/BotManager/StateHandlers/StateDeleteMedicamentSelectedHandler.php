@@ -36,7 +36,8 @@ final readonly class StateDeleteMedicamentSelectedHandler implements StateHandle
         foreach ($medicaments as $medicament) {
             $buttons[] = new MessageButton(
                 $medicament->getName(),
-                EnumState::CHANGE_MEDICAMENT_NAME_SELECTED,
+                EnumState::SELECTED_MEDICAMENT_FOR_DELETE,
+                (string) $medicament->getId(),
             );
         }
 

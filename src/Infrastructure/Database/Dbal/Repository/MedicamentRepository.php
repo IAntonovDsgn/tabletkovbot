@@ -4,13 +4,15 @@ namespace App\Infrastructure\Database\Dbal\Repository;
 
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
-use DateMalformedStringException;
+use App\Infrastructure\Database\Dbal\Repository\Concerns\HydratesRows;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
 final readonly class MedicamentRepository implements MedicamentRepositoryInterface
 {
+    use HydratesRows;
+
     const string MEDICAMENT_TABLE_NAME = 'medicaments';
     const string NAME_COLUMN_NAME = 'name';
     const string CHAT_ID_COLUMN_NAME = 'chat_id';
@@ -31,7 +33,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
         $data = [
             self::NAME_COLUMN_NAME => $medicament->getName(),
             self::CHAT_ID_COLUMN_NAME => $medicament->getChatId(),
-            self::NOTIFICATION_TIME_COLUMN_NAME => $medicament->getNotificationTime()->format(Medicament::TIME_FORMAT),
+            self::NOTIFICATION_TIME_COLUMN_NAME => $medicament->getNotificationTime()?->format(Medicament::TIME_FORMAT),
             self::IS_ACTIVE_COLUMN_NAME => $medicament->isActive(),
         ];
 
@@ -41,14 +43,13 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
                 $data,
                 [self::ID_COLUMN_NAME => $medicament->getId()]
             );
-        } else {
-            $this->connection->insert(self::MEDICAMENT_TABLE_NAME, $data);
         }
+
+        $this->connection->insert(self::MEDICAMENT_TABLE_NAME, $data);
     }
 
     /**
      * @throws Exception
-     * @throws DateMalformedStringException
      */
     public function findByChatIdAndMedicamentName(string $medicamentName, int $chatId): ?Medicament
     {
@@ -73,7 +74,6 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
     }
 
     /**
-     * @throws DateMalformedStringException
      * @throws Exception
      */
     public function findById(int $id): ?Medicament
@@ -97,7 +97,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
     }
 
     /**
-     * @throws DateMalformedStringException
+     * @return Medicament[]
      * @throws Exception
      */
     public function findByChatId(int $chatId): array
@@ -110,7 +110,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             ->where(self::CHAT_ID_COLUMN_NAME . ' = :chatId')
             ->setParameter('chatId', $chatId);
 
-        $rows = $queryBuilder->executeQuery()->fetchAssociative();
+        $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
 
         foreach ($rows as $row) {
             $result[] = $this->hydrate($row);
@@ -120,16 +120,20 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
     }
 
     /**
-     * @throws DateMalformedStringException
+     * @param array<string, mixed> $row
      */
     private function hydrate(array $row): Medicament
     {
+        $notificationTime = $this->toStringOrNull($row[self::NOTIFICATION_TIME_COLUMN_NAME]);
+
         return new Medicament(
-            $row[self::NAME_COLUMN_NAME],
-            (int)$row[self::CHAT_ID_COLUMN_NAME],
-            new DateTimeImmutable($row[self::NOTIFICATION_TIME_COLUMN_NAME], Medicament::TIME_FORMAT),
-            (bool)$row[self::IS_ACTIVE_COLUMN_NAME],
-            (int)$row[self::ID_COLUMN_NAME]
+            $this->toString($row[self::NAME_COLUMN_NAME]),
+            $this->toInt($row[self::CHAT_ID_COLUMN_NAME]),
+            $notificationTime !== null
+                ? DateTimeImmutable::createFromFormat(Medicament::TIME_FORMAT, $notificationTime) ?: null
+                : null,
+            $this->toBool($row[self::IS_ACTIVE_COLUMN_NAME]),
+            $this->toInt($row[self::ID_COLUMN_NAME])
         );
     }
 }

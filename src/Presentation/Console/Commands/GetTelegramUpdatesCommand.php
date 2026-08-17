@@ -2,7 +2,7 @@
 
 namespace App\Presentation\Console\Commands;
 
-use App\Application\Query\Message\GetUpdates\Handler;
+use App\Application\Services\MessageService\MessageServiceInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -11,7 +11,7 @@ use Throwable;
 class GetTelegramUpdatesCommand extends Command
 {
     public function __construct(
-        private readonly Handler $handler,
+        private readonly MessageServiceInterface $messageService,
     ) {
         parent::__construct();
     }
@@ -24,9 +24,17 @@ class GetTelegramUpdatesCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $response = $this->handler->handle();
-            $result = 'Updates: '.print_r($response, true);
-            $output->writeln($result);
+            $updates = $this->messageService->getUpdates();
+
+            if (empty($updates)) {
+                $output->writeln('No updates');
+                return self::SUCCESS;
+            }
+
+            foreach ($updates as $update) {
+                $output->writeln(sprintf('chat_id: %d, text: %s', $update->chatId, $update->text ?? ''));
+            }
+
             return self::SUCCESS;
         } catch (Throwable $e) {
             $output->writeln("<error>Failed: " . $e->getMessage() . "</error>");

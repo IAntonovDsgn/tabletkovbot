@@ -3,13 +3,17 @@
 namespace App\Infrastructure\Database\Dbal\Repository;
 
 use App\Application\Persistence\OutboxRepositoryInterface;
-use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Message\Message;
+use App\Domain\Entities\Session\State\EnumState;
+use App\Infrastructure\Database\Dbal\Repository\Concerns\HydratesRows;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
 final readonly class OutboxRepository implements OutboxRepositoryInterface
 {
+    use HydratesRows;
+
     const string MESSAGE_OUTBOX_TABLE_NAME = 'message_outbox';
     const string ID_COLUMN_NAME = 'id';
     const string CHAT_ID_COLUMN_NAME = 'chat_id';
@@ -55,7 +59,8 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
         $queryBuilder->select('*')
             ->from(self::MESSAGE_OUTBOX_TABLE_NAME)
             ->where(self::STATUS_COLUMN_NAME . ' = :status')
-            ->setParameter('status', self::PENDING_STATUS);
+            ->setParameter('status', self::PENDING_STATUS)
+            ->setMaxResults($limit);
 
         $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
 
@@ -80,13 +85,41 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
         );
     }
 
+    /**
+     * @param array<string, mixed> $row
+     */
     private function hydrate(array $row): Message
     {
+        $buttons = [];
+        $buttonsData = json_decode($this->toString($row[self::BUTTONS_COLUMN_NAME]), true);
+
+        if (is_array($buttonsData)) {
+            foreach ($buttonsData as $buttonData) {
+                if (!is_array($buttonData)) {
+                    continue;
+                }
+
+                $state = isset($buttonData['new_state']) && is_string($buttonData['new_state'])
+                    ? EnumState::tryFrom($buttonData['new_state'])
+                    : null;
+
+                if ($state !== null && isset($buttonData['title']) && is_string($buttonData['title'])) {
+                    $buttons[] = new MessageButton(
+                        $buttonData['title'],
+                        $state,
+                        isset($buttonData['additional_payload']) && is_string($buttonData['additional_payload'])
+                            ? $buttonData['additional_payload']
+                            : null,
+                    );
+                }
+            }
+        }
+
         return new Message(
-            (int) $row[self::CHAT_ID_COLUMN_NAME],
-            EnumMessageText::tryFrom($row[self::TEXT_COLUMN_NAME]),
-            json_decode($row[self::BUTTONS_COLUMN_NAME], true),
-            (int) $row[self::ID_COLUMN_NAME],
+            $this->toInt($row[self::CHAT_ID_COLUMN_NAME]),
+            $this->toStringOrNull($row[self::TEXT_COLUMN_NAME]),
+            $buttons,
+            $this->toInt($row[self::ID_COLUMN_NAME]),
         );
     }
 }

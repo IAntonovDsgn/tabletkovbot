@@ -9,7 +9,7 @@ use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
-use App\Domain\Exceptions\Interior\SendMessageException;
+use App\Domain\Exceptions\Interior\NotFoundEntityException;
 
 final readonly class StateNotifiedHandler implements StateHandlerInterface
 {
@@ -21,7 +21,7 @@ final readonly class StateNotifiedHandler implements StateHandlerInterface
     }
 
     /**
-     * @throws SendMessageException
+     * @throws NotFoundEntityException
      */
     public function handle(
         int $chatId,
@@ -29,18 +29,15 @@ final readonly class StateNotifiedHandler implements StateHandlerInterface
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
-        $medicament = $this->medicamentRepository->findById($text);
+        $medicament = $this->medicamentRepository->findById((int) $text);
 
-        if (is_null($medicament)) {
-            throw new SendMessageException('Medicament not found');
+        if (is_null($medicament) || $medicament->getChatId() !== $chatId) {
+            throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
 
-        $intakeMark = new IntakeMark(
-            $chatId,
-            $medicament->getId(),
+        $this->intakeMarkRepository->save(
+            new IntakeMark($chatId, (int) $medicament->getId())
         );
-
-        $this->intakeMarkRepository->save($intakeMark);
 
         return new StateHandlerResponseDTO(
             EnumMessageText::INTAKE_MARK_SAVED, $this->keyboardFactory->makeMenuKeyboard()

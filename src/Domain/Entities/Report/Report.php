@@ -7,22 +7,20 @@ use DateTimeImmutable;
 
 final readonly class Report
 {
-    private string $startDate;
-    const string DATE_FORMAT = 'dd.mm.yyyy';
+    const string DATE_FORMAT = 'd.m.Y';
 
     /**
      * @param IntakeMark[] $intakeMarks
      */
     public function __construct(
-        DateTimeImmutable $startDate,
+        private DateTimeImmutable $startDate,
         private array $intakeMarks,
     ) {
-        $this->startDate = $startDate->format(self::DATE_FORMAT);
     }
 
     public function getStartDate(): DateTimeImmutable
     {
-        return DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $this->startDate);
+        return $this->startDate;
     }
 
     /**

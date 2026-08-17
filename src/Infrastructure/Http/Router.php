@@ -26,8 +26,12 @@ final readonly class Router
     public function __invoke(): void
     {
         $dispatcher = simpleDispatcher($this->routes(...));
-        $httpMethod = $_SERVER['REQUEST_METHOD'];
-        $uri = rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+        $requestMethod = $_SERVER['REQUEST_METHOD'] ?? null;
+        $httpMethod = is_string($requestMethod) ? $requestMethod : 'GET';
+
+        $requestUri = $_SERVER['REQUEST_URI'] ?? null;
+        $path = is_string($requestUri) ? parse_url($requestUri, PHP_URL_PATH) : null;
+        $uri = rawurldecode(is_string($path) ? $path : '/');
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 
         switch ($routeInfo[0]) {

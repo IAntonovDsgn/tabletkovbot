@@ -6,6 +6,7 @@ use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Application\Services\Keyboard\KeyboardFactory;
 use App\Domain\Entities\IntakeMark\IntakeMark;
+use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Exceptions\Interior\NotFoundEntityException;
@@ -14,6 +15,7 @@ final readonly class StateIntakeMarkHasMadeHandler implements StateHandlerInterf
 {
     public function __construct(
         private MedicamentRepositoryInterface $medicamentRepository,
+        private IntakeMarkRepositoryInterface $intakeMarkRepository,
         private KeyboardFactory $keyboardFactory,
     ) {
     }
@@ -27,24 +29,15 @@ final readonly class StateIntakeMarkHasMadeHandler implements StateHandlerInterf
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
-        $intakeMark = null;
-        $medicaments = $this->medicamentRepository->findByChatId($chatId);
-        if (empty($medicaments)) {
+        $medicament = $this->medicamentRepository->findById((int) $buttonPayload);
+
+        if (is_null($medicament) || $medicament->getChatId() !== $chatId) {
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
 
-        foreach ($medicaments as $medicament) {
-            if ($medicament->getName() === $buttonPayload) {
-                $intakeMark = new IntakeMark(
-                    $chatId,
-                    $medicament->getId()
-                );
-            }
-        }
-
-        if (is_null($intakeMark)) {
-            throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
-        }
+        $this->intakeMarkRepository->save(
+            new IntakeMark($chatId, (int) $medicament->getId())
+        );
 
         return new StateHandlerResponseDTO(
             EnumMessageText::INTAKE_MARK_SAVED, $this->keyboardFactory->makeMenuKeyboard()

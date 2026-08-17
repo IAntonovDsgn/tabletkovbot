@@ -16,6 +16,12 @@ final readonly class SwaggerController
         $generator = new Generator();
         $openapi = $generator->generate($pathsToScan);
 
+        if ($openapi === null) {
+            http_response_code(500);
+            echo json_encode(['error' => 'OpenAPI generation failed']);
+            return;
+        }
+
         header('Content-Type: application/json; charset=utf-8');
         echo $openapi->toJson();
     }

@@ -16,7 +16,7 @@ enum EnumMessageText: string {
     case WHAT_YOU_WANT_TO_CHANGE = 'Что вы хотите изменить?';
     case ARE_YOU_CONFIRM_DELETE_MEDICAMENT = 'Вы уверены, что хотите удалить медикамент?';
     case MEDICAMENT_DELETED = 'Медикамент успешно удален. Чем еще я могу помочь?';
-    case ENTER_DATE = 'Введите дату начала начала отчёта в формате dd.mm.yyyy';
+    case ENTER_DATE = 'Введите дату начала отчёта в формате dd.mm.yyyy';
     case FORMAT_DATE_ERROR = 'Введен неверный формат даты. Пожалуйста, введите дату в формате dd.mm.yyyy';
     case INTAKE_MARKS_NOT_FOUND = 'За выбранный период не найдены отметки о приеме медикаментов';
     case REPORT_READY = 'Отчет сформирован! Чем еще я могу помочь?';

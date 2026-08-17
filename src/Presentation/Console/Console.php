@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Presentation\console;
+namespace App\Presentation\Console;
 
-use App\Presentation\console\Commands\GetTelegramUpdatesCommand;
-use App\Presentation\console\Commands\SendTelegramMessageCommand;
+use App\Presentation\Console\Commands\GetTelegramUpdatesCommand;
+use App\Presentation\Console\Commands\SendTelegramMessageCommand;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
 

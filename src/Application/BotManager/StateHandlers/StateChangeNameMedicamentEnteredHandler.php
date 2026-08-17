@@ -35,7 +35,7 @@ final readonly class StateChangeNameMedicamentEnteredHandler implements StateHan
         $medicamentId = intval($sessionPayload);
         $medicament = $this->medicamentRepository->findById($medicamentId);
 
-        if (is_null($medicament)) {
+        if (is_null($medicament) || $medicament->getChatId() !== $chatId) {
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
 

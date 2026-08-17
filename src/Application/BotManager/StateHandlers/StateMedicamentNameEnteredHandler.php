@@ -31,22 +31,15 @@ final readonly class StateMedicamentNameEnteredHandler implements StateHandlerIn
             throw new InvalidValueException(EnumMessageText::MEDICAMENT_EMPTY_NAME_ERROR->value);
         }
 
-        $medicaments = $this->medicamentRepository->findByChatId($chatId);
-        $lastMedicamentId = array_reduce($medicaments, function ($carry, $item) {
-            if ($carry === null || $item->getId() > $carry->getId()) {
-                return $item;
-            }
-            return $carry;
-        });
+        $medicament = new Medicament($text, $chatId);
+        $medicamentId = $this->medicamentRepository->save($medicament);
 
-        $medicament = new Medicament($text, $chatId, id: ++$lastMedicamentId);
-        $this->medicamentRepository->save($medicament);
         return new StateHandlerResponseDTO(
             EnumMessageText::ENTER_TIME,
             [
                 new MessageButton(MessageButton::MENU, EnumState::MENU)
             ],
-            $lastMedicamentId
+            (string) $medicamentId
         );
     }
 }

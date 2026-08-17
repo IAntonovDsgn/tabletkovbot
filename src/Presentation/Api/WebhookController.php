@@ -4,10 +4,8 @@ namespace App\Presentation\Api;
 
 use App\Application\BotManager\Manager;
 use App\Application\BotManager\RequestDTO;
-use App\Domain\Exceptions\Interior\TransitionStateNotAllowedException;
 use OpenApi\Attributes as OA;
 use Telegram\Bot\Api;
-use Telegram\Bot\Exceptions\CouldNotUploadInputFile;
 use Throwable;
 
 #[OA\Info(
@@ -24,8 +22,6 @@ final readonly class WebhookController
     }
 
     /**
-     * @throws TransitionStateNotAllowedException
-     * @throws CouldNotUploadInputFile
      * @throws Throwable
      */
     #[OA\Post(
@@ -60,19 +56,27 @@ final readonly class WebhookController
         $update = $this->telegramApi->getWebhookUpdate();
 
         if ($update->has('callback_query')) {
-            $callbackQuery = $update->getCallbackQuery();
+            $callbackQuery = $update->callbackQuery;
+            if ($callbackQuery === null || $callbackQuery->message === null) {
+                return;
+            }
+
             $this->telegramApi->answerCallbackQuery([
-                'callback_query_id' => $callbackQuery->getId()
+                'callback_query_id' => $callbackQuery->id
             ]);
-            $chatId = $callbackQuery->getMessage()->getChat()->getId();
-            $payload = $callbackQuery->getData();
-            $requestDTO = new RequestDTO($chatId, null, $payload);
+
+            $chatId = $callbackQuery->message->chat->id;
+            $requestDTO = new RequestDTO($chatId, null, $callbackQuery->data);
         } elseif ($update->has('message')) {
-            $message = $update->getMessage();
-            $chatId = $message->getChat()->getId();
-            $requestDTO = new RequestDTO($chatId, $message->getText());
+            $message = $update->message;
+            if ($message === null) {
+                return;
+            }
+
+            $chatId = $message->chat->id;
+            $requestDTO = new RequestDTO($chatId, $message->text);
         } else {
-            throw new CouldNotUploadInputFile();
+            return;
         }
 
         $this->manager->process($requestDTO);

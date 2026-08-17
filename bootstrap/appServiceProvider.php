@@ -53,11 +53,7 @@ return [
         Telegram
     ==========================================*/
     MessageServiceInterface::class => get(TelegramMessageService::class),
-    TelegramMessageService::class => autowire()
-        ->constructorParameter(
-            'telegramConfig',
-            require __DIR__ . '/../config/telegram.php'
-        ),
+    TelegramMessageService::class => autowire(),
     Api::class => function () {
         $config = require __DIR__ . '/../config/telegram.php';
         return new Api($config['token']);

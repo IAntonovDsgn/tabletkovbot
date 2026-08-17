@@ -5,11 +5,14 @@ namespace App\Infrastructure\Database\Dbal\Repository;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
+use App\Infrastructure\Database\Dbal\Repository\Concerns\HydratesRows;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
 final readonly class SessionRepository implements SessionRepositoryInterface
 {
+    use HydratesRows;
+
     const string SESSION_TABLE_NAME = 'sessions';
     const string CHAT_ID_COLUMN_NAME = 'chat_id';
     const string IS_NOTIFICATION_ENABLED_COLUMN_NAME = 'is_notification_enabled';
@@ -81,17 +84,18 @@ final readonly class SessionRepository implements SessionRepositoryInterface
                 ]
             );
         }
-
-
     }
 
+    /**
+     * @param array<string, mixed> $row
+     */
     private function hydrate(array $row): Session
     {
         return new Session(
-            (int) $row[self::CHAT_ID_COLUMN_NAME],
-            (bool) $row[self::IS_NOTIFICATION_ENABLED_COLUMN_NAME],
-            $row[self::PAYLOAD_COLUMN_NAME],
-            EnumState::tryFrom($row[self::STATE_COLUMN_NAME]),
+            $this->toInt($row[self::CHAT_ID_COLUMN_NAME]),
+            $this->toBool($row[self::IS_NOTIFICATION_ENABLED_COLUMN_NAME]),
+            $this->toStringOrNull($row[self::PAYLOAD_COLUMN_NAME]),
+            EnumState::tryFrom($this->toString($row[self::STATE_COLUMN_NAME])) ?? EnumState::MENU,
         );
     }
 }

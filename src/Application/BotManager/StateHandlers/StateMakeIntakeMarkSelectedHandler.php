@@ -37,6 +37,7 @@ final readonly class StateMakeIntakeMarkSelectedHandler implements StateHandlerI
             $buttons[] = new MessageButton(
                 $medicament->getName(),
                 EnumState::INTAKE_MARK_HAS_MADE,
+                (string) $medicament->getId(),
             );
         }
 

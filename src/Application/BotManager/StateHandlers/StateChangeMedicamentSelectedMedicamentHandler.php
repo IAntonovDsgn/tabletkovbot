@@ -29,8 +29,9 @@ final readonly class StateChangeMedicamentSelectedMedicamentHandler implements S
         $medicamentId = null;
         $medicaments = $this->medicamentRepository->findByChatId($chatId);
         foreach ($medicaments as $medicament) {
-            if ($medicament->getId() === $buttonPayload) {
+            if ((string) $medicament->getId() === $buttonPayload) {
                 $medicamentId = $medicament->getId();
+                break;
             }
         }
 
@@ -45,7 +46,7 @@ final readonly class StateChangeMedicamentSelectedMedicamentHandler implements S
                 new MessageButton(MessageButton::CHANGE_NOTIFICATION_TIME, EnumState::CHANGE_NOTIFICATION_TIME_SELECTED),
                 new MessageButton(MessageButton::MENU, EnumState::MENU)
             ],
-            $medicamentId
+            (string) $medicamentId
         );
     }
 }

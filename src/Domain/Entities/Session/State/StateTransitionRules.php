@@ -103,12 +103,11 @@ class StateTransitionRules
 
     public function isTransitionToStateAllowed(EnumState $newState, EnumState $oldState): bool
     {
-        $result = false;
-        if (in_array($newState, self::ALLOWED_TRANSITIONS_FROM_TO[$oldState->value], true))
-        {
-            $result = true;
-        }
-        return $result;
+        return in_array(
+            $newState,
+            self::ALLOWED_TRANSITIONS_FROM_TO[$oldState->value] ?? [],
+            true
+        );
     }
 
 

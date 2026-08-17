@@ -9,7 +9,7 @@ final readonly class Message
      */
     public function __construct(
         private int $chatId,
-        private ?EnumMessageText $text,
+        private ?string $text,
         private array $buttons,
         private ?int $id = null,
     ) {
@@ -22,7 +22,7 @@ final readonly class Message
 
     public function getText(): string
     {
-        return $this->text->value;
+        return $this->text ?? '';
     }
 
     /**
@@ -31,5 +31,10 @@ final readonly class Message
     public function getButtons(): array
     {
         return $this->buttons;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
     }
 }

@@ -21,7 +21,8 @@ final readonly class StateSelectedMedicamentForDeleteHandler implements StateHan
             [
                 new MessageButton(MessageButton::CONFIRM, EnumState::DELETE_MEDICAMENT_CONFIRMED),
                 new MessageButton(MessageButton::MENU, EnumState::MENU)
-            ]
+            ],
+            $buttonPayload
         );
     }
 }

@@ -7,16 +7,16 @@ use DateTimeImmutable;
 class IntakeMark
 {
     const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
-    private readonly string $createdAt;
+    private readonly DateTimeImmutable $createdAt;
 
     public function __construct(
         private readonly int $chatId,
-        private int $medicamentId,
+        private readonly int $medicamentId,
         DateTimeImmutable $createdAt = new DateTimeImmutable(),
         private bool $isActive = true,
         private readonly ?int $id = null,
     ) {
-        $this->createdAt = $createdAt->format(self::DATE_TIME_FORMAT);
+        $this->createdAt = $createdAt;
     }
 
     public function isActive(): bool
@@ -33,14 +33,7 @@ class IntakeMark
 
     public function isIncludeInInterval(DateTimeImmutable $startDate, DateTimeImmutable $endDate): bool
     {
-        $result = false;
-        $createdAt = DateTimeImmutable::createFromFormat(self::DATE_TIME_FORMAT, $this->createdAt);
-
-        if ($createdAt >= $startDate && $createdAt <= $endDate) {
-            $result = true;
-        }
-
-        return $result;
+        return $this->createdAt >= $startDate && $this->createdAt <= $endDate;
     }
 
     public function getChatId(): int

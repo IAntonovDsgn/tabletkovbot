@@ -26,9 +26,9 @@ final readonly class StateDeleteMedicamentConfirmedHandler implements StateHandl
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
-        $medicament = $this->medicamentRepository->findById($sessionPayload);
+        $medicament = $this->medicamentRepository->findById((int) $sessionPayload);
 
-        if (is_null($medicament)) {
+        if (is_null($medicament) || $medicament->getChatId() !== $chatId) {
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
 

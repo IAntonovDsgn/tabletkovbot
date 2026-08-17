@@ -24,8 +24,9 @@ final readonly class StateNotificationsSelectedHandler implements StateHandlerIn
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
         $session = $this->sessionRepository->findByChatId($chatId);
+        $isNotificationEnabled = $session?->isNotificationEnabled() ?? true;
 
-        if ($session->isNotificationEnabled()) {
+        if ($isNotificationEnabled) {
             $result = new StateHandlerResponseDTO(
                 EnumMessageText::NOTIFICATIONS_ENABLE,
                 [
