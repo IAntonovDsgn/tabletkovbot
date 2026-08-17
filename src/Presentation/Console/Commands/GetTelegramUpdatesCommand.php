@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Presentation\Console\Commands;
 
 use App\Application\Services\MessageService\MessageServiceInterface;

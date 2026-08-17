@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Application\BotManager;
 
 use App\Application\BotManager\StateHandlers\StateAddMedicamentSelectedHandler;

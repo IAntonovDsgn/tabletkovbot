@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Application\Services\MessageService;
 
 use App\Application\BotManager\RequestDTO;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\TelegramMessageService;
 
 use App\Application\BotManager\RequestDTO;

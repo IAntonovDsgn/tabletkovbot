@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Application\Services\Keyboard;
 
 use App\Domain\Entities\Message\MessageButton;
