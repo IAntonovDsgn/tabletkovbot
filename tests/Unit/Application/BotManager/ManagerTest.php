@@ -18,7 +18,6 @@ use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\External\InvalidValueException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Throwable;
 
 class ManagerTest extends TestCase
 {
@@ -99,7 +98,7 @@ class ManagerTest extends TestCase
         $chatId = 123;
         $payloadState = EnumState::ADD_MEDICAMENT_SELECTED;
         $requestDTO = new RequestDTO($chatId, 'some_text', $payloadState->value);
-        
+
         $existingSession = new Session($chatId); // Defaults to MENU
         $existingSession->transitionToState(EnumState::MENU); // Ensure initial state is MENU
 
@@ -132,7 +131,7 @@ class ManagerTest extends TestCase
             ->with($this->callback(function (Session $session) use ($chatId, $payloadState, $handlerResponseDTO) {
                 // First save: check state transition
                 // Second save: check new payload
-                return $session->getChatId() === $chatId && 
+                return $session->getChatId() === $chatId &&
                        ($session->getState() === $payloadState || $session->getPayload() === $handlerResponseDTO->newSessionPayload);
             }));
 
@@ -140,8 +139,10 @@ class ManagerTest extends TestCase
         $this->outboxRepository->expects($this->once())
             ->method('save')
             ->with($this->callback(function (Message $message) use ($chatId, $handlerResponseDTO) {
-                return $message->getChatId() === $chatId && 
-                       $message->getText() === $handlerResponseDTO->messageText->value;
+                $messageText = $handlerResponseDTO->messageText;
+                $messageTextValue = $messageText?->value;
+                return $message->getChatId() === $chatId &&
+                       $message->getText() === $messageTextValue;
             }));
 
         $this->manager->process($requestDTO);
@@ -168,13 +169,13 @@ class ManagerTest extends TestCase
         $mockStateHandler->expects($this->once())
             ->method('handle')
             ->willThrowException(new InvalidValueException('Error message'));
-        
+
         $this->sessionRepository->expects($this->exactly(2)) // Initial save (before handler throws), and save in errorHandler
              ->method('save')
              ->with($this->callback(function (Session $session) {
                  return $session->getState() === EnumState::MENU && $session->getPayload() === null;
              }));
-        
+
         $this->keyboardFactory->expects($this->once())->method('makeMenuKeyboard')->willReturn([]);
 
         $this->outboxRepository->expects($this->once())
@@ -208,7 +209,7 @@ class ManagerTest extends TestCase
         $mockStateHandler->expects($this->once())
             ->method('handle')
             ->willThrowException($expectedException);
-        
+
         // Ensure errorHandler is NOT called for general Throwables
         $this->sessionRepository->expects($this->once())->method('findByChatId'); // Initial find, not second find from errorHandler
         $this->sessionRepository->expects($this->once())->method('save'); // This will be called before the exception from handler
@@ -219,14 +220,14 @@ class ManagerTest extends TestCase
         $this->expectException(get_class($expectedException));
         $this->manager->process($requestDTO);
     }
-    
+
     // Add more tests for getNextState logic, specifically edge cases and other paths
     public function testGetNextStateThrowsInvalidValueExceptionForInvalidPayload(): void
     {
         $chatId = 123;
         $requestDTO = new RequestDTO($chatId, 'text', 'INVALID_STATE'); // This payload will trigger InvalidValueException
         $existingSession = new Session($chatId);
-        
+
         $this->unitOfWork->expects($this->once())->method('begin');
         $this->unitOfWork->expects($this->never())->method('commit');
         $this->unitOfWork->expects($this->once())->method('rollback'); // Rollback is expected
@@ -244,13 +245,13 @@ class ManagerTest extends TestCase
         $handlerResponseDTO = new StateHandlerResponseDTO(EnumMessageText::ERROR, []);
         $mockStateHandler->expects($this->never()) // handle is NOT called if getNextState throws
             ->method('handle');
-        
+
         $this->sessionRepository->expects($this->once()) // Save in errorHandler after resetState
              ->method('save')
              ->with($this->callback(function (Session $session) {
                  return $session->getState() === EnumState::MENU && $session->getPayload() === null;
              }));
-        
+
         $this->keyboardFactory->expects($this->once())->method('makeMenuKeyboard')->willReturn([]);
 
         $this->outboxRepository->expects($this->once())
