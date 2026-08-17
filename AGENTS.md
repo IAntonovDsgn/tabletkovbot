@@ -17,7 +17,7 @@ docker exec tabletkovbot-app /var/www/tabletkovbot/vendor/bin/pest
 docker exec tabletkovbot-app php /var/www/tabletkovbot/src/Presentation/Console/Console.php <cmd>
 ```
 
-Note: `run-phpstan-from-docker.sh` references a stale container name (`tabletkovbot-php`); the real container is `tabletkovbot-app`. Verify the container is up with `docker ps` — other services: `tabletkovbot-db` (MariaDB 10.11), `tabletkovbot-rabbitmq`, `tabletkovbot-nginx`.
+Note: The correct container name for running PHP commands is `tabletkovbot-app`. Verify the container is up with `docker ps`. Other services: `tabletkovbot-db` (MariaDB 10.11), `tabletkovbot-rabbitmq`, `tabletkovbot-nginx`.
 
 ## Environment
 
@@ -26,21 +26,24 @@ Env vars live in **`docker/.env`** (not project root). `bootstrap/bootstrap.php`
 ## Architecture
 
 - `src/Domain` — entities + repository interfaces; no infra dependencies.
-- `src/Application` — use-case layer: `BotManager` state machine, `Services`, `Persistence` (outbox/UnitOfWork interfaces).
+- `src/Application` — use-case layer: `BotManager` state machine, `Services`, `Persistence` (outbox/UnitOfWork interfaces). The `Manager` class orchestrates transactions, session, and state transitions.
 - `src/Infrastructure` — DBAL repos, HTTP `Router`, `TelegramMessageService`, PHP-DI bootstrap, Doctrine migrations.
 - `src/Presentation` — `Api/WebhookController` (web entry `public/index.php`) and `Console/Console.php`.
 - DI is PHP-DI with autowiring; repository/service **interfaces** are bound explicitly in `bootstrap/appServiceProvider.php`. After changing a constructor, verify resolution (e.g. `docker exec tabletkovbot-app php -r 'require ".../bootstrap/bootstrap.php"; $c->get(<class>::class); echo "OK";'`).
 
-Adding a new conversation state = create `State<X>Handler` implementing `StateHandlerInterface`, then register it in `src/Application/BotManager/StateHandlerFactory.php` (constructor + `match` arm). PHPStan level 9 + `match` means every `EnumState` case must be covered.
+Adding a new conversation state: create `State<X>Handler` implementing `StateHandlerInterface`, then register it in `src/Application/BotManager/StateHandlerFactory.php` (constructor + `match` arm). PHPStan level 9 + `match` means every `EnumState` case must be covered.
 
 ## Hard-earned quirks (do not regress)
 
+- **Strict Types**: All PHP files in `src/` now include `declare(strict_types=1);`. Ensure all function/method calls respect scalar type hints to avoid `TypeError`.
 - **PHPStan level 9 forbids casting `mixed`.** DBAL `fetchAssociative()`/`fetchAllAssociative()` return `array<string, mixed>`; narrow each value with `is_*` checks before casting. Use the `HydratesRows` trait in `src/Infrastructure/Database/Dbal/Repository/Concerns/HydratesRows.php` (`toInt`, `toBool`, `toString`, `toStringOrNull`).
 - **Telegram SDK** (`irazasyed/telegram-bot-sdk`) uses magic `__get`/`__call` + `@property`. Use property access (`$update->callbackQuery`, `$message->chat->id`) — not methods like `getCallbackQuery()` — or PHPStan fails.
-- `MedicamentRepositoryInterface::save()` returns `int` (DB lastInsertId); do not assign manual ids.
+- `MedicamentRepositoryInterface::save()` **now returns `int`** (DB lastInsertId); do not assign manual ids. The interface and concrete implementations (`MedicamentRepository`) are aligned.
 - Dates: user-facing `Report::DATE_FORMAT = 'd.m.Y'`; DB rows parsed with `createFromFormat()` and checked for `=== false` (never `new DateTimeImmutable($string)` directly).
 - Outbox buttons: `MessageButton implements JsonSerializable` (`new_state` enum value + `additional_payload`); `Message::$text` is nullable.
 - State handlers that load a medicament by id must also verify ownership: `$medicament->getChatId() !== $chatId` → throw `NotFoundEntityException`.
+- **PHPUnit Mocking Final Classes**: `final` classes (e.g., `StateHandlerFactory`) cannot be mocked by PHPUnit. If a dependency needs to be mocked, consider making the class non-`final` or using alternative mocking strategies.
+- **Pest Data Providers**: When using `@dataProvider` with Pest, if traditional PHPUnit style fails, consider using a `foreach` loop within the test method to iterate through data sets as a workaround.
 
 ## Reference
 
