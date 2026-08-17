@@ -7,8 +7,8 @@ Telegram bot "TabletkovBot" (PHP 8.4, clean architecture). Runs entirely in Dock
 All PHP tooling runs in the **`tabletkovbot-app`** container, with the project mounted at `/var/www/tabletkovbot`. Host-side `composer`/`php`/`vendor/bin/*` do not work standalone.
 
 ```sh
-# PHPStan (level 9, paths: [src]) — the required check after any change
-docker exec tabletkovbot-app /var/www/tabletkovbot/vendor/bin/phpstan analyse --no-progress --memory-limit=1G -c /var/www/tabletkovbot/phpstan.neon
+# PHPStan (full project check) — recommended after any change
+./run-phpstan-full-project-from-docker.sh
 
 # Tests
 docker exec tabletkovbot-app /var/www/tabletkovbot/vendor/bin/pest
