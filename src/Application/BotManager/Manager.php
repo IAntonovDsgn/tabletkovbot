@@ -14,6 +14,7 @@ use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\External\InvalidValueException;
+use App\Domain\Exceptions\Interior\TransitionStateNotAllowedException;
 use Throwable;
 
 final readonly class Manager
@@ -27,6 +28,11 @@ final readonly class Manager
     ) {
     }
 
+    /**
+     * @throws TransitionStateNotAllowedException
+     * @throws Throwable
+     * @throws InvalidValueException
+     */
     public function process(RequestDTO $params): void
     {
         try {
