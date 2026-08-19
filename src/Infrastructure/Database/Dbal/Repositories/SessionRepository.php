@@ -12,7 +12,7 @@ use Doctrine\DBAL\Exception;
 
 final readonly class SessionRepository implements SessionRepositoryInterface
 {
-    use HydratesRows;
+    use HydrateRowsTrait;
 
     const string SESSION_TABLE_NAME = 'sessions';
     const string CHAT_ID_COLUMN_NAME = 'chat_id';

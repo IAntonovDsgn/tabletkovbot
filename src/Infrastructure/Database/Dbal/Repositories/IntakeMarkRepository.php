@@ -12,7 +12,7 @@ use Doctrine\DBAL\Exception;
 
 final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterface
 {
-    use HydratesRows;
+    use HydrateRowsTrait;
 
     const string INTAKE_MARKS_TABLE_NAME = 'intake_marks';
     const string CHAT_ID_COLUMN_NAME = 'chat_id';

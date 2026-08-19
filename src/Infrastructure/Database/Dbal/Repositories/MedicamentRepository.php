@@ -12,7 +12,7 @@ use Doctrine\DBAL\Exception;
 
 final readonly class MedicamentRepository implements MedicamentRepositoryInterface
 {
-    use HydratesRows;
+    use HydrateRowsTrait;
 
     const string MEDICAMENT_TABLE_NAME = 'medicaments';
     const string NAME_COLUMN_NAME = 'name';

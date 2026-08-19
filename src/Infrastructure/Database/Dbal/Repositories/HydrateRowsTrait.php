@@ -6,7 +6,7 @@ namespace App\Infrastructure\Database\Dbal\Repositories;
 
 use RuntimeException;
 
-trait HydratesRows
+trait HydrateRowsTrait
 {
     protected function toInt(mixed $value): int
     {

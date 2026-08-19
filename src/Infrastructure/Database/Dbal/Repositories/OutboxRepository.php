@@ -13,7 +13,7 @@ use Doctrine\DBAL\Exception;
 
 final readonly class OutboxRepository implements OutboxRepositoryInterface
 {
-    use HydratesRows;
+    use HydrateRowsTrait;
 
     const string MESSAGE_OUTBOX_TABLE_NAME = 'message_outbox';
     const string ID_COLUMN_NAME = 'id';
