@@ -36,14 +36,12 @@ final class Version20260806094910 extends AbstractMigration
             'default' => OutboxRepository::PENDING_STATUS,
         ]);
 
-        $table->addColumn(OutboxRepository::TEXT_COLUMN_NAME, 'string', [
+        $table->addColumn(OutboxRepository::TEXT_COLUMN_NAME, 'text', [
             'notnull' => false,
-            'length' => 255,
         ]);
 
-        $table->addColumn(OutboxRepository::BUTTONS_COLUMN_NAME, 'string', [
+        $table->addColumn(OutboxRepository::BUTTONS_COLUMN_NAME, 'text', [
             'notnull' => false,
-            'length' => 255,
         ]);
 
         $table->setPrimaryKey([OutboxRepository::ID_COLUMN_NAME]);
