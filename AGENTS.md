@@ -36,7 +36,7 @@ Adding a new conversation state: create `State<X>Handler` implementing `StateHan
 ## Hard-earned quirks (do not regress)
 
 - **Strict Types**: All PHP files in `src/` now include `declare(strict_types=1);`. Ensure all function/method calls respect scalar type hints to avoid `TypeError`.
-- **PHPStan level 9 forbids casting `mixed`.** DBAL `fetchAssociative()`/`fetchAllAssociative()` return `array<string, mixed>`; narrow each value with `is_*` checks before casting. Use the `HydratesRows` trait in `src/Infrastructure/Database/Dbal/Repository/Concerns/HydratesRows.php` (`toInt`, `toBool`, `toString`, `toStringOrNull`).
+- **PHPStan level 9 forbids casting `mixed`.** DBAL `fetchAssociative()`/`fetchAllAssociative()` return `array<string, mixed>`; narrow each value with `is_*` checks before casting. Use the `HydratesRows` trait in `src/Infrastructure/Database/Dbal/Repositories/Concerns/HydratesRows.php` (`toInt`, `toBool`, `toString`, `toStringOrNull`).
 - **Telegram SDK** (`irazasyed/telegram-bot-sdk`) uses magic `__get`/`__call` + `@property`. Use property access (`$update->callbackQuery`, `$message->chat->id`) — not methods like `getCallbackQuery()` — or PHPStan fails.
 - `MedicamentRepositoryInterface::save()` **now returns `int`** (DB lastInsertId); do not assign manual ids. The interface and concrete implementations (`MedicamentRepository`) are aligned.
 - Dates: user-facing `Report::DATE_FORMAT = 'd.m.Y'`; DB rows parsed with `createFromFormat()` and checked for `=== false` (never `new DateTimeImmutable($string)` directly).

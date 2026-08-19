@@ -9,16 +9,50 @@ use DateTimeImmutable;
 class IntakeMark
 {
     const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
-    private readonly DateTimeImmutable $createdAt;
 
-    public function __construct(
+    private function __construct(
+        private readonly ?int $id,
+        private readonly bool $isExistInPersistence,
         private readonly int $chatId,
         private readonly int $medicamentId,
-        DateTimeImmutable $createdAt = new DateTimeImmutable(),
-        private bool $isActive = true,
-        private readonly ?int $id = null,
-    ) {
-        $this->createdAt = $createdAt;
+        private readonly DateTimeImmutable $createdAt,
+        private bool $isActive,
+    ) {}
+
+    public static function create(
+        int $chatId,
+        int $medicamentId
+    ): self {
+        return new self(
+            null,
+            false,
+            $chatId,
+            $medicamentId,
+            new DateTimeImmutable(),
+            true
+        );
+    }
+
+    public static function restoreFromPersistence(
+        int $id,
+        int $chatId,
+        int $medicamentId,
+        DateTimeImmutable $createdAt,
+        bool $isActive
+    ): self {
+        return new self(
+            $id,
+            true,
+            $chatId,
+            $medicamentId,
+            $createdAt,
+            $isActive
+        );
+    }
+
+    public function isExistInPersistence(): bool
+    {
+        return $this->isExistInPersistence;
     }
 
     public function isActive(): bool

@@ -38,7 +38,7 @@ final readonly class StateIntakeMarkHasMadeHandler implements StateHandlerInterf
         }
 
         $this->intakeMarkRepository->save(
-            new IntakeMark($chatId, (int) $medicament->getId())
+            IntakeMark::create($chatId, (int) $medicament->getId())
         );
 
         return new StateHandlerResponseDTO(

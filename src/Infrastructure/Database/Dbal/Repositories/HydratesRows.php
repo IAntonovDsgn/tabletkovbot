@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Database\Dbal\Repository\Concerns;
+namespace App\Infrastructure\Database\Dbal\Repositories;
 
 use RuntimeException;
 

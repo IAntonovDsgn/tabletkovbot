@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Database\Dbal\Repository;
+namespace App\Infrastructure\Database\Dbal\Repositories;
 
 use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
-use App\Infrastructure\Database\Dbal\Repository\Concerns\HydratesRows;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -67,7 +66,7 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
         if ($row === false) {
             $result = null;
         } else {
-            $result = $this->hydrate($row);
+            $result = $this->mapToDomain($row);
         }
 
         return $result;
@@ -75,6 +74,7 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
 
     /**
      * @return IntakeMark[]
+     *
      * @throws Exception
      */
     public function findByChatId(int $chatId): array
@@ -90,7 +90,7 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
         $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
 
         foreach ($rows as $row) {
-            $result[] = $this->hydrate($row);
+            $result[] = $this->mapToDomain($row);
         }
 
         return $result;
@@ -99,17 +99,17 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
     /**
      * @param array<string, mixed> $row
      */
-    private function hydrate(array $row): IntakeMark
+    private function mapToDomain(array $row): IntakeMark
     {
-        return new IntakeMark(
+        return IntakeMark::restoreFromPersistence(
+            $this->toInt($row[self::ID_COLUMN_NAME]),
             $this->toInt($row[self::CHAT_ID_COLUMN_NAME]),
             $this->toInt($row[self::MEDICAMENT_ID_COLUMN_NAME]),
             DateTimeImmutable::createFromFormat(
                 IntakeMark::DATE_TIME_FORMAT,
                 $this->toString($row[self::CREATED_AT_COLUMN_NAME])
             ) ?: new DateTimeImmutable(),
-            $this->toBool($row[self::IS_ACTIVE_COLUMN_NAME]),
-            $this->toInt($row[self::ID_COLUMN_NAME])
+            $this->toBool($row[self::IS_ACTIVE_COLUMN_NAME])
         );
     }
 }

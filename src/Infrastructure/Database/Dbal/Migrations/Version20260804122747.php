@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Database\Dbal\Migrations;
 
-use App\Infrastructure\Database\Dbal\Repository\IntakeMarkRepository;
+use App\Infrastructure\Database\Dbal\Repositories\IntakeMarkRepository;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 

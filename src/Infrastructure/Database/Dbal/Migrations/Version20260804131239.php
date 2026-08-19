@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Database\Dbal\Migrations;
 
-use App\Infrastructure\Database\Dbal\Repository\MedicamentRepository;
+use App\Infrastructure\Database\Dbal\Repositories\MedicamentRepository;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 

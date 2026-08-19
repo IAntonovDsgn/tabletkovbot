@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Database\Dbal\Repository;
+namespace App\Infrastructure\Database\Dbal\Repositories;
 
 use App\Application\Persistence\OutboxRepositoryInterface;
-use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Message\Message;
+use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Infrastructure\Database\Dbal\Repository\Concerns\HydratesRows;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 

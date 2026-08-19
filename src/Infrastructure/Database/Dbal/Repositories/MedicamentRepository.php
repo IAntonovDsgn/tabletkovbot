@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Database\Dbal\Repository;
+namespace App\Infrastructure\Database\Dbal\Repositories;
 
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
-use App\Infrastructure\Database\Dbal\Repository\Concerns\HydratesRows;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;

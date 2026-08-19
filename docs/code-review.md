@@ -43,7 +43,7 @@ public function __construct(
 **Как чинить:** убрать мёртвые поля `$token`/`$httpClient` или инициализировать корректно через DI-параметр; `$keyboard` инициализировать до `if`; `getUpdates()` строить `RequestDTO` из апдейтов.
 
 ### P0-2. `hydrate()` в репозиториях кидает TypeError
-`src/Infrastructure/Database/Dbal/Repository/MedicamentRepository.php:130` и `IntakeMarkRepository.php:104`
+`src/Infrastructure/Database/Dbal/Repositories/MedicamentRepository.php:130` и `IntakeMarkRepository.php:104`
 
 ```php
 new DateTimeImmutable($row[self::NOTIFICATION_TIME_COLUMN_NAME], Medicament::TIME_FORMAT)
@@ -58,7 +58,7 @@ TypeError: DateTimeImmutable::__construct(): Argument #2 ($timezone) must be of 
 Любое чтение медикамента/отметки с временем падает. **Как чинить:** `DateTimeImmutable::createFromFormat(Medicament::TIME_FORMAT, $row[...])`.
 
 ### P0-3. `MedicamentRepository::findByChatId` читает одну строку
-`src/Infrastructure/Database/Dbal/Repository/MedicamentRepository.php:113`
+`src/Infrastructure/Database/Dbal/Repositories/MedicamentRepository.php:113`
 
 ```php
 $rows = $queryBuilder->executeQuery()->fetchAssociative(); // должно быть fetchAllAssociative()
