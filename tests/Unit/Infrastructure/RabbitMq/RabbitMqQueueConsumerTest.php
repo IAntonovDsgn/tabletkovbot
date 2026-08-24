@@ -21,7 +21,7 @@ class RabbitMqQueueConsumerTest extends TestCase
     private MockObject $connectionFactory;
     private MockObject $channel;
 
-    /** @var callable(Message): void|null */
+    /** @var callable(AMQPMessage): void|null */
     private $capturedCallback = null;
 
     protected function setUp(): void

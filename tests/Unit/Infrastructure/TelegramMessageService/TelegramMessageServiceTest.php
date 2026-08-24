@@ -55,8 +55,8 @@ class TelegramMessageServiceTest extends TestCase
         $message = Message::create($chatId, $text, [$button1, $button2]);
 
         $keyboard = Keyboard::make()->inline();
-        $keyboard->row(['text' => $button1->getTitle(), 'callback_data' => $button1->getNewState()]);
-        $keyboard->row(['text' => $button2->getTitle(), 'callback_data' => $button2->getNewState() . MessageButton::PAYLOAD_SEPARATOR . $button2->getAdditionalPayload()]);
+        $keyboard->row([['text' => $button1->getTitle(), 'callback_data' => $button1->getNewState()]]);
+        $keyboard->row([['text' => $button2->getTitle(), 'callback_data' => $button2->getNewState() . MessageButton::PAYLOAD_SEPARATOR . $button2->getAdditionalPayload()]]);
 
         $this->telegramApi->expects($this->once())
             ->method('sendMessage')

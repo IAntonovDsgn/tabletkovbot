@@ -35,7 +35,7 @@ final readonly class TelegramMessageService implements MessageServiceInterface
                     ? $button->getNewState() . MessageButton::PAYLOAD_SEPARATOR . $button->getAdditionalPayload()
                     : $button->getNewState();
 
-                $keyboard->row(['text' => $button->getTitle(), 'callback_data' => $callbackData]);
+                $keyboard->row([['text' => $button->getTitle(), 'callback_data' => $callbackData]]);
             }
         }
 
