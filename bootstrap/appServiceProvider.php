@@ -2,6 +2,7 @@
 
 use App\Application\Message\MessageBrokerInterface;
 use App\Application\Message\MessageServiceInterface;
+use App\Application\Message\QueueConsumerInterface;
 use App\Application\Outbox\OutboxRelay;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
@@ -12,9 +13,13 @@ use App\Infrastructure\Database\Dbal\Repositories\IntakeMarkRepository;
 use App\Infrastructure\Database\Dbal\Repositories\MedicamentRepository;
 use App\Infrastructure\Database\Dbal\Repositories\OutboxRepository;
 use App\Infrastructure\Database\Dbal\Repositories\SessionRepository;
-use App\Infrastructure\Database\Dbal\Repositories\UnitOfWork;
+use App\Infrastructure\Database\Dbal\UnitOfWork\UnitOfWork;
+use App\Infrastructure\RabbitMq\AmqpConnectionFactory;
+use App\Infrastructure\RabbitMq\AmqpConnectionFactoryInterface;
+use App\Infrastructure\RabbitMq\MessagePayloadDeserializer;
 use App\Infrastructure\RabbitMq\MessagePayloadSerializer;
 use App\Infrastructure\RabbitMq\RabbitMqMessageBroker;
+use App\Infrastructure\RabbitMq\RabbitMqQueueConsumer;
 use App\Infrastructure\TelegramMessageService\TelegramMessageService;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
@@ -53,7 +58,7 @@ return [
         $handler->setFormatter($formatterFactory());
         $monolog->pushHandler($handler);
 
-        if ((bool)($config['stdout'] ?? false)) {
+        if ($config['stdout'] ?? false) {
             $stdoutHandler = new StreamHandler('php://stdout', Level::Debug);
             $stdoutHandler->setFormatter($formatterFactory());
             $monolog->pushHandler($stdoutHandler);
@@ -92,6 +97,22 @@ return [
         );
     },
 
+    QueueConsumerInterface::class => function (ContainerInterface $c) {
+        $config = require __DIR__ . '/../config/rabbitmq.php';
+        return new RabbitMqQueueConsumer(
+            new MessagePayloadDeserializer(),
+            $c->get(LoggerInterface::class),
+            (string)($config['host'] ?? 'rabbitmq'),
+            (int)($config['port'] ?? 5672),
+            (string)($config['vhost'] ?? '/'),
+            (string)($config['user'] ?? 'guest'),
+            (string)($config['password'] ?? 'guest'),
+            (string)($config['exchange'] ?? 'outbox'),
+            (string)($config['queue'] ?? 'telegram.send-message'),
+            max(1, (int)($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
+        );
+    },
+
     OutboxRelay::class => function (ContainerInterface $c) {
         return new OutboxRelay(
             $c->get(OutboxRepositoryInterface::class),
@@ -101,6 +122,8 @@ return [
             max(1, (int)($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
         );
     },
+
+    AmqpConnectionFactoryInterface::class => autowire(AmqpConnectionFactory::class),
 
     /*==========================================
         Database

@@ -67,11 +67,6 @@ class IntakeMark
         }
     }
 
-    public function isIncludeInInterval(DateTimeImmutable $startDate, DateTimeImmutable $endDate): bool
-    {
-        return $this->createdAt >= $startDate && $this->createdAt <= $endDate;
-    }
-
     public function getChatId(): int
     {
         return $this->chatId;

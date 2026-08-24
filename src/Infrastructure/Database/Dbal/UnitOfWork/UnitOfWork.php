@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\Database\Dbal\Repositories;
+namespace App\Infrastructure\Database\Dbal\UnitOfWork;
 
 use App\Application\UnitOfWork\UnitOfWorkInterface;
 use Doctrine\DBAL\Connection;

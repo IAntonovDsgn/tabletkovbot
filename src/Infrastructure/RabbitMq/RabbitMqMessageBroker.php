@@ -29,6 +29,7 @@ final class RabbitMqMessageBroker implements MessageBrokerInterface
         private readonly string $exchange,
         private readonly string $queue,
         private readonly float $confirmTimeoutSeconds = 5.0,
+        private readonly AmqpConnectionFactoryInterface $connectionFactory = new AmqpConnectionFactory(),
     ) {
     }
 
@@ -82,17 +83,13 @@ final class RabbitMqMessageBroker implements MessageBrokerInterface
 
         $this->close();
 
-        try {
-            $this->connection = new AMQPStreamConnection(
-                $this->host,
-                $this->port,
-                $this->user,
-                $this->password,
-                $this->vhost,
-            );
-        } catch (\Exception $e) {
-            throw new AMQPException($e->getMessage());
-        }
+        $this->connection = $this->connectionFactory->create(
+            $this->host,
+            $this->port,
+            $this->vhost,
+            $this->user,
+            $this->password,
+        );
 
         $channel = $this->connection->channel();
         $this->channel = $channel;
