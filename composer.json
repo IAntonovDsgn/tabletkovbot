@@ -16,7 +16,8 @@
     "illuminate/container": "^13.23",
     "ext-pdo": "*",
     "doctrine/migrations": "^3.9",
-    "php-amqplib/php-amqplib": "^3.7"
+    "php-amqplib/php-amqplib": "^3.7",
+    "ext-pcntl": "*"
   },
   "require-dev": {
     "pestphp/pest": "^4.7",
