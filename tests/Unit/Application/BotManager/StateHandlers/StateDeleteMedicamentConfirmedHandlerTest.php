@@ -49,7 +49,7 @@ class StateDeleteMedicamentConfirmedHandlerTest extends TestCase
             ->willReturn($medicament);
 
         $this->medicamentRepository->expects($this->once())
-            ->method('save')
+            ->method('update')
             ->with($this->callback(function (Medicament $savedMedicament) {
                 return !$savedMedicament->isActive(); // Check that it was deactivated
             }));

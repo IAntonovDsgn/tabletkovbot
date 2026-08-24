@@ -34,7 +34,7 @@ class StateDownloadReportStartDateEnteredHandlerTest extends TestCase
     {
         $chatId = 12345;
         $date = '01.01.2023';
-        $startDate = new DateTimeImmutable();
+        $startDate = DateTimeImmutable::createFromFormat('!' . Report::DATE_FORMAT, $date);
 
         $intakeMarks = [
             IntakeMark::create($chatId, 1),

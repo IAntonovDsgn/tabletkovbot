@@ -52,7 +52,7 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
             ->willReturn($medicament);
 
         $this->intakeMarkRepository->expects($this->once())
-            ->method('save')
+            ->method('insert')
             ->with($this->callback(function (IntakeMark $intakeMark) use ($chatId, $medicamentId) {
                 return $intakeMark->getChatId() === $chatId && $intakeMark->getMedicamentId() === $medicamentId;
             }));
@@ -75,7 +75,7 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
             ->with($medicamentId)
             ->willReturn(null);
 
-        $this->intakeMarkRepository->expects($this->never())->method('save');
+        $this->intakeMarkRepository->expects($this->never())->method('insert');
 
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
@@ -90,9 +90,9 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
         $medicamentId = 1;
 
         $medicament = Medicament::restoreFromPersistence(
-            $anotherChatId,
+            $medicamentId,
             'Aspirin',
-            $chatId,
+            $anotherChatId,
             new \DateTimeImmutable(),
             true
         );
@@ -102,7 +102,7 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
             ->with($medicamentId)
             ->willReturn($medicament);
 
-        $this->intakeMarkRepository->expects($this->never())->method('save');
+        $this->intakeMarkRepository->expects($this->never())->method('insert');
 
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);

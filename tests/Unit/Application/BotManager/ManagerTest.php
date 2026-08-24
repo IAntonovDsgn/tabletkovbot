@@ -52,17 +52,16 @@ class ManagerTest extends TestCase
     {
         $chatId = 123;
         $requestDTO = new RequestDTO($chatId, 'start', null);
-        $initialSession = Session::create($chatId); // What a new session looks like
 
         $this->unitOfWork->expects($this->once())->method('begin');
         $this->unitOfWork->expects($this->once())->method('commit');
         $this->unitOfWork->expects($this->never())->method('rollback');
 
         // Session handling for a new user
-        $this->sessionRepository->expects($this->exactly(2)) // Find (null), Save (new session), Find (existing), Save (updated session)
+        $this->sessionRepository->expects($this->once()) // Find (null)
             ->method('findByChatId')
             ->with($chatId)
-            ->willReturnOnConsecutiveCalls(null, $initialSession); // First call returns null, second call returns the newly created session
+            ->willReturn(null);
 
         // Mock the StateHandler
         $mockStateHandler = $this->createMock(StateHandlerInterface::class);
@@ -77,9 +76,9 @@ class ManagerTest extends TestCase
             ->with($chatId, 'start', null, null)
             ->willReturn($handlerResponseDTO);
 
-        // Session save calls (for state transition and for payload update)
-        $this->sessionRepository->expects($this->exactly(2))
-            ->method('save')
+        // A freshly created session is inserted
+        $this->sessionRepository->expects($this->once())
+            ->method('insert')
             ->with($this->callback(function (Session $session) use ($chatId) {
                 // Ensure the session is for the correct chat ID and has transitioned to MENU
                 return $session->getChatId() === $chatId && $session->getState() === EnumState::MENU;
@@ -101,18 +100,17 @@ class ManagerTest extends TestCase
         $payloadState = EnumState::ADD_MEDICAMENT_SELECTED;
         $requestDTO = new RequestDTO($chatId, 'some_text', $payloadState->value);
 
-        $existingSession = Session::create($chatId); // Defaults to MENU
-        $existingSession->transitionToState(EnumState::MENU); // Ensure initial state is MENU
+        $existingSession = Session::restoreFromPersistence(1, $chatId, true, EnumState::MENU);
 
         $this->unitOfWork->expects($this->once())->method('begin');
         $this->unitOfWork->expects($this->once())->method('commit');
         $this->unitOfWork->expects($this->never())->method('rollback');
 
         // Session handling
-        $this->sessionRepository->expects($this->exactly(2)) // First find, second find after handler
+        $this->sessionRepository->expects($this->once())
             ->method('findByChatId')
             ->with($chatId)
-            ->willReturnOnConsecutiveCalls($existingSession, $existingSession);
+            ->willReturn($existingSession);
 
         // Mock the StateHandler
         $mockStateHandler = $this->createMock(StateHandlerInterface::class);
@@ -127,14 +125,13 @@ class ManagerTest extends TestCase
             ->with($chatId, 'some_text', null, null) // No session payload initially, button payload is null
             ->willReturn($handlerResponseDTO);
 
-        // Session save calls (for state transition and for payload update)
-        $this->sessionRepository->expects($this->exactly(2))
-            ->method('save')
+        // Session is updated after state transition and payload update
+        $this->sessionRepository->expects($this->once())
+            ->method('update')
             ->with($this->callback(function (Session $session) use ($chatId, $payloadState, $handlerResponseDTO) {
-                // First save: check state transition
-                // Second save: check new payload
                 return $session->getChatId() === $chatId &&
-                       ($session->getState() === $payloadState || $session->getPayload() === $handlerResponseDTO->newSessionPayload);
+                       $session->getState() === $payloadState &&
+                       $session->getPayload() === $handlerResponseDTO->newSessionPayload;
             }));
 
         // Outbox save
@@ -172,8 +169,10 @@ class ManagerTest extends TestCase
             ->method('handle')
             ->willThrowException(new InvalidValueException('Error message'));
 
-        $this->sessionRepository->expects($this->exactly(2)) // Initial save (before handler throws), and save in errorHandler
-             ->method('save')
+        // Nothing is inserted; the errorHandler updates the session after resetState
+        $this->sessionRepository->expects($this->never())->method('insert');
+        $this->sessionRepository->expects($this->once())
+             ->method('update')
              ->with($this->callback(function (Session $session) {
                  return $session->getState() === EnumState::MENU && $session->getPayload() === null;
              }));
@@ -213,8 +212,8 @@ class ManagerTest extends TestCase
             ->willThrowException($expectedException);
 
         // Ensure errorHandler is NOT called for general Throwables
-        $this->sessionRepository->expects($this->once())->method('findByChatId'); // Initial find, not second find from errorHandler
-        $this->sessionRepository->expects($this->once())->method('save'); // This will be called before the exception from handler
+        $this->sessionRepository->expects($this->never())->method('insert');
+        $this->sessionRepository->expects($this->never())->method('update');
         $this->outboxRepository->expects($this->never())->method('insert');
         $this->keyboardFactory->expects($this->never())->method('makeMenuKeyboard');
 
@@ -248,8 +247,8 @@ class ManagerTest extends TestCase
         $mockStateHandler->expects($this->never()) // handle is NOT called if getNextState throws
             ->method('handle');
 
-        $this->sessionRepository->expects($this->once()) // Save in errorHandler after resetState
-             ->method('save')
+        $this->sessionRepository->expects($this->once()) // Update in errorHandler after resetState
+             ->method('update')
              ->with($this->callback(function (Session $session) {
                  return $session->getState() === EnumState::MENU && $session->getPayload() === null;
              }));

@@ -49,7 +49,7 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
             ->willReturn($medicament);
 
         $this->medicamentRepository->expects($this->once())
-            ->method('save')
+            ->method('update')
             ->with($this->callback(function (Medicament $savedMedicament) use ($newName) {
                 return $savedMedicament->getName() === $newName;
             }));

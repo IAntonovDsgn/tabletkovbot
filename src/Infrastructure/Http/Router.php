@@ -7,8 +7,12 @@ namespace App\Infrastructure\Http;
 use App\Presentation\Api\SwaggerController;
 use App\Presentation\Api\WebhookController;
 use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
+use RuntimeException;
+
 use function FastRoute\simpleDispatcher;
 
 final readonly class Router
@@ -25,6 +29,10 @@ final readonly class Router
         $routes->addRoute('GET', '/docs', [SwaggerController::class, 'ui']);
     }
 
+    /**
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
     public function __invoke(): void
     {
         $dispatcher = simpleDispatcher($this->routes(...));
@@ -49,9 +57,22 @@ final readonly class Router
 
             case Dispatcher::FOUND:
                 $handler = $routeInfo[1];
-                [$class, $method] = $handler;
-                $controller = $this->container->get($class);
-                $controller->$method();
+                if (
+                    !is_array($handler)
+                    || !isset($handler[0], $handler[1])
+                    || !is_string($handler[0])
+                    || !is_string($handler[1])
+                ) {
+                    throw new RuntimeException('Invalid route handler configuration.');
+                }
+
+                $controller = $this->container->get($handler[0]);
+                if (!is_object($controller) || !method_exists($controller, $handler[1])) {
+                    throw new RuntimeException(
+                        sprintf('Handler %s::%s() is not resolvable.', $handler[0], $handler[1])
+                    );
+                }
+                $controller->{$handler[1]}();
                 break;
         }
     }

@@ -49,7 +49,7 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
             ->willReturn($medicament);
 
         $this->medicamentRepository->expects($this->once())
-            ->method('save')
+            ->method('update')
             ->with($this->callback(function (Medicament $savedMedicament) use ($time) {
                 return $savedMedicament->getNotificationTime()?->format('H:i') === $time;
             }));

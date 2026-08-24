@@ -6,6 +6,8 @@ namespace App\Presentation\Console;
 
 use App\Presentation\Console\Commands\GetTelegramUpdatesCommand;
 use App\Presentation\Console\Commands\SendTelegramMessageCommand;
+use DI\Container;
+use RuntimeException;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\CommandLoader\ContainerCommandLoader;
 
@@ -16,6 +18,9 @@ use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Tools\Console\Command as MigrationCommand;
 
 $container = require __DIR__ . '/../../../bootstrap/bootstrap.php';
+if (!$container instanceof Container) {
+    throw new RuntimeException('bootstrap/bootstrap.php must return a DI\Container instance.');
+}
 
 $commandLoader = new ContainerCommandLoader($container, [
     'app:tg-bot-get-updates'    => GetTelegramUpdatesCommand::class,
@@ -26,6 +31,9 @@ $application = new Application('app');
 $application->setCommandLoader($commandLoader);
 
 $connection = $container->get(Connection::class);
+if (!$connection instanceof Connection) {
+    throw new RuntimeException(sprintf('Container entry "%s" must be a DBAL Connection.', Connection::class));
+}
 
 $config = new PhpFile(__DIR__ . '/../../../config/migrations.php');
 $dependencyFactory = DependencyFactory::fromConnection($config, new ExistingConnection($connection));

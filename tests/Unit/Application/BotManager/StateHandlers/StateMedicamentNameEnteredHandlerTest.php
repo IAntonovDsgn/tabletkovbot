@@ -24,7 +24,7 @@ class StateMedicamentNameEnteredHandlerTest extends TestCase
         $newMedicamentId = 1;
 
         $medicamentRepository->expects($this->once())
-            ->method('save')
+            ->method('insert')
             ->with($this->callback(function (Medicament $medicament) use ($chatId, $medicamentName) {
                 return $medicament->getName() === $medicamentName && $medicament->getChatId() === $chatId;
             }))

@@ -8,6 +8,7 @@ use App\Application\Services\Keyboard\KeyboardFactory;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
+use App\Domain\Exceptions\Interior\NotFoundEntityException;
 use PHPUnit\Framework\TestCase;
 
 class StateNotificationEnabledHandlerTest extends TestCase
@@ -39,7 +40,7 @@ class StateNotificationEnabledHandlerTest extends TestCase
             ->willReturn($session);
 
         $this->sessionRepository->expects($this->once())
-            ->method('save')
+            ->method('update')
             ->with($this->callback(function (Session $savedSession) {
                 return $savedSession->isNotificationEnabled();
             }));
@@ -54,7 +55,7 @@ class StateNotificationEnabledHandlerTest extends TestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
-    public function testHandleWithoutExistingSession(): void
+    public function testHandleThrowsExceptionIfSessionNotFound(): void
     {
         $chatId = 12345;
 
@@ -63,19 +64,12 @@ class StateNotificationEnabledHandlerTest extends TestCase
             ->with($chatId)
             ->willReturn(null);
 
-        $this->sessionRepository->expects($this->once())
-            ->method('save')
-            ->with($this->callback(function (Session $savedSession) use ($chatId) {
-                return $savedSession->getChatId() === $chatId && $savedSession->isNotificationEnabled();
-            }));
+        $this->sessionRepository->expects($this->never())->method('insert');
+        $this->sessionRepository->expects($this->never())->method('update');
 
-        $response = $this->handler->handle($chatId, null, null, null);
+        $this->expectException(NotFoundEntityException::class);
+        $this->expectExceptionMessage("Session not found with chatId = $chatId");
 
-        $expectedResponse = new StateHandlerResponseDTO(
-            EnumMessageText::SETTINGS_SAVED,
-            $this->keyboardFactory->makeMenuKeyboard()
-        );
-
-        $this->assertEquals($expectedResponse, $response);
+        $this->handler->handle($chatId, null, null, null);
     }
 }
