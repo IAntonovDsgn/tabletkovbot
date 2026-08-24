@@ -33,7 +33,7 @@ services:
     networks:
       - app-network
     env_file:
-      - .env
+      - ../.env
 
   outbox-relay:
     build:
@@ -57,7 +57,7 @@ services:
     networks:
       - app-network
     env_file:
-      - .env
+      - ../.env
     restart: unless-stopped
     stop_grace_period: 30s
     command: ["php", "src/Presentation/Console/Console.php", "app:outbox-publish"]

@@ -18,13 +18,16 @@ docker exec tabletkovbot-app sh -c 'cd /var/www/tabletkovbot && composer test'
 
 # Console (app commands + Doctrine migrations)
 docker exec tabletkovbot-app sh -c 'cd /var/www/tabletkovbot && composer console -- app:tg-bot-get-updates'
+
+# Docker Compose — canonical invocation (always from repo root; .env lives at the root)
+docker compose -f docker/docker-compose.yml --env-file .env up -d
 ```
 
-Container names are `${COMPOSE_PROJECT_NAME}-*` with `COMPOSE_PROJECT_NAME=tabletkovbot` from `docker/.env`: `tabletkovbot-app`, `-db` (MariaDB 10.11), `-rabbitmq`, `-nginx`, `-outbox-relay`. Verify with `docker ps`. First-time setup: `./first-run.sh` (creates `docker/.env` from `.env.example`, builds, `composer install`).
+Container names are `${COMPOSE_PROJECT_NAME}-*` with `COMPOSE_PROJECT_NAME=tabletkovbot` from the root `.env`: `tabletkovbot-app`, `-db` (MariaDB 10.11), `-rabbitmq`, `-nginx`, `-outbox-relay`. Verify with `docker ps`. First-time setup: `./first-run.sh` (creates root `.env` from `.env.example`, builds, `composer install`, runs migrations).
 
 ## Environment
 
-Env vars live in **`docker/.env`** (not project root). `bootstrap/bootstrap.php` loads it via `Symfony\Dotenv`; docker-compose also uses `env_file: docker/.env`. New settings must be added there. DB config: `config/database.php`; Telegram token: `config/telegram.php`.
+Env vars live in **`.env`** at the project root. `bootstrap/bootstrap.php` loads it via `Symfony\Dotenv`; docker-compose uses it both for interpolation (`--env-file .env`) and as `env_file: ../.env` for containers. New settings must be added there. DB config: `config/database.php`; Telegram token: `config/telegram.php`; RabbitMQ/outbox tuning: `config/rabbitmq.php`.
 
 ## Architecture
 

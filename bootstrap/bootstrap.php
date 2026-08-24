@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Dotenv\Dotenv;
 
 $dotenv = new Dotenv();
-$dotenv->load(__DIR__ . '/../docker/.env');
+$dotenv->load(__DIR__ . '/../.env');
 
 if (isset($_ENV['APP_TIMEZONE'])) {
     date_default_timezone_set($_ENV['APP_TIMEZONE']);
