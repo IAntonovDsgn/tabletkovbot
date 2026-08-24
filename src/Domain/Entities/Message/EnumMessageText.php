@@ -27,4 +27,17 @@ enum EnumMessageText: string {
     case SETTINGS_SAVED = 'Настройки сохранены! Чем еще я могу помочь?';
     case INTAKE_MARK_SAVED = 'Отметка о приеме сохранена! Чем еще я могу помочь?';
     case INTERNAL_ERROR = 'Oops! Something broke. Please contact the administrator';
+
+    public function isError(): bool
+    {
+        return match ($this) {
+            self::ERROR,
+            self::INTERNAL_ERROR,
+            self::MEDICAMENT_EMPTY_NAME_ERROR,
+            self::MEDICAMENT_NOT_FOUND,
+            self::FORMAT_TIME_ERROR,
+            self::FORMAT_DATE_ERROR => true,
+            default => false,
+        };
+    }
 }

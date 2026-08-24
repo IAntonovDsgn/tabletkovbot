@@ -39,7 +39,7 @@ class TelegramMessageServiceTest extends TestCase
             ->method('sendMessage')
             ->with([
                 'chat_id' => $chatId,
-                'text' => $text,
+                'text' => '🐸 ' . $text,
                 'reply_markup' => null,
             ]);
 
@@ -62,7 +62,44 @@ class TelegramMessageServiceTest extends TestCase
             ->method('sendMessage')
             ->with([
                 'chat_id' => $chatId,
-                'text' => $text,
+                'text' => '🐸 ' . $text,
+                'reply_markup' => $keyboard,
+            ]);
+
+        $this->service->sendMessage($message);
+    }
+
+    public function testErrorMessageGetsCrossPrefix(): void
+    {
+        $chatId = 123;
+        $text = EnumMessageText::INTERNAL_ERROR->value;
+        $message = Message::create($chatId, $text);
+
+        $this->telegramApi->expects($this->once())
+            ->method('sendMessage')
+            ->with([
+                'chat_id' => $chatId,
+                'text' => '❌ ' . $text,
+                'reply_markup' => null,
+            ]);
+
+        $this->service->sendMessage($message);
+    }
+
+    public function testEmptyTextWithButtonsIsSentWithoutAnyPrefix(): void
+    {
+        $chatId = 123;
+        $button = new MessageButton('Button 1', \App\Domain\Entities\Session\State\EnumState::ADD_MEDICAMENT_SELECTED);
+        $message = Message::create($chatId, null, [$button]);
+
+        $keyboard = Keyboard::make()->inline();
+        $keyboard->row([['text' => $button->getTitle(), 'callback_data' => $button->getNewState()]]);
+
+        $this->telegramApi->expects($this->once())
+            ->method('sendMessage')
+            ->with([
+                'chat_id' => $chatId,
+                'text' => '',
                 'reply_markup' => $keyboard,
             ]);
 

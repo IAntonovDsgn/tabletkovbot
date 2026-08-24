@@ -6,6 +6,7 @@ namespace App\Infrastructure\TelegramMessageService;
 
 use App\Application\BotManager\RequestDTO;
 use App\Application\Message\MessageServiceInterface;
+use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Exceptions\Interior\SendMessageException;
@@ -16,6 +17,9 @@ use Telegram\Bot\Keyboard\Keyboard;
 
 final readonly class TelegramMessageService implements MessageServiceInterface
 {
+    private const string MESSAGE_PREFIX = '🐸 ';
+    private const string ERROR_PREFIX = '❌ ';
+
     public function __construct(
         private TelegramBotApi $telegramApi,
     ) {
@@ -42,12 +46,26 @@ final readonly class TelegramMessageService implements MessageServiceInterface
         try {
             $this->telegramApi->sendMessage([
                 'chat_id' => $message->getChatId(),
-                'text' => $message->getText(),
+                'text' => $this->decorateText($message->getText()),
                 'reply_markup' => $keyboard,
             ]);
         } catch (TelegramSDKException $e) {
             throw new SendMessageException($e->getMessage());
         }
+    }
+
+    private function decorateText(string $text): string
+    {
+        if ($text === '') {
+            return '';
+        }
+
+        $enum = EnumMessageText::tryFrom($text);
+        $prefix = $enum !== null && $enum->isError()
+            ? self::ERROR_PREFIX
+            : self::MESSAGE_PREFIX;
+
+        return $prefix . $text;
     }
 
     /**
