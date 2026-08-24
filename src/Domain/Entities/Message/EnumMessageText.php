@@ -7,7 +7,7 @@ namespace  App\Domain\Entities\Message;
 enum EnumMessageText: string {
     case CHOOSE_MEDICAMENT = 'Выберите медикамент';
     case ENTER_NEW_NAME = 'Введите новое имя медикамента';
-    case ENTER_TIME = 'Введите время в формате hh:mm';
+    case ENTER_TIME = 'Введите время уведомления в формате hh:mm';
     case MEDICAMENT_EMPTY_NAME_ERROR = 'Имя медикамента не может быть пустым, попробуйте снова';
     case MEDICAMENT_NOT_FOUND = 'Медикамент не найден, попробуйте снова';
     case MEDICAMENT_RENAMED_SUCCESS = 'Имя медикамента успешно изменено. Чем еще я могу помочь?';

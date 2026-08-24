@@ -24,6 +24,16 @@ interface OutboxRepositoryInterface
     public function getPendingMessages(int $limit): array;
 
     /**
+     * Registers one failed delivery attempt for the message.
+     *
+     * @return int The updated attempts counter value.
+     *
+     * @throws NotFoundEntityException
+     * @throws RepositoryException
+     */
+    public function markAttempt(Message $message): int;
+
+    /**
      * @throws NotFoundEntityException
      * @throws RepositoryException
      */

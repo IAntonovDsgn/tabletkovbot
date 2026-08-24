@@ -25,7 +25,7 @@ class OutboxRelayTest extends TestCase
         $this->outboxRepository = $this->createMock(OutboxRepositoryInterface::class);
         $this->broker = $this->createMock(MessageBrokerInterface::class);
         $this->logger = $this->createMock(LoggerInterface::class);
-        $this->relay = new OutboxRelay($this->outboxRepository, $this->broker, $this->logger, 10, 1000);
+        $this->relay = new OutboxRelay($this->outboxRepository, $this->broker, $this->logger, 10, 1000, 4);
     }
 
     private function makePendingMessage(int $id, int $chatId): Message
@@ -42,6 +42,9 @@ class OutboxRelayTest extends TestCase
             ->method('getPendingMessages')
             ->with(10)
             ->willReturn([$first, $second]);
+
+        // Successful delivery must not touch the attempts counter.
+        $this->outboxRepository->expects($this->never())->method('markAttempt');
 
         $publishedChatIds = [];
         $deletedMessages = [];
@@ -73,13 +76,86 @@ class OutboxRelayTest extends TestCase
             ->method('publish')
             ->willThrowException(new RuntimeException('broker is down'));
 
-        // The row must stay pending: delete must never be called after a failed publish
+        $this->outboxRepository->expects($this->once())
+            ->method('markAttempt')
+            ->with($message)
+            ->willReturn(1);
+
+        // The row must stay pending below the attempts threshold.
         $this->outboxRepository->expects($this->never())->method('delete');
 
         $this->logger->expects($this->atLeastOnce())->method('error');
 
         // Nothing was relayed, so the caller should back off before retrying
         $this->assertFalse($this->relay->processBatch());
+    }
+
+    public function testProcessBatchDropsMessageAfterMaxAttemptsReached(): void
+    {
+        $relay = new OutboxRelay($this->outboxRepository, $this->broker, $this->logger, 10, 1000, 2);
+        $message = $this->makePendingMessage(1, 111);
+
+        $this->outboxRepository->method('getPendingMessages')->willReturn([$message]);
+
+        $this->broker->method('publish')->willThrowException(new RuntimeException('broker is down'));
+
+        $this->outboxRepository->expects($this->once())
+            ->method('markAttempt')
+            ->with($message)
+            ->willReturn(2);
+
+        $this->outboxRepository->expects($this->once())->method('delete')->with($message);
+
+        /** @var list<array{string, array<string, mixed>}> $errors */
+        $errors = [];
+        $this->logger->method('error')->willReturnCallback(
+            function (string $logMessage, array $context) use (&$errors): void {
+                $errors[] = [$logMessage, $context];
+            }
+        );
+
+        $this->assertFalse($relay->processBatch());
+
+        $drops = array_values(array_filter(
+            $errors,
+            static fn (array $record): bool => $record[0] === 'Dropping outbox message after repeated failures'
+        ));
+        self::assertCount(1, $drops);
+        self::assertSame(2, $drops[0][1]['attempts']);
+        self::assertSame('broker is down', $drops[0][1]['last_error']);
+    }
+
+    public function testProcessBatchKeepsRowWhenMarkAttemptFails(): void
+    {
+        $message = $this->makePendingMessage(1, 111);
+
+        $this->outboxRepository->method('getPendingMessages')->willReturn([$message]);
+
+        $this->broker->method('publish')->willThrowException(new RuntimeException('broker is down'));
+
+        $this->outboxRepository->expects($this->once())
+            ->method('markAttempt')
+            ->willThrowException(new RuntimeException('db is down'));
+
+        // Counter update failed: the row must stay pending for the next cycle.
+        $this->outboxRepository->expects($this->never())->method('delete');
+
+        /** @var list<array{string, array<string, mixed>}> $warnings */
+        $warnings = [];
+        $this->logger->method('warning')->willReturnCallback(
+            function (string $logMessage, array $context) use (&$warnings): void {
+                $warnings[] = [$logMessage, $context];
+            }
+        );
+
+        $this->assertFalse($this->relay->processBatch());
+
+        $failures = array_values(array_filter(
+            $warnings,
+            static fn (array $record): bool => $record[0] === 'Failed to register outbox delivery attempt'
+        ));
+        self::assertCount(1, $failures);
+        self::assertSame('db is down', $failures[0][1]['error']);
     }
 
     public function testProcessBatchDoesNotFailWhenDeleteFailsAfterConfirmedPublish(): void

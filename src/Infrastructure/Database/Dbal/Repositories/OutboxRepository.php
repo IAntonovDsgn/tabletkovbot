@@ -24,6 +24,7 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
     const string TEXT_COLUMN_NAME = 'text';
     const string BUTTONS_COLUMN_NAME = 'buttons';
     const string STATUS_COLUMN_NAME = 'status';
+    const string ATTEMPTS_COLUMN_NAME = 'attempts';
     const string PENDING_STATUS = 'pending';
 
     public function __construct(
@@ -83,6 +84,52 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
         return $result;
     }
 
+    /**
+     * Registers one failed delivery attempt for the message.
+     *
+     * @return int The updated attempts counter value.
+     *
+     * @throws NotFoundEntityException
+     * @throws RepositoryException
+     */
+    public function markAttempt(Message $message): int
+    {
+        if (!$message->isExistInPersistence()) {
+            throw new NotFoundEntityException('isExistInPersistence = false');
+        }
+
+        try {
+            $this->connection->executeStatement(
+                sprintf(
+                    'UPDATE %s SET %s = %s + 1 WHERE %s = :id',
+                    self::MESSAGE_OUTBOX_TABLE_NAME,
+                    self::ATTEMPTS_COLUMN_NAME,
+                    self::ATTEMPTS_COLUMN_NAME,
+                    self::ID_COLUMN_NAME,
+                ),
+                ['id' => $message->getId()],
+            );
+
+            $attempts = $this->connection->fetchOne(
+                sprintf(
+                    'SELECT %s FROM %s WHERE %s = :id',
+                    self::ATTEMPTS_COLUMN_NAME,
+                    self::MESSAGE_OUTBOX_TABLE_NAME,
+                    self::ID_COLUMN_NAME,
+                ),
+                ['id' => $message->getId()],
+            );
+        } catch (Exception $e) {
+            throw new RepositoryException($e->getMessage());
+        }
+
+        if ($attempts === false) {
+            throw new NotFoundEntityException('Outbox row disappeared');
+        }
+
+        return $this->toInt($attempts);
+    }
+
     public function delete(Message $message): void
     {
         if (!$message->isExistInPersistence()) {
@@ -105,7 +152,8 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
     private function mapOrmToDomain(array $row): Message
     {
         $buttons = [];
-        $buttonsData = json_decode($this->toString($row[self::BUTTONS_COLUMN_NAME]), true);
+        $buttonsJson = $this->toStringOrNull($row[self::BUTTONS_COLUMN_NAME]);
+        $buttonsData = $buttonsJson !== null ? json_decode($buttonsJson, true) : [];
 
         if (is_array($buttonsData)) {
             foreach ($buttonsData as $buttonData) {

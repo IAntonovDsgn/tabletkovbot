@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Outbox;
 
 use App\Application\Message\MessageBrokerInterface;
+use App\Domain\Entities\Message\Message;
 use App\Domain\Exceptions\Interior\RepositoryException;
 use Psr\Log\LoggerInterface;
 
@@ -18,6 +19,7 @@ final class OutboxRelay
         private readonly LoggerInterface $logger,
         private readonly int $batchSize,
         private readonly int $pollIntervalMs,
+        private readonly int $maxAttempts = 4,
     ) {
     }
 
@@ -36,6 +38,7 @@ final class OutboxRelay
             } catch (\Exception $e) {
                 $this->logger->error('Outbox relay cycle failed, will retry', [
                     'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
                 ]);
                 usleep($this->pollIntervalMs * 1000);
             }
@@ -68,10 +71,49 @@ final class OutboxRelay
                     'chat_id' => $message->getChatId(),
                     'error' => $e->getMessage(),
                 ]);
+                $this->registerFailedAttempt($message, $e);
             }
         }
 
         return $relayed;
+    }
+
+    private function registerFailedAttempt(Message $message, \Exception $error): void
+    {
+        try {
+            $attempts = $this->outboxRepository->markAttempt($message);
+        } catch (\Exception $e) {
+            // Counter update failed: keep the row pending, it will be retried.
+            $this->logger->warning('Failed to register outbox delivery attempt', [
+                'message_id' => $message->getId(),
+                'chat_id' => $message->getChatId(),
+                'error' => $e->getMessage(),
+            ]);
+
+            return;
+        }
+
+        if ($attempts < $this->maxAttempts) {
+            return;
+        }
+
+        $this->logger->error('Dropping outbox message after repeated failures', [
+            'message_id' => $message->getId(),
+            'chat_id' => $message->getChatId(),
+            'attempts' => $attempts,
+            'last_error' => $error->getMessage(),
+        ]);
+
+        try {
+            $this->outboxRepository->delete($message);
+        } catch (\Exception $e) {
+            // Same best-effort policy as delete-after-publish.
+            $this->logger->warning('Failed to delete dropped outbox message', [
+                'message_id' => $message->getId(),
+                'chat_id' => $message->getChatId(),
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function requestStop(): void
