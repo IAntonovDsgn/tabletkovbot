@@ -16,7 +16,7 @@ final readonly class Handler
     /**
      * @param MessageButton[] $messageButtons
      */
-    public function handle(int $chat_id, string $messageText, ?array $messageButtons = null): void
+    public function handle(int $chat_id, string $messageText, array $messageButtons = []): void
     {
         $message = Message::create($chat_id, $messageText, $messageButtons);
         $this->messageService->sendMessage($message);

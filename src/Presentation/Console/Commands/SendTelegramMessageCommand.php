@@ -32,6 +32,7 @@ final class SendTelegramMessageCommand extends Command
             $output->writeln('<error>chat_id must be numeric</error>');
             return self::FAILURE;
         }
+        $chatId = (int) $chatId;
 
         $message = $input->getArgument('message');
         if (!is_string($message)) {
