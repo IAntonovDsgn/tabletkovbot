@@ -13,10 +13,10 @@ class MessageButton implements JsonSerializable
     const string CHANGE_MEDICAMENT_BUTTON_TITLE = 'Изменить медикамент';
     const string DELETE_MEDICAMENT_BUTTON_TITLE = 'Удалить медикамент';
     const string DOWNLOAD_REPORT_BUTTON_TITLE = 'Скачать отчет';
-    const string NOTIFICATIONS_BUTTON_TITLE = 'Уведомления';
+    const string NOTIFICATIONS_BUTTON_TITLE = 'Напоминания';
     const string MAKE_INTAKE_MARK_BUTTON_TITLE = 'Принять медикамент';
     const string CHANGE_NAME = 'Изменить имя';
-    const string CHANGE_NOTIFICATION_TIME = 'Изменить время уведомления';
+    const string CHANGE_NOTIFICATION_TIME = 'Изменить время напоминаний';
     const string MENU = 'Меню';
     const string CONFIRM = 'Подтвердить';
     const string DISABLE_NOTIFICATIONS = 'Отключить напоминания';

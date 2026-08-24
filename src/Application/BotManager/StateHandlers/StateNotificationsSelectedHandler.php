@@ -10,6 +10,7 @@ use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Exceptions\Interior\RepositoryException;
 
 final readonly class StateNotificationsSelectedHandler implements StateHandlerInterface
 {
@@ -19,6 +20,9 @@ final readonly class StateNotificationsSelectedHandler implements StateHandlerIn
     ) {
     }
 
+    /**
+     * @throws RepositoryException
+     */
     public function handle(
         int $chatId,
         ?string $messageText,
@@ -32,14 +36,16 @@ final readonly class StateNotificationsSelectedHandler implements StateHandlerIn
             $result = new StateHandlerResponseDTO(
                 EnumMessageText::NOTIFICATIONS_ENABLE,
                 [
-                    new MessageButton(MessageButton::DISABLE_NOTIFICATIONS, EnumState::NOTIFICATION_DISABLED)
+                    new MessageButton(MessageButton::DISABLE_NOTIFICATIONS, EnumState::NOTIFICATION_DISABLED),
+                    new MessageButton(MessageButton::MENU, EnumState::MENU),
                 ]
             );
         } else {
             $result = new StateHandlerResponseDTO(
                 EnumMessageText::NOTIFICATIONS_DISABLE,
                 [
-                    new MessageButton(MessageButton::ENABLE_NOTIFICATIONS, EnumState::NOTIFICATION_ENABLED)
+                    new MessageButton(MessageButton::ENABLE_NOTIFICATIONS, EnumState::NOTIFICATION_ENABLED),
+                    new MessageButton(MessageButton::MENU, EnumState::MENU),
                 ]
             );
         }

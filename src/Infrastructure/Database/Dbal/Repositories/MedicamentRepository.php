@@ -10,6 +10,7 @@ use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
 use App\Domain\Exceptions\Interior\NotFoundEntityException;
 use App\Domain\Exceptions\Interior\RepositoryException;
 use DateTimeImmutable;
+use DateTimeZone;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -38,7 +39,8 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
         $data = [
             self::NAME_COLUMN_NAME => $medicament->getName(),
             self::CHAT_ID_COLUMN_NAME => $medicament->getChatId(),
-            self::NOTIFICATION_TIME_COLUMN_NAME => $medicament->getNotificationTime()?->format(Medicament::TIME_FORMAT),
+            self::NOTIFICATION_TIME_COLUMN_NAME => $medicament->getNotificationTime()
+                ?->format(Medicament::TIME_FORMAT . ':s'),
             self::IS_ACTIVE_COLUMN_NAME => $medicament->isActive(),
         ];
 
@@ -59,7 +61,8 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
         $data = [
             self::NAME_COLUMN_NAME => $medicament->getName(),
             self::CHAT_ID_COLUMN_NAME => $medicament->getChatId(),
-            self::NOTIFICATION_TIME_COLUMN_NAME => $medicament->getNotificationTime()?->format(Medicament::TIME_FORMAT),
+            self::NOTIFICATION_TIME_COLUMN_NAME => $medicament->getNotificationTime()
+                ?->format(Medicament::TIME_FORMAT . ':s'),
             self::IS_ACTIVE_COLUMN_NAME => $medicament->isActive(),
         ];
 
@@ -75,7 +78,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
     }
 
     /**
-     * @throws Exception
+     * @throws RepositoryException
      */
     public function findByChatIdAndMedicamentName(string $medicamentName, int $chatId): ?Medicament
     {
@@ -88,7 +91,11 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             ->setParameter('chatId', $chatId)
             ->setParameter('medicamentName', $medicamentName);
 
-        $row = $queryBuilder->executeQuery()->fetchAssociative();
+        try {
+            $row = $queryBuilder->executeQuery()->fetchAssociative();
+        } catch (\Exception $e) {
+            throw new RepositoryException($e->getMessage());
+        }
 
         if ($row === false) {
             $result = null;
@@ -100,7 +107,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
     }
 
     /**
-     * @throws Exception
+     * @throws RepositoryException
      */
     public function findById(int $id): ?Medicament
     {
@@ -111,7 +118,11 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             ->where(self::ID_COLUMN_NAME . ' = :id')
             ->setParameter('id', $id);
 
-        $row = $queryBuilder->executeQuery()->fetchAssociative();
+        try {
+            $row = $queryBuilder->executeQuery()->fetchAssociative();
+        } catch (\Exception $e) {
+            throw new RepositoryException($e->getMessage());
+        }
 
         if ($row === false) {
             $result = null;
@@ -124,7 +135,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
 
     /**
      * @return Medicament[]
-     * @throws Exception
+     * @throws RepositoryException
      */
     public function findByChatId(int $chatId): array
     {
@@ -136,7 +147,11 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             ->where(self::CHAT_ID_COLUMN_NAME . ' = :chatId')
             ->setParameter('chatId', $chatId);
 
-        $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
+        try {
+            $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
+        } catch (\Exception $e) {
+            throw new RepositoryException($e->getMessage());
+        }
 
         foreach ($rows as $row) {
             $result[] = $this->mapOrmToDomain($row);
@@ -147,18 +162,38 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
 
     /**
      * @param array<string, mixed> $row
+     * @throws RepositoryException
      */
     private function mapOrmToDomain(array $row): Medicament
     {
-        $notificationTime = $this->toStringOrNull($row[self::NOTIFICATION_TIME_COLUMN_NAME]);
+        $notificationTimeString = $this->toStringOrNull($row[self::NOTIFICATION_TIME_COLUMN_NAME]);
 
-        return MEdicament::restoreFromPersistence(
+        if ($notificationTimeString === null) {
+            $notificationTime = null;
+        } else {
+            $notificationTime = DateTimeImmutable::createFromFormat(
+                '!' . Medicament::TIME_FORMAT . ':s',
+                $notificationTimeString,
+                new DateTimeZone(Medicament::DATE_TIME_ZONE)
+            );
+
+            if ($notificationTime === false) {
+                throw new RepositoryException(
+                    sprintf(
+                        'Unexpected notification_time value "%s" in %s.%d',
+                        $notificationTimeString,
+                        self::MEDICAMENT_TABLE_NAME,
+                        $this->toInt($row[self::ID_COLUMN_NAME]),
+                    )
+                );
+            }
+        }
+
+        return Medicament::restoreFromPersistence(
             $this->toInt($row[self::ID_COLUMN_NAME]),
             $this->toString($row[self::NAME_COLUMN_NAME]),
             $this->toInt($row[self::CHAT_ID_COLUMN_NAME]),
-            $notificationTime !== null
-                ? DateTimeImmutable::createFromFormat(Medicament::TIME_FORMAT, $notificationTime) ?: null
-                : null,
+            $notificationTime,
             $this->toBool($row[self::IS_ACTIVE_COLUMN_NAME]),
         );
     }
