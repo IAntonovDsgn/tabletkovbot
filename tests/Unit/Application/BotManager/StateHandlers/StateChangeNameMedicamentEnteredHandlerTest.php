@@ -35,7 +35,13 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
         $medicamentId = 1;
         $newName = 'Paracetamol';
 
-        $medicament = new Medicament('Aspirin', $chatId, id: $medicamentId);
+        $medicament = Medicament::restoreFromPersistence(
+            $medicamentId,
+            'Aspirin',
+            $chatId,
+            new \DateTimeImmutable(),
+            true
+        );
 
         $this->medicamentRepository->expects($this->once())
             ->method('findById')
@@ -85,7 +91,13 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
         $anotherChatId = 54321;
         $medicamentId = 1;
 
-        $medicament = new Medicament('Aspirin', $anotherChatId, id: $medicamentId);
+        $medicament = Medicament::restoreFromPersistence(
+            $medicamentId,
+            'Aspirin',
+            $anotherChatId,
+            new \DateTimeImmutable(),
+            true
+        );
 
         $this->medicamentRepository->expects($this->once())
             ->method('findById')

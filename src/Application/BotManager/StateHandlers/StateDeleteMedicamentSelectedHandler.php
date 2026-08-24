@@ -24,7 +24,7 @@ final readonly class StateDeleteMedicamentSelectedHandler implements StateHandle
      */
     public function handle(
         int $chatId,
-        ?string $text,
+        ?string $messageText,
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {

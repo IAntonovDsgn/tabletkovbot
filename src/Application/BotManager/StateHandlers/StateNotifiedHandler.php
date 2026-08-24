@@ -29,14 +29,14 @@ final readonly class StateNotifiedHandler implements StateHandlerInterface
      */
     public function handle(
         int $chatId,
-        ?string $text,
+        ?string $messageText,
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
-        if ($text === null) {
+        if ($messageText === null) {
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
-        $medicament = $this->medicamentRepository->findById((int) $text);
+        $medicament = $this->medicamentRepository->findById((int) $messageText);
 
         if (is_null($medicament) || $medicament->getChatId() !== $chatId) {
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);

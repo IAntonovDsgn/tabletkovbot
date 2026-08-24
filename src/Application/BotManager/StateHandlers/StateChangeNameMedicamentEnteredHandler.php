@@ -11,6 +11,7 @@ use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Exceptions\External\InvalidValueException;
 use App\Domain\Exceptions\Interior\NotFoundEntityException;
+use App\Domain\Exceptions\Interior\RepositoryException;
 
 final readonly class StateChangeNameMedicamentEnteredHandler implements StateHandlerInterface
 {
@@ -23,14 +24,15 @@ final readonly class StateChangeNameMedicamentEnteredHandler implements StateHan
     /**
      * @throws InvalidValueException
      * @throws NotFoundEntityException
+     * @throws RepositoryException
      */
     public function handle(
         int $chatId,
-        ?string $text,
+        ?string $messageText,
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
-        if (is_null($text)) {
+        if (is_null($messageText)) {
             throw new InvalidValueException(EnumMessageText::MEDICAMENT_EMPTY_NAME_ERROR->value);
         }
 
@@ -41,8 +43,8 @@ final readonly class StateChangeNameMedicamentEnteredHandler implements StateHan
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
 
-        $medicament->setName($text);
-        $this->medicamentRepository->save($medicament);
+        $medicament->setName($messageText);
+        $this->medicamentRepository->update($medicament);
 
         return new StateHandlerResponseDTO(
             EnumMessageText::MEDICAMENT_RENAMED_SUCCESS, $this->keyboardFactory->makeMenuKeyboard()

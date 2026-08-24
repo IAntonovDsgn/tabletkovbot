@@ -14,7 +14,7 @@ final readonly class StateDownloadReportSelectedHandler implements StateHandlerI
 {
     public function handle(
         int $chatId,
-        ?string $text,
+        ?string $messageText,
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {

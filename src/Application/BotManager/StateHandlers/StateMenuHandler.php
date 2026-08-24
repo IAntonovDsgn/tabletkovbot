@@ -18,7 +18,7 @@ final readonly class StateMenuHandler implements StateHandlerInterface
 
     public function handle(
         int $chatId,
-        ?string $text,
+        ?string $messageText,
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {

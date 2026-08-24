@@ -24,15 +24,15 @@ final readonly class StateDownloadReportStartDateEnteredHandler implements State
 
     public function handle(
         int $chatId,
-        ?string $text,
+        ?string $messageText,
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
-        if ($text === null) {
+        if ($messageText === null) {
             throw new InvalidValueException(EnumMessageText::FORMAT_DATE_ERROR->value);
         }
 
-        $startDate = DateTimeImmutable::createFromFormat('!' . Report::DATE_FORMAT, $text);
+        $startDate = DateTimeImmutable::createFromFormat('!' . Report::DATE_FORMAT, $messageText);
         if ($startDate === false) {
             throw new InvalidValueException(EnumMessageText::FORMAT_DATE_ERROR->value);
         }

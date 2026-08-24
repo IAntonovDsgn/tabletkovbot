@@ -26,7 +26,7 @@ class StateNotificationsSelectedHandlerTest extends TestCase
     public function testHandleWhenNotificationsAreEnabled(): void
     {
         $chatId = 12345;
-        $session = new Session($chatId);
+        $session = Session::create($chatId);
         $session->enableNotifications();
 
         $this->sessionRepository->expects($this->once())
@@ -49,7 +49,7 @@ class StateNotificationsSelectedHandlerTest extends TestCase
     public function testHandleWhenNotificationsAreDisabled(): void
     {
         $chatId = 12345;
-        $session = new Session($chatId);
+        $session = Session::create($chatId);
         $session->disableNotifications();
 
         $this->sessionRepository->expects($this->once())

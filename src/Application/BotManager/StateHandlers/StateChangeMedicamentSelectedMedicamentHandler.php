@@ -24,7 +24,7 @@ final readonly class StateChangeMedicamentSelectedMedicamentHandler implements S
      */
     public function handle(
         int $chatId,
-        ?string $text,
+        ?string $messageText,
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {

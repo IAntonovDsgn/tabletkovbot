@@ -36,7 +36,12 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
         $medicamentId = 1;
         $time = '09:30';
 
-        $medicament = new Medicament('Test', $chatId, id: $medicamentId);
+        $medicament = Medicament::restoreFromPersistence(
+            $medicamentId,
+            'Test', $chatId,
+            new DateTimeImmutable(),
+            true
+        );
 
         $this->medicamentRepository->expects($this->once())
             ->method('findById')
@@ -95,7 +100,13 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
         $anotherChatId = 54321;
         $medicamentId = 1;
 
-        $medicament = new Medicament('Test', $anotherChatId, id: $medicamentId);
+        $medicament = Medicament::restoreFromPersistence(
+            $medicamentId,
+            'Test',
+            $anotherChatId,
+            new DateTimeImmutable(),
+            true
+        );
 
         $this->medicamentRepository->expects($this->once())
             ->method('findById')

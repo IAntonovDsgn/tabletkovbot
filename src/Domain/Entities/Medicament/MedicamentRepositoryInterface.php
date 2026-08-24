@@ -4,9 +4,23 @@ declare(strict_types=1);
 
 namespace App\Domain\Entities\Medicament;
 
+use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
+use App\Domain\Exceptions\Interior\NotFoundEntityException;
+use App\Domain\Exceptions\Interior\RepositoryException;
+
 interface MedicamentRepositoryInterface
 {
-    public function save(Medicament $medicament): int;
+    /**
+     * @throws EntityAlreadyExistInPersistenceException
+     * @throws RepositoryException
+     */
+    public function insert(Medicament $medicament): int;
+
+    /**
+     * @throws NotFoundEntityException
+     * @throws RepositoryException
+     */
+    public function update(Medicament $medicament): void;
 
     public function findByChatIdAndMedicamentName(string $medicamentName, int $chatId): ?Medicament;
 

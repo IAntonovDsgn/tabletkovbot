@@ -10,6 +10,7 @@ use App\Application\Services\Keyboard\KeyboardFactory;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Exceptions\Interior\NotFoundEntityException;
+use App\Domain\Exceptions\Interior\RepositoryException;
 
 final readonly class StateDeleteMedicamentConfirmedHandler implements StateHandlerInterface
 {
@@ -21,21 +22,22 @@ final readonly class StateDeleteMedicamentConfirmedHandler implements StateHandl
 
     /**
      * @throws NotFoundEntityException
+     * @throws RepositoryException
      */
     public function handle(
         int $chatId,
-        ?string $text,
+        ?string $messageText,
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
-        $medicament = $this->medicamentRepository->findById((int) $sessionPayload);
+        $medicament = $this->medicamentRepository->findById((int)$sessionPayload);
 
         if (is_null($medicament) || $medicament->getChatId() !== $chatId) {
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
 
         $medicament->deactivate();
-        $this->medicamentRepository->save($medicament);
+        $this->medicamentRepository->update($medicament);
         return new StateHandlerResponseDTO(
             EnumMessageText::MEDICAMENT_DELETED, $this->keyboardFactory->makeMenuKeyboard()
         );

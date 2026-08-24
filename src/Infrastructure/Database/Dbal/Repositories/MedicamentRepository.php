@@ -6,6 +6,9 @@ namespace App\Infrastructure\Database\Dbal\Repositories;
 
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
+use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
+use App\Domain\Exceptions\Interior\NotFoundEntityException;
+use App\Domain\Exceptions\Interior\RepositoryException;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -26,11 +29,12 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
     ) {
     }
 
-    /**
-     * @throws Exception
-     */
-    public function save(Medicament $medicament): int
+    public function insert(Medicament $medicament): int
     {
+        if ($medicament->isExistInPersistence()) {
+            throw new EntityAlreadyExistInPersistenceException('isExistInPersistence = true');
+        }
+
         $data = [
             self::NAME_COLUMN_NAME => $medicament->getName(),
             self::CHAT_ID_COLUMN_NAME => $medicament->getChatId(),
@@ -38,16 +42,35 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             self::IS_ACTIVE_COLUMN_NAME => $medicament->isActive(),
         ];
 
-        if ($medicament->getId() !== null) {
+        try {
+            $this->connection->insert(self::MEDICAMENT_TABLE_NAME, $data);
+            return (int)$this->connection->lastInsertId();
+        } catch (\Exception $e) {
+            throw new RepositoryException($e->getMessage());
+        }
+    }
+
+    public function update(Medicament $medicament): void
+    {
+        if (!$medicament->isExistInPersistence()) {
+            throw new NotFoundEntityException('isExistInPersistence = false');
+        }
+
+        $data = [
+            self::NAME_COLUMN_NAME => $medicament->getName(),
+            self::CHAT_ID_COLUMN_NAME => $medicament->getChatId(),
+            self::NOTIFICATION_TIME_COLUMN_NAME => $medicament->getNotificationTime()?->format(Medicament::TIME_FORMAT),
+            self::IS_ACTIVE_COLUMN_NAME => $medicament->isActive(),
+        ];
+
+        try {
             $this->connection->update(
                 self::MEDICAMENT_TABLE_NAME,
                 $data,
                 [self::ID_COLUMN_NAME => $medicament->getId()]
             );
-            return $medicament->getId();
-        } else {
-            $this->connection->insert(self::MEDICAMENT_TABLE_NAME, $data);
-            return (int)$this->connection->lastInsertId();
+        } catch (\Exception $e) {
+            throw new RepositoryException($e->getMessage());
         }
     }
 
@@ -70,7 +93,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
         if ($row === false) {
             $result = null;
         } else {
-            $result = $this->hydrate($row);
+            $result = $this->mapOrmToDomain($row);
         }
 
         return $result;
@@ -93,7 +116,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
         if ($row === false) {
             $result = null;
         } else {
-            $result = $this->hydrate($row);
+            $result = $this->mapOrmToDomain($row);
         }
 
         return $result;
@@ -116,7 +139,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
         $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
 
         foreach ($rows as $row) {
-            $result[] = $this->hydrate($row);
+            $result[] = $this->mapOrmToDomain($row);
         }
 
         return $result;
@@ -125,18 +148,18 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
     /**
      * @param array<string, mixed> $row
      */
-    private function hydrate(array $row): Medicament
+    private function mapOrmToDomain(array $row): Medicament
     {
         $notificationTime = $this->toStringOrNull($row[self::NOTIFICATION_TIME_COLUMN_NAME]);
 
-        return new Medicament(
+        return MEdicament::restoreFromPersistence(
+            $this->toInt($row[self::ID_COLUMN_NAME]),
             $this->toString($row[self::NAME_COLUMN_NAME]),
             $this->toInt($row[self::CHAT_ID_COLUMN_NAME]),
             $notificationTime !== null
                 ? DateTimeImmutable::createFromFormat(Medicament::TIME_FORMAT, $notificationTime) ?: null
                 : null,
             $this->toBool($row[self::IS_ACTIVE_COLUMN_NAME]),
-            $this->toInt($row[self::ID_COLUMN_NAME])
         );
     }
 }

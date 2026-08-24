@@ -7,6 +7,9 @@ namespace App\Infrastructure\Database\Dbal\Repositories;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
+use App\Domain\Exceptions\Interior\NotFoundEntityException;
+use App\Domain\Exceptions\Interior\RepositoryException;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -16,6 +19,7 @@ final readonly class SessionRepository implements SessionRepositoryInterface
 
     const string SESSION_TABLE_NAME = 'sessions';
     const string CHAT_ID_COLUMN_NAME = 'chat_id';
+    const string ID_COLUMN_NAME = 'id';
     const string IS_NOTIFICATION_ENABLED_COLUMN_NAME = 'is_notification_enabled';
     const string PAYLOAD_COLUMN_NAME = 'payload';
     const string STATE_COLUMN_NAME = 'state';
@@ -25,9 +29,6 @@ final readonly class SessionRepository implements SessionRepositoryInterface
     ) {
     }
 
-    /**
-     * @throws Exception
-     */
     public function findByChatId(int $chatId): ?Session
     {
         $queryBuilder = $this->connection->createQueryBuilder();
@@ -37,32 +38,29 @@ final readonly class SessionRepository implements SessionRepositoryInterface
             ->where(self::CHAT_ID_COLUMN_NAME . ' = :chatId')
             ->setParameter('chatId', $chatId);
 
-        $row  = $queryBuilder->executeQuery()->fetchAssociative();
+        try {
+            $row = $queryBuilder->executeQuery()->fetchAssociative();
+        } catch (Exception $e) {
+            throw new RepositoryException($e->getMessage());
+        }
+
 
         if ($row === false) {
             $result = null;
         } else {
-            $result = $this->hydrate($row);
+            $result = $this->mapOrmToDomain($row);
         }
 
         return $result;
     }
 
-
-    /**
-     * @throws Exception
-     */
-    public function save(Session $session): void
+    public function insert(Session $session): int
     {
-        $queryBuilder = $this->connection->createQueryBuilder();
+        if ($session->isExistInPersistence()) {
+            throw new EntityAlreadyExistInPersistenceException('isExistInPersistence = true');
+        }
 
-        $existingSession = $queryBuilder->select('*')
-            ->from(self::SESSION_TABLE_NAME)
-            ->where(self::CHAT_ID_COLUMN_NAME . ' = :chatId')
-            ->setParameter('chatId', $session->getChatId())
-            ->executeQuery()->fetchAssociative();
-
-        if ($existingSession === false) {
+        try {
             $this->connection->insert(
                 self::SESSION_TABLE_NAME,
                 [
@@ -72,7 +70,20 @@ final readonly class SessionRepository implements SessionRepositoryInterface
                     self::STATE_COLUMN_NAME => $session->getState()->value,
                 ]
             );
-        } else {
+
+            return (int)$this->connection->lastInsertId();
+        } catch (Exception $e) {
+            throw new RepositoryException($e->getMessage());
+        }
+    }
+
+    public function update(Session $session): void
+    {
+        if (!$session->isExistInPersistence()) {
+            throw new NotFoundEntityException('isExistInPersistence = false');
+        }
+
+        try {
             $this->connection->update(
                 self::SESSION_TABLE_NAME,
                 [
@@ -84,19 +95,22 @@ final readonly class SessionRepository implements SessionRepositoryInterface
                     self::CHAT_ID_COLUMN_NAME => $session->getChatId(),
                 ]
             );
+        } catch (Exception $e) {
+            throw new RepositoryException($e->getMessage());
         }
     }
 
     /**
      * @param array<string, mixed> $row
      */
-    private function hydrate(array $row): Session
+    private function mapOrmToDomain(array $row): Session
     {
-        return new Session(
+        return Session::restoreFromPersistence(
+            $this->toInt($row[self::ID_COLUMN_NAME]),
             $this->toInt($row[self::CHAT_ID_COLUMN_NAME]),
             $this->toBool($row[self::IS_NOTIFICATION_ENABLED_COLUMN_NAME]),
-            $this->toStringOrNull($row[self::PAYLOAD_COLUMN_NAME]),
             EnumState::tryFrom($this->toString($row[self::STATE_COLUMN_NAME])) ?? EnumState::MENU,
+            $this->toStringOrNull($row[self::PAYLOAD_COLUMN_NAME]),
         );
     }
 }

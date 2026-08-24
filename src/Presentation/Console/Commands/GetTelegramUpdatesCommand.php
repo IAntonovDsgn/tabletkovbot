@@ -34,7 +34,7 @@ class GetTelegramUpdatesCommand extends Command
             }
 
             foreach ($updates as $update) {
-                $output->writeln(sprintf('chat_id: %d, text: %s', $update->chatId, $update->text ?? ''));
+                $output->writeln(sprintf('chat_id: %d, text: %s', $update->chatId, $update->messageText ?? ''));
             }
 
             return self::SUCCESS;

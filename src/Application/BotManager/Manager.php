@@ -14,6 +14,9 @@ use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\External\InvalidValueException;
+use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
+use App\Domain\Exceptions\Interior\NotFoundEntityException;
+use App\Domain\Exceptions\Interior\RepositoryException;
 use App\Domain\Exceptions\Interior\TransitionStateNotAllowedException;
 use Throwable;
 
@@ -37,30 +40,34 @@ final readonly class Manager
     {
         try {
             $this->unitOfWork->begin();
-            $session = $this->sessionRepository->findByChatId($params->chatId) ?? new Session($params->chatId);
+
+            $session = $this->sessionRepository->findByChatId($params->chatId) ?? Session::create($params->chatId);
             $requestPayloadArr = $params->payload
                 ? explode(MessageButton::PAYLOAD_SEPARATOR, $params->payload)
                 : [];
             $nextState = $this->getNextState($requestPayloadArr, $session);
             $stateHandler = $this->factoryStateHandler->makeByState($nextState);
             $session->transitionToState($nextState);
-            $this->sessionRepository->save($session);
 
             $handlerResponseDTO = $stateHandler->handle(
                 $params->chatId,
-                $params->text,
+                $params->messageText,
                 $session->getPayload(),
                 $requestPayloadArr[1] ?? null,
             );
 
-            $session = $this->sessionRepository->findByChatId($params->chatId) ?? new Session($params->chatId);
             if ($handlerResponseDTO->newSessionPayload) {
                 $session->setPayload($handlerResponseDTO->newSessionPayload);
             }
-            $this->sessionRepository->save($session);
 
-            $this->outboxRepository->save(
-                new Message(
+            if ($session->isExistInPersistence()) {
+                $this->sessionRepository->update($session);
+            } else {
+                $this->sessionRepository->insert($session);
+            }
+
+            $this->outboxRepository->insert(
+                Message::create(
                     $params->chatId,
                     $handlerResponseDTO->messageText?->value,
                     $handlerResponseDTO->buttons
@@ -77,16 +84,21 @@ final readonly class Manager
         }
     }
 
+    /**
+     * @throws EntityAlreadyExistInPersistenceException
+     * @throws RepositoryException
+     * @throws NotFoundEntityException
+     */
     private function errorHandler(int $chatId, ?string $message = null): void
     {
         $session = $this->sessionRepository->findByChatId($chatId);
         if ($session !== null) {
             $session->resetState();
-            $this->sessionRepository->save($session);
+            $this->sessionRepository->update($session);
         }
 
-        $this->outboxRepository->save(
-            new Message(
+        $this->outboxRepository->insert(
+            Message::create(
                 $chatId,
                 $message ?? EnumMessageText::ERROR->value,
                 $this->keyboardFactory->makeMenuKeyboard()
@@ -105,10 +117,12 @@ final readonly class Manager
                 ?? throw new InvalidValueException(EnumMessageText::ERROR->value);
         }
 
-        $filteredStates = array_values(array_filter(
-            $session->getAllowedNextStates(),
-            fn(EnumState $state) => $state !== EnumState::NOTIFIED && $state !== EnumState::MENU
-        ));
+        $filteredStates = array_values(
+            array_filter(
+                $session->getAllowedNextStates(),
+                fn(EnumState $state) => $state !== EnumState::NOTIFIED && $state !== EnumState::MENU
+            )
+        );
 
         if (count($filteredStates) === 1) {
             $result = $filteredStates[0];

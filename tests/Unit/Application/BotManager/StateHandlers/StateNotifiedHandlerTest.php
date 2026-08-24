@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\StateHandlers\StateNotifiedHandler;
 use App\Application\BotManager\StateHandlerResponseDTO;
+use App\Application\BotManager\StateHandlers\StateNotifiedHandler;
 use App\Application\Services\Keyboard\KeyboardFactory;
 use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
@@ -38,7 +38,13 @@ class StateNotifiedHandlerTest extends TestCase
         $chatId = 12345;
         $medicamentId = 1;
 
-        $medicament = new Medicament('Aspirin', $chatId, id: $medicamentId);
+        $medicament = Medicament::restoreFromPersistence(
+            $medicamentId,
+            'Aspirin',
+            $chatId,
+            new \DateTimeImmutable(),
+            true
+        );
 
         $this->medicamentRepository->expects($this->once())
             ->method('findById')
@@ -47,9 +53,11 @@ class StateNotifiedHandlerTest extends TestCase
 
         $this->intakeMarkRepository->expects($this->once())
             ->method('save')
-            ->with($this->callback(function (IntakeMark $intakeMark) use ($chatId, $medicamentId) {
-                return $intakeMark->getChatId() === $chatId && $intakeMark->getMedicamentId() === $medicamentId;
-            }));
+            ->with(
+                $this->callback(function (IntakeMark $intakeMark) use ($chatId, $medicamentId) {
+                    return $intakeMark->getChatId() === $chatId && $intakeMark->getMedicamentId() === $medicamentId;
+                })
+            );
 
         $response = $this->handler->handle($chatId, (string)$medicamentId, null, null);
 
@@ -83,7 +91,13 @@ class StateNotifiedHandlerTest extends TestCase
         $anotherChatId = 54321;
         $medicamentId = 1;
 
-        $medicament = new Medicament('Aspirin', $anotherChatId, id: $medicamentId);
+        $medicament = Medicament::restoreFromPersistence(
+            $medicamentId,
+            'Aspirin',
+            $anotherChatId,
+            new \DateTimeImmutable(),
+            true
+        );
 
         $this->medicamentRepository->expects($this->once())
             ->method('findById')
@@ -97,8 +111,8 @@ class StateNotifiedHandlerTest extends TestCase
 
         $this->handler->handle($chatId, (string)$medicamentId, null, null);
     }
-    
-    // This handler is bugged. It doesn't check for null text. 
+
+    // This handler is bugged. It doesn't check for null text.
     // It will fail with "findById(null)"
     // I will add a test to document this.
     public function testHandleThrowsExceptionIfTextIsNull(): void

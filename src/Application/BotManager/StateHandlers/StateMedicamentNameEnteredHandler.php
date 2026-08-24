@@ -8,10 +8,12 @@ use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
-use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\External\InvalidValueException;
+use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
+use App\Domain\Exceptions\Interior\RepositoryException;
 
 final readonly class StateMedicamentNameEnteredHandler implements StateHandlerInterface
 {
@@ -22,26 +24,28 @@ final readonly class StateMedicamentNameEnteredHandler implements StateHandlerIn
 
     /**
      * @throws InvalidValueException
+     * @throws EntityAlreadyExistInPersistenceException
+     * @throws RepositoryException
      */
     public function handle(
         int $chatId,
-        ?string $text,
+        ?string $messageText,
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
-        if (is_null($text)) {
+        if (is_null($messageText)) {
             throw new InvalidValueException(EnumMessageText::MEDICAMENT_EMPTY_NAME_ERROR->value);
         }
 
-        $medicament = new Medicament($text, $chatId);
-        $medicamentId = $this->medicamentRepository->save($medicament);
+        $medicament = Medicament::create($messageText, $chatId);
+        $medicamentId = $this->medicamentRepository->insert($medicament);
 
         return new StateHandlerResponseDTO(
             EnumMessageText::ENTER_TIME,
             [
                 new MessageButton(MessageButton::MENU, EnumState::MENU)
             ],
-            (string) $medicamentId
+            (string)$medicamentId
         );
     }
 }

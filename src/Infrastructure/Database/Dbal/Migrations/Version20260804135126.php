@@ -19,6 +19,11 @@ final class Version20260804135126 extends AbstractMigration
     {
         $table = $schema->createTable(SessionRepository::SESSION_TABLE_NAME);
 
+        $table->addColumn(SessionRepository::ID_COLUMN_NAME, 'bigint', [
+            'unsigned' => true,
+            'autoincrement' => true,
+        ]);
+
         $table->addColumn(SessionRepository::CHAT_ID_COLUMN_NAME, 'bigint', [
             'notnull' => true,
             'unsigned' => true,

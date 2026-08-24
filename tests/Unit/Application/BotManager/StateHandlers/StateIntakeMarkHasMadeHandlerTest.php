@@ -38,7 +38,13 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
         $chatId = 12345;
         $medicamentId = 1;
 
-        $medicament = new Medicament('Aspirin', $chatId, id: $medicamentId);
+        $medicament = Medicament::restoreFromPersistence(
+            $medicamentId,
+            'Aspirin',
+            $chatId,
+            new \DateTimeImmutable(),
+            true
+        );
 
         $this->medicamentRepository->expects($this->once())
             ->method('findById')
@@ -83,13 +89,19 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
         $anotherChatId = 54321;
         $medicamentId = 1;
 
-        $medicament = new Medicament('Aspirin', $anotherChatId, id: $medicamentId);
+        $medicament = Medicament::restoreFromPersistence(
+            $anotherChatId,
+            'Aspirin',
+            $chatId,
+            new \DateTimeImmutable(),
+            true
+        );
 
         $this->medicamentRepository->expects($this->once())
             ->method('findById')
             ->with($medicamentId)
             ->willReturn($medicament);
-        
+
         $this->intakeMarkRepository->expects($this->never())->method('save');
 
         $this->expectException(NotFoundEntityException::class);

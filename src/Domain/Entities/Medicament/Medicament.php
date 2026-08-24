@@ -10,16 +10,52 @@ class Medicament
 {
     const string TIME_FORMAT = 'H:i';
     const string DATE_TIME_ZONE = 'Asia/Yekaterinburg';
-    private ?DateTimeImmutable $notificationTime = null;
 
-    public function __construct(
+    private function __construct(
+        private readonly ?int $id,
         private string $name,
+        private readonly bool $isExistInPersistence,
         private readonly int $chatId,
-        ?DateTimeImmutable $notificationTime = null,
-        private bool $isActive = true,
-        private readonly ?int $id = null,
+        private ?DateTimeImmutable $notificationTime,
+        private bool $isActive,
     ) {
-        $this->notificationTime = $notificationTime;
+    }
+
+    public static function create(
+        string $name,
+        int $chatId,
+        ?DateTimeImmutable $notificationTime = null,
+    ): Medicament {
+        return new self(
+            null,
+            $name,
+            false,
+            $chatId,
+            $notificationTime,
+            true
+        );
+    }
+
+    public static function restoreFromPersistence(
+        int $id,
+        string $name,
+        int $chatId,
+        ?DateTimeImmutable $notificationTime,
+        bool $isActive,
+    ):Medicament {
+        return new self(
+            $id,
+            $name,
+            true,
+            $chatId,
+            $notificationTime,
+            $isActive,
+        );
+    }
+
+    public function isExistInPersistence(): bool
+    {
+        return $this->isExistInPersistence;
     }
 
     public function getId(): ?int

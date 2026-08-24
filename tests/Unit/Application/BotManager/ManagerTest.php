@@ -19,6 +19,8 @@ use App\Domain\Exceptions\External\InvalidValueException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
+use function DI\create;
+
 class ManagerTest extends TestCase
 {
     private MockObject $factoryStateHandler;
@@ -50,7 +52,7 @@ class ManagerTest extends TestCase
     {
         $chatId = 123;
         $requestDTO = new RequestDTO($chatId, 'start', null);
-        $initialSession = new Session($chatId); // What a new session looks like
+        $initialSession = Session::create($chatId); // What a new session looks like
 
         $this->unitOfWork->expects($this->once())->method('begin');
         $this->unitOfWork->expects($this->once())->method('commit');
@@ -85,7 +87,7 @@ class ManagerTest extends TestCase
 
         // Outbox save
         $this->outboxRepository->expects($this->once())
-            ->method('save')
+            ->method('insert')
             ->with($this->callback(function (Message $message) use ($chatId) {
                 return $message->getChatId() === $chatId && $message->getText() === EnumMessageText::MENU->value;
             }));
@@ -99,7 +101,7 @@ class ManagerTest extends TestCase
         $payloadState = EnumState::ADD_MEDICAMENT_SELECTED;
         $requestDTO = new RequestDTO($chatId, 'some_text', $payloadState->value);
 
-        $existingSession = new Session($chatId); // Defaults to MENU
+        $existingSession = Session::create($chatId); // Defaults to MENU
         $existingSession->transitionToState(EnumState::MENU); // Ensure initial state is MENU
 
         $this->unitOfWork->expects($this->once())->method('begin');
@@ -137,7 +139,7 @@ class ManagerTest extends TestCase
 
         // Outbox save
         $this->outboxRepository->expects($this->once())
-            ->method('save')
+            ->method('insert')
             ->with($this->callback(function (Message $message) use ($chatId, $handlerResponseDTO) {
                 $messageText = $handlerResponseDTO->messageText;
                 $messageTextValue = $messageText?->value;
@@ -152,7 +154,7 @@ class ManagerTest extends TestCase
     {
         $chatId = 123;
         $requestDTO = new RequestDTO($chatId, 'invalid_input', null);
-        $existingSession = new Session($chatId);
+        $existingSession = Session::create($chatId);
 
         $this->unitOfWork->expects($this->once())->method('begin');
         $this->unitOfWork->expects($this->never())->method('commit');
@@ -179,7 +181,7 @@ class ManagerTest extends TestCase
         $this->keyboardFactory->expects($this->once())->method('makeMenuKeyboard')->willReturn([]);
 
         $this->outboxRepository->expects($this->once())
-            ->method('save')
+            ->method('insert')
             ->with($this->callback(function (Message $message) use ($chatId) {
                 return $message->getChatId() === $chatId && $message->getText() === 'Error message';
             }));
@@ -191,7 +193,7 @@ class ManagerTest extends TestCase
     {
         $chatId = 123;
         $requestDTO = new RequestDTO($chatId, 'error', null);
-        $existingSession = new Session($chatId);
+        $existingSession = Session::create($chatId);
         $expectedException = new class extends \Exception {};
 
         $this->unitOfWork->expects($this->once())->method('begin');
@@ -213,7 +215,7 @@ class ManagerTest extends TestCase
         // Ensure errorHandler is NOT called for general Throwables
         $this->sessionRepository->expects($this->once())->method('findByChatId'); // Initial find, not second find from errorHandler
         $this->sessionRepository->expects($this->once())->method('save'); // This will be called before the exception from handler
-        $this->outboxRepository->expects($this->never())->method('save');
+        $this->outboxRepository->expects($this->never())->method('insert');
         $this->keyboardFactory->expects($this->never())->method('makeMenuKeyboard');
 
 
@@ -226,7 +228,7 @@ class ManagerTest extends TestCase
     {
         $chatId = 123;
         $requestDTO = new RequestDTO($chatId, 'text', 'INVALID_STATE'); // This payload will trigger InvalidValueException
-        $existingSession = new Session($chatId);
+        $existingSession = Session::create($chatId);
 
         $this->unitOfWork->expects($this->once())->method('begin');
         $this->unitOfWork->expects($this->never())->method('commit');
@@ -255,7 +257,7 @@ class ManagerTest extends TestCase
         $this->keyboardFactory->expects($this->once())->method('makeMenuKeyboard')->willReturn([]);
 
         $this->outboxRepository->expects($this->once())
-            ->method('save')
+            ->method('insert')
             ->with($this->callback(function (Message $message) use ($chatId) {
                 return $message->getChatId() === $chatId && $message->getText() === EnumMessageText::ERROR->value;
             }));

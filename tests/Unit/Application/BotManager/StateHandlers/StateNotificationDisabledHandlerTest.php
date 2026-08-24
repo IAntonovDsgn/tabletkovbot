@@ -30,7 +30,7 @@ class StateNotificationDisabledHandlerTest extends TestCase
     public function testHandleWithExistingSession(): void
     {
         $chatId = 12345;
-        $session = new Session($chatId);
+        $session = Session::create($chatId);
         $session->enableNotifications(); // Start with them enabled
 
         $this->sessionRepository->expects($this->once())

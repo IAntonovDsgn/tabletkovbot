@@ -12,13 +12,49 @@ final class Session
 {
     private StateTransitionRules $stateMachineTransitionRules;
 
-    public function __construct(
+    private function __construct(
+        private readonly ?int $id,
         private readonly int $chatId,
-        private bool $isNotificationEnable = true,
-        private ?string $payload = null,
-        private EnumState $state = EnumState::MENU
+        private readonly bool $isExistInPersistence,
+        private bool $isNotificationEnable,
+        private ?string $payload,
+        private EnumState $state
     ) {
         $this->stateMachineTransitionRules = new StateTransitionRules();
+    }
+
+    public static function create(
+        int $chatId,
+        bool $isNotificationEnable = true,
+        ?string $payload = null,
+        EnumState $state = EnumState::MENU,
+    ): Session {
+        return new self(
+            null,
+            $chatId,
+            false,
+            $isNotificationEnable,
+            $payload,
+            $state
+        );
+    }
+
+    public static function restoreFromPersistence(
+        int $id,
+        int $chatId,
+        bool $isNotificationEnable,
+        EnumState $state,
+        ?string $payload = null,
+    ): Session
+    {
+        return new self(
+            $id,
+            $chatId,
+            true,
+            $isNotificationEnable,
+            $payload,
+            $state
+        );
     }
 
     public function getState(): EnumState
@@ -79,5 +115,15 @@ final class Session
     public function getAllowedNextStates(): array
     {
         return $this->stateMachineTransitionRules->getAllowedStates($this->state);
+    }
+
+    public function isExistInPersistence(): bool
+    {
+        return $this->isExistInPersistence;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
     }
 }

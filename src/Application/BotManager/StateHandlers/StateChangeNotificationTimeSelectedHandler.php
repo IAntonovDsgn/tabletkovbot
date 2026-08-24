@@ -14,7 +14,7 @@ class StateChangeNotificationTimeSelectedHandler implements StateHandlerInterfac
 {
     public function handle(
         int $chatId,
-        ?string $text,
+        ?string $messageText,
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {

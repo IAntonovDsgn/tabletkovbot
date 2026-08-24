@@ -33,7 +33,14 @@ class StateDeleteMedicamentConfirmedHandlerTest extends TestCase
         $chatId = 12345;
         $medicamentId = 1;
 
-        $medicament = new Medicament('Aspirin', $chatId, id: $medicamentId);
+        $medicament = Medicament::restoreFromPersistence(
+            $medicamentId,
+            'Aspirin',
+            $chatId,
+            new \DateTimeImmutable(),
+            true
+        );
+
         $this->assertTrue($medicament->isActive()); // Pre-condition
 
         $this->medicamentRepository->expects($this->once())
@@ -76,7 +83,13 @@ class StateDeleteMedicamentConfirmedHandlerTest extends TestCase
         $anotherChatId = 54321;
         $medicamentId = 1;
 
-        $medicament = new Medicament('Aspirin', $anotherChatId, id: $medicamentId);
+        $medicament = Medicament::restoreFromPersistence(
+            $medicamentId,
+            'Aspirin',
+            $anotherChatId,
+            new \DateTimeImmutable(),
+            true
+        );
 
         $this->medicamentRepository->expects($this->once())
             ->method('findById')

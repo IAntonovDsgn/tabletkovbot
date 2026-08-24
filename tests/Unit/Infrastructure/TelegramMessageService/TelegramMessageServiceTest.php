@@ -33,7 +33,7 @@ class TelegramMessageServiceTest extends TestCase
     {
         $chatId = 123;
         $text = EnumMessageText::MENU->value;
-        $message = new Message($chatId, $text, []);
+        $message = Message::create($chatId, $text, []);
 
         $this->telegramApi->expects($this->once())
             ->method('sendMessage')
@@ -52,7 +52,7 @@ class TelegramMessageServiceTest extends TestCase
         $text = EnumMessageText::CHOOSE_MEDICAMENT->value;
         $button1 = new MessageButton('Button 1', \App\Domain\Entities\Session\State\EnumState::ADD_MEDICAMENT_SELECTED);
         $button2 = new MessageButton('Button 2', \App\Domain\Entities\Session\State\EnumState::CHANGE_MEDICAMENT_SELECTED, 'payload');
-        $message = new Message($chatId, $text, [$button1, $button2]);
+        $message = Message::create($chatId, $text, [$button1, $button2]);
 
         $keyboard = Keyboard::make()->inline();
         $keyboard->row(['text' => $button1->getTitle(), 'callback_data' => $button1->getNewState()]);
@@ -71,7 +71,7 @@ class TelegramMessageServiceTest extends TestCase
 
     public function testSendMessageThrowsExceptionOnTelegramSDKException(): void
     {
-        $message = new Message(123, 'Test', []);
+        $message = Message::create(123, 'Test');
 
         $this->telegramApi->expects($this->once())
             ->method('sendMessage')

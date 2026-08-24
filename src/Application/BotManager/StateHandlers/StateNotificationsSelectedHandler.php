@@ -21,7 +21,7 @@ final readonly class StateNotificationsSelectedHandler implements StateHandlerIn
 
     public function handle(
         int $chatId,
-        ?string $text,
+        ?string $messageText,
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {

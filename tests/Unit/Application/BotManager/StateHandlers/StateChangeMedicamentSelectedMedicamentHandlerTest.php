@@ -29,8 +29,8 @@ class StateChangeMedicamentSelectedMedicamentHandlerTest extends TestCase
         $chatId = 12345;
         $medicamentIdToChange = 2;
         $medicaments = [
-            new Medicament('Aspirin', $chatId, id: 1),
-            new Medicament('Ibuprofen', $chatId, id: 2),
+            Medicament::restoreFromPersistence(1, 'Aspirin', $chatId, new \DateTimeImmutable(), true),
+            Medicament::restoreFromPersistence(2, 'Ibuprofen', $chatId, new \DateTimeImmutable(), true),
         ];
 
         $this->medicamentRepository->expects($this->once())
@@ -59,7 +59,7 @@ class StateChangeMedicamentSelectedMedicamentHandlerTest extends TestCase
         $chatId = 12345;
         $invalidMedicamentId = 999;
         $medicaments = [
-            new Medicament('Aspirin', $chatId, id: 1),
+            Medicament::restoreFromPersistence(1, 'Aspirin', $chatId, new \DateTimeImmutable(), true),
         ];
 
         $this->medicamentRepository->expects($this->once())

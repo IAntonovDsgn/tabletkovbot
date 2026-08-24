@@ -6,19 +6,19 @@ namespace App\Domain\Entities\IntakeMark;
 
 use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
 use App\Domain\Exceptions\Interior\NotFoundEntityException;
-use Doctrine\DBAL\Exception;
+use App\Domain\Exceptions\Interior\RepositoryException;
 
 interface IntakeMarkRepositoryInterface
 {
     /**
      * @throws EntityAlreadyExistInPersistenceException
-     * @throws Exception
+     * @throws RepositoryException
      */
-    public function insert(IntakeMark $intakeMark): void;
+    public function insert(IntakeMark $intakeMark): int;
 
     /**
      * @throws NotFoundEntityException
-     * @throws Exception
+     * @throws RepositoryException
      */
     public function update(IntakeMark $intakeMark): void;
 

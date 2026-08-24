@@ -42,7 +42,7 @@ class SendTelegramMessageCommand extends Command
         }
 
         try {
-            $this->messageService->sendMessage(new Message((int) $chatIdArg, $message, []));
+            $this->messageService->sendMessage(Message::create((int) $chatIdArg, $message));
             return self::SUCCESS;
         } catch (Throwable $e) {
             $output->writeln("<error>Failed to send message: " . $e->getMessage() . "</error>");

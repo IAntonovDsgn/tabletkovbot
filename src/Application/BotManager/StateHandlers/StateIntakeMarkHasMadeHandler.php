@@ -29,7 +29,7 @@ final readonly class StateIntakeMarkHasMadeHandler implements StateHandlerInterf
      */
     public function handle(
         int $chatId,
-        ?string $text,
+        ?string $messageText,
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {

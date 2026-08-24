@@ -8,6 +8,7 @@ use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
 use App\Domain\Exceptions\Interior\NotFoundEntityException;
+use App\Domain\Exceptions\Interior\RepositoryException;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -28,7 +29,7 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
     ) {
     }
 
-    public function insert(IntakeMark $intakeMark): void
+    public function insert(IntakeMark $intakeMark): int
     {
         if ($intakeMark->isExistInPersistence()) {
             throw new EntityAlreadyExistInPersistenceException('IntakeMark isExistInPersistence = true');
@@ -41,10 +42,12 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
             self::CREATED_AT_COLUMN_NAME => $intakeMark->getCreatedAt()->format(IntakeMark::DATE_TIME_FORMAT),
         ];
 
-        $this->connection->insert(
-            self::INTAKE_MARKS_TABLE_NAME,
-            $data
-        );
+        try {
+            $this->connection->insert(self::INTAKE_MARKS_TABLE_NAME, $data);
+            return (int)$this->connection->lastInsertId();
+        } catch (Exception $e) {
+            throw new RepositoryException($e->getMessage());
+        }
     }
 
     public function update(IntakeMark $intakeMark): void
@@ -60,11 +63,15 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
             self::CREATED_AT_COLUMN_NAME => $intakeMark->getCreatedAt()->format(IntakeMark::DATE_TIME_FORMAT),
         ];
 
-        $this->connection->update(
-            self::INTAKE_MARKS_TABLE_NAME,
-            $data,
-            [self::ID_COLUMN_NAME => $intakeMark->getId()]
-        );
+        try {
+            $this->connection->update(
+                self::INTAKE_MARKS_TABLE_NAME,
+                $data,
+                [self::ID_COLUMN_NAME => $intakeMark->getId()]
+            );
+        } catch (Exception $e) {
+            throw new RepositoryException($e->getMessage());
+        }
     }
 
     /**
