@@ -84,10 +84,6 @@ final readonly class Manager
         }
     }
 
-    /**
-     * Queues a user-facing apology for an unhandled failure. Best effort:
-     * a failed notification must never mask the original exception.
-     */
     private function notifyInternalError(int $chatId): void
     {
         try {
