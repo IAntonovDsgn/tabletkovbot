@@ -36,18 +36,29 @@ return [
     ==========================================*/
     LoggerInterface::class => function () {
         $config = require __DIR__ . '/../config/logging.php';
-        $path = $config['path'] ?? __DIR__ . '/../storage/logs/app.log';
-        $channel = $config['channel'] ?? 'app';
+        $path = (string)($config['path'] ?? __DIR__ . '/../storage/logs/app.log');
+        $channel = (string)($config['channel'] ?? 'app');
+        $formatterFactory = function () {
+            return new LineFormatter(
+                null,
+                null,
+                true,
+                true
+            );
+        };
+
         $monolog = new MonologLogger($channel);
+
         $handler = new StreamHandler($path, Level::Debug);
-        $formatter = new LineFormatter(
-            null,
-            null,
-            true,
-            true
-        );
-        $handler->setFormatter($formatter);
+        $handler->setFormatter($formatterFactory());
         $monolog->pushHandler($handler);
+
+        if ((bool)($config['stdout'] ?? false)) {
+            $stdoutHandler = new StreamHandler('php://stdout', Level::Debug);
+            $stdoutHandler->setFormatter($formatterFactory());
+            $monolog->pushHandler($stdoutHandler);
+        }
+
         return $monolog;
     },
 
