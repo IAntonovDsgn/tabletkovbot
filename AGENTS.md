@@ -2,49 +2,56 @@
 
 Telegram bot "TabletkovBot" (PHP 8.4, clean architecture). Runs entirely in Docker; the repo is mounted into the app container.
 
-## Run everything inside the Docker container
+## Commands (all inside Docker)
 
-All PHP tooling runs in the **`tabletkovbot-app`** container, with the project mounted at `/var/www/tabletkovbot`. Host-side `composer`/`php`/`vendor/bin/*` do not work standalone.
+All PHP tooling runs in the **`tabletkovbot-app`** container (project mounted at `/var/www/tabletkovbot`). Host-side `composer`/`php`/`vendor/bin/*` do not work standalone.
 
 ```sh
-# PHPStan (full project check) — recommended after any change
+# Tests (Pest)
+docker exec tabletkovbot-app sh -c 'cd /var/www/tabletkovbot && composer test'
+
+# PHPStan — full check (analyses src/ per phpstan.neon); run after any change
 ./run-phpstan-full-project-from-docker.sh
 
-# Tests
-docker exec tabletkovbot-app /var/www/tabletkovbot/vendor/bin/pest
+# PHPStan — single file (arg is translated from host path to container path)
+./run-phpstan-from-docker.sh src/Infrastructure/Http/Router.php
 
 # Console (app commands + Doctrine migrations)
-docker exec tabletkovbot-app php /var/www/tabletkovbot/src/Presentation/Console/Console.php <cmd>
+docker exec tabletkovbot-app sh -c 'cd /var/www/tabletkovbot && composer console -- app:tg-bot-get-updates'
 ```
 
-Note: The correct container name for running PHP commands is `tabletkovbot-app`. Verify the container is up with `docker ps`. Other services: `tabletkovbot-db` (MariaDB 10.11), `tabletkovbot-rabbitmq`, `tabletkovbot-nginx`.
+Container names are `${COMPOSE_PROJECT_NAME}-*` with `COMPOSE_PROJECT_NAME=tabletkovbot` from `docker/.env`: `tabletkovbot-app`, `-db` (MariaDB 10.11), `-rabbitmq`, `-nginx`. Verify with `docker ps`. First-time setup: `./first-run.sh` (creates `docker/.env` from `.env.example`, builds, `composer install`).
 
 ## Environment
 
-Env vars live in **`docker/.env`** (not project root). `bootstrap/bootstrap.php` loads `docker/.env` via `Symfony\Dotenv`; docker-compose also uses `env_file: docker/.env`. New settings must be added there. DB config: `config/database.php` (pdo_mysql, MariaDB). Telegram token: `config/telegram.php`.
+Env vars live in **`docker/.env`** (not project root). `bootstrap/bootstrap.php` loads it via `Symfony\Dotenv`; docker-compose also uses `env_file: docker/.env`. New settings must be added there. DB config: `config/database.php`; Telegram token: `config/telegram.php`.
 
 ## Architecture
 
 - `src/Domain` — entities + repository interfaces; no infra dependencies.
-- `src/Application` — use-case layer: `BotManager` state machine, `Services`, `Persistence` (outbox/UnitOfWork interfaces). The `Manager` class orchestrates transactions, session, and state transitions.
-- `src/Infrastructure` — DBAL repos, HTTP `Router`, `TelegramMessageService`, PHP-DI bootstrap, Doctrine migrations.
+- `src/Application` — use cases: `BotManager` state machine, `Services`, `Persistence` (outbox/UnitOfWork interfaces). `Manager::process()` orchestrates transaction + session + state transition.
+- `src/Infrastructure` — DBAL repos, HTTP `Router` (FastRoute), `TelegramMessageService`, Doctrine migrations.
 - `src/Presentation` — `Api/WebhookController` (web entry `public/index.php`) and `Console/Console.php`.
-- DI is PHP-DI with autowiring; repository/service **interfaces** are bound explicitly in `bootstrap/appServiceProvider.php`. After changing a constructor, verify resolution (e.g. `docker exec tabletkovbot-app php -r 'require ".../bootstrap/bootstrap.php"; $c->get(<class>::class); echo "OK";'`).
+- DI is PHP-DI with autowiring; repository/service **interfaces** are bound explicitly in `bootstrap/appServiceProvider.php`. After changing a constructor, verify resolution: `docker exec tabletkovbot-app php -r 'require "/var/www/tabletkovbot/bootstrap/bootstrap.php"; $c->get(<class>::class); echo "OK";'`
 
-Adding a new conversation state: create `State<X>Handler` implementing `StateHandlerInterface`, then register it in `src/Application/BotManager/StateHandlerFactory.php` (constructor + `match` arm). PHPStan level 9 + `match` means every `EnumState` case must be covered.
+Adding a conversation state: create `State<X>Handler` implementing `StateHandlerInterface`, then register it in `src/Application/BotManager/StateHandlerFactory.php` (**both** the constructor param and the `match` arm — `match` over `EnumState` is exhaustive, PHPStan fails on a missing case).
 
-## Hard-earned quirks (do not regress)
+## Persistence contract (do not regress)
 
-- **Strict Types**: All PHP files in `src/` now include `declare(strict_types=1);`. Ensure all function/method calls respect scalar type hints to avoid `TypeError`.
-- **PHPStan level 9 forbids casting `mixed`.** DBAL `fetchAssociative()`/`fetchAllAssociative()` return `array<string, mixed>`; narrow each value with `is_*` checks before casting. Use the `HydrateRowsTrait` trait in `src/Infrastructure/Database/Dbal/Repositories/Concerns/HydratesRows.php` (`toInt`, `toBool`, `toString`, `toStringOrNull`).
-- **Telegram SDK** (`irazasyed/telegram-bot-sdk`) uses magic `__get`/`__call` + `@property`. Use property access (`$update->callbackQuery`, `$message->chat->id`) — not methods like `getCallbackQuery()` — or PHPStan fails.
-- `MedicamentRepositoryInterface::save()` **now returns `int`** (DB lastInsertId); do not assign manual ids. The interface and concrete implementations (`MedicamentRepository`) are aligned.
-- Dates: user-facing `Report::DATE_FORMAT = 'd.m.Y'`; DB rows parsed with `createFromFormat()` and checked for `=== false` (never `new DateTimeImmutable($string)` directly).
-- Outbox buttons: `MessageButton implements JsonSerializable` (`new_state` enum value + `additional_payload`); `Message::$text` is nullable.
-- State handlers that load a medicament by id must also verify ownership: `$medicament->getChatId() !== $chatId` → throw `NotFoundEntityException`.
-- **PHPUnit Mocking Final Classes**: `final` classes (e.g., `StateHandlerFactory`) cannot be mocked by PHPUnit. If a dependency needs to be mocked, consider making the class non-`final` or using alternative mocking strategies.
-- **Pest Data Providers**: When using `@dataProvider` with Pest, if traditional PHPUnit style fails, consider using a `foreach` loop within the test method to iterate through data sets as a workaround.
+- Repositories expose `insert(X $e): int` (returns DB id — never assign ids manually) and `update(X $e): void`. There is **no** `save()`.
+- Entities track their own persistence state: `Entity::create()` = new, `Entity::restoreFromPersistence(id, ...)` = existing (watch argument order — id comes first, then owner fields).
+- `Manager::process()` calls `findByChatId()` once, then persists the session **once, after the handler runs**: `insert` for a fresh session, `update` if `isExistInPersistence()`. On `InvalidValueException` → rollback + `errorHandler` (re-finds session, `resetState()`, `update`). On other `Throwable` → rollback + rethrow, nothing persisted.
+- State handlers do their own lookups and must verify ownership: `$medicament->getChatId() !== $chatId` → throw `NotFoundEntityException`. Handlers like notifications expect the session to already exist and throw if `findByChatId()` returns null (the `Manager` creates missing sessions, handlers don't).
+
+## Hard-earned quirks
+
+- **PHPStan level 10 forbids using `mixed`**: no casting, no method calls, no destructuring on it. Narrow with `is_*`/`instanceof` checks at runtime. DBAL rows return `array<string, mixed>` — use `HydrateRowsTrait` (`src/Infrastructure/Database/Dbal/Repositories/HydrateRowsTrait.php`: `toInt`, `toBool`, `toString`, `toStringOrNull`). `require` results (e.g. bootstrap returning the container, `Container::get()`) are `mixed` too — see `Router.php`/`Console.php` for the established narrowing pattern.
+- All `src/` files use `declare(strict_types=1);` — respect scalar type hints or get `TypeError`.
+- **Telegram SDK** (`irazasyed/telegram-bot-sdk`) relies on magic `__get`/`__call` + `@property`. Use property access (`$update->callbackQuery`, `$message->chat->id`) — not `getCallbackQuery()`-style methods — or PHPStan fails.
+- Dates/times: parse with `DateTimeImmutable::createFromFormat('!' . FORMAT, $value)` and check `=== false`; never `new DateTimeImmutable($string)` on user input. Formats: `Report::DATE_FORMAT = 'd.m.Y'`, `Medicament::TIME_FORMAT = 'H:i'` in `Medicament::DATE_TIME_ZONE = 'Asia/Yekaterinburg'`.
+- Outbox buttons: `MessageButton implements JsonSerializable` (`new_state` enum value + `additional_payload`, separator `MessageButton::PAYLOAD_SEPARATOR = '|'`); `Message::$text` is nullable.
+- **Testing**: Pest on top of PHPUnit-style classes (`tests/Unit`, `tests/Feature`). `final` classes can't be PHPUnit-mocked (mock repository *interfaces* instead). If a classic `@dataProvider` misbehaves under Pest, iterate data sets with `foreach` inside the test.
 
 ## Reference
 
-`docs/code-review.md` is the code review report (P0 fixes, P1 roadmap — incl. RabbitMQ consumer for the outbox). `src/Domain/Entities/Session/State/StateTransitionRules.php` defines state transitions.
+`src/Domain/Entities/Session/State/StateTransitionRules.php` defines allowed state transitions (checked by `Session::transitionToState()`).

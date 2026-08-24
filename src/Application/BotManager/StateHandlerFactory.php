@@ -26,7 +26,7 @@ use App\Application\BotManager\StateHandlers\StateNotifiedHandler;
 use App\Application\BotManager\StateHandlers\StateSelectedMedicamentForDeleteHandler;
 use App\Domain\Entities\Session\State\EnumState;
 
-class StateHandlerFactory
+readonly class StateHandlerFactory
 {
     public function __construct(
         private StateMenuHandler $menuHandler,
