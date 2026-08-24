@@ -27,5 +27,5 @@ interface OutboxRepositoryInterface
      * @throws NotFoundEntityException
      * @throws RepositoryException
      */
-    public function markAsSent(Message $message): void;
+    public function delete(Message $message): void;
 }

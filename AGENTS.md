@@ -11,7 +11,7 @@ All PHP tooling runs in the **`tabletkovbot-app`** container (project mounted at
 docker exec tabletkovbot-app sh -c 'cd /var/www/tabletkovbot && composer test'
 
 # PHPStan — full check (analyses src/ per phpstan.neon); run after any change
-./run-phpstan-full-project-from-docker.sh
+./check-full-project-from-docker.sh
 
 # PHPStan — single file (arg is translated from host path to container path)
 ./run-phpstan-from-docker.sh src/Infrastructure/Http/Router.php
@@ -20,7 +20,7 @@ docker exec tabletkovbot-app sh -c 'cd /var/www/tabletkovbot && composer test'
 docker exec tabletkovbot-app sh -c 'cd /var/www/tabletkovbot && composer console -- app:tg-bot-get-updates'
 ```
 
-Container names are `${COMPOSE_PROJECT_NAME}-*` with `COMPOSE_PROJECT_NAME=tabletkovbot` from `docker/.env`: `tabletkovbot-app`, `-db` (MariaDB 10.11), `-rabbitmq`, `-nginx`. Verify with `docker ps`. First-time setup: `./first-run.sh` (creates `docker/.env` from `.env.example`, builds, `composer install`).
+Container names are `${COMPOSE_PROJECT_NAME}-*` with `COMPOSE_PROJECT_NAME=tabletkovbot` from `docker/.env`: `tabletkovbot-app`, `-db` (MariaDB 10.11), `-rabbitmq`, `-nginx`, `-outbox-relay`. Verify with `docker ps`. First-time setup: `./first-run.sh` (creates `docker/.env` from `.env.example`, builds, `composer install`).
 
 ## Environment
 
@@ -49,7 +49,8 @@ Adding a conversation state: create `State<X>Handler` implementing `StateHandler
 - All `src/` files use `declare(strict_types=1);` — respect scalar type hints or get `TypeError`.
 - **Telegram SDK** (`irazasyed/telegram-bot-sdk`) relies on magic `__get`/`__call` + `@property`. Use property access (`$update->callbackQuery`, `$message->chat->id`) — not `getCallbackQuery()`-style methods — or PHPStan fails.
 - Dates/times: parse with `DateTimeImmutable::createFromFormat('!' . FORMAT, $value)` and check `=== false`; never `new DateTimeImmutable($string)` on user input. Formats: `Report::DATE_FORMAT = 'd.m.Y'`, `Medicament::TIME_FORMAT = 'H:i'` in `Medicament::DATE_TIME_ZONE = 'Asia/Yekaterinburg'`.
-- Outbox buttons: `MessageButton implements JsonSerializable` (`new_state` enum value + `additional_payload`, separator `MessageButton::PAYLOAD_SEPARATOR = '|'`); `Message::$text` is nullable.
+- Outbox buttons: `MessageButton implements JsonSerializable` (`new_state` enum value + `additional_payload`, separator `MessageButton::PAYLOAD_SEPARATOR = '|'`); `Message::$text` is nullable (getter normalizes null to `''`).
+- **Outbox → RabbitMQ relay** (`app:outbox-publish` in the `-outbox-relay` container): `OutboxRelay` polls pending rows, publishes via `RabbitMqMessageBroker` (direct exchange `outbox`, durable queue `telegram.send-message`, routing key = queue name, publisher confirms), deletes the row **only after** broker confirm — at-least-once semantics; consumers must dedupe. Config: `config/rabbitmq.php`; tuning: `OUTBOX_BATCH_SIZE`, `OUTBOX_POLL_INTERVAL_MS`. pcntl signals handle graceful stop. **Docker Desktop on this machine does not deliver SIGTERM to containers** — `docker stop` always ends in SIGKILL after grace period; test signal handling with `docker exec <ctr> sh -c 'kill -TERM 1'`.
 - **Testing**: Pest on top of PHPUnit-style classes (`tests/Unit`, `tests/Feature`). `final` classes can't be PHPUnit-mocked (mock repository *interfaces* instead). If a classic `@dataProvider` misbehaves under Pest, iterate data sets with `foreach` inside the test.
 
 ## Reference

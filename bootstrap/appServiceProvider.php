@@ -2,7 +2,9 @@
 
 use App\Application\Persistence\OutboxRepositoryInterface;
 use App\Application\Persistence\UnitOfWorkInterface;
+use App\Application\Services\MessageBroker\MessageBrokerInterface;
 use App\Application\Services\MessageService\MessageServiceInterface;
+use App\Application\Services\OutboxRelay;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
@@ -11,6 +13,8 @@ use App\Infrastructure\Database\Dbal\Repositories\MedicamentRepository;
 use App\Infrastructure\Database\Dbal\Repositories\OutboxRepository;
 use App\Infrastructure\Database\Dbal\Repositories\SessionRepository;
 use App\Infrastructure\Database\Dbal\Repositories\UnitOfWork;
+use App\Infrastructure\RabbitMq\MessagePayloadSerializer;
+use App\Infrastructure\RabbitMq\RabbitMqMessageBroker;
 use App\Infrastructure\TelegramMessageService\TelegramMessageService;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
@@ -57,6 +61,34 @@ return [
     Api::class => function () {
         $config = require __DIR__ . '/../config/telegram.php';
         return new Api($config['token']);
+    },
+
+    /*==========================================
+        Message broker (RabbitMQ)
+    ==========================================*/
+    MessageBrokerInterface::class => function () {
+        $config = require __DIR__ . '/../config/rabbitmq.php';
+        return new RabbitMqMessageBroker(
+            new MessagePayloadSerializer(),
+            (string)($config['host'] ?? 'rabbitmq'),
+            (int)($config['port'] ?? 5672),
+            (string)($config['vhost'] ?? '/'),
+            (string)($config['user'] ?? 'guest'),
+            (string)($config['password'] ?? 'guest'),
+            (string)($config['exchange'] ?? 'outbox'),
+            (string)($config['queue'] ?? 'telegram.send-message'),
+            (float)($config['confirm_timeout_seconds'] ?? 5.0),
+        );
+    },
+
+    OutboxRelay::class => function (ContainerInterface $c) {
+        return new OutboxRelay(
+            $c->get(OutboxRepositoryInterface::class),
+            $c->get(MessageBrokerInterface::class),
+            $c->get(LoggerInterface::class),
+            max(1, (int)($_ENV['OUTBOX_BATCH_SIZE'] ?? 50)),
+            max(1, (int)($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
+        );
     },
 
     /*==========================================

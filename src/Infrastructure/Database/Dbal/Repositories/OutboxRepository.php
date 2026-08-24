@@ -25,7 +25,6 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
     const string BUTTONS_COLUMN_NAME = 'buttons';
     const string STATUS_COLUMN_NAME = 'status';
     const string PENDING_STATUS = 'pending';
-    const string SENT_STATUS = 'sent';
 
     public function __construct(
         private Connection $connection
@@ -65,6 +64,7 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
             ->from(self::MESSAGE_OUTBOX_TABLE_NAME)
             ->where(self::STATUS_COLUMN_NAME . ' = :status')
             ->setParameter('status', self::PENDING_STATUS)
+            ->orderBy(self::ID_COLUMN_NAME, 'ASC')
             ->setMaxResults($limit);
 
         try {
@@ -83,16 +83,15 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
         return $result;
     }
 
-    public function markAsSent(Message $message): void
+    public function delete(Message $message): void
     {
         if (!$message->isExistInPersistence()) {
             throw new NotFoundEntityException('isExistInPersistence = false');
         }
 
         try {
-            $this->connection->update(
+            $this->connection->delete(
                 self::MESSAGE_OUTBOX_TABLE_NAME,
-                [self::STATUS_COLUMN_NAME => self::SENT_STATUS],
                 [self::ID_COLUMN_NAME => $message->getId()]
             );
         } catch (Exception $e) {

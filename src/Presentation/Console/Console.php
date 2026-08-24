@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Presentation\Console;
 
 use App\Presentation\Console\Commands\GetTelegramUpdatesCommand;
+use App\Presentation\Console\Commands\OutboxPublishCommand;
 use App\Presentation\Console\Commands\SendTelegramMessageCommand;
 use DI\Container;
 use RuntimeException;
@@ -25,6 +26,7 @@ if (!$container instanceof Container) {
 $commandLoader = new ContainerCommandLoader($container, [
     'app:tg-bot-get-updates'    => GetTelegramUpdatesCommand::class,
     'app:send-telegram-message' => SendTelegramMessageCommand::class,
+    'app:outbox-publish'        => OutboxPublishCommand::class,
 ]);
 
 $application = new Application('app');
