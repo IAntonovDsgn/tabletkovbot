@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Services;
+namespace App\Application\Outbox;
 
-use App\Application\Persistence\OutboxRepositoryInterface;
-use App\Application\Services\MessageBroker\MessageBrokerInterface;
+use App\Application\MessageBroker\MessageBrokerInterface;
 use App\Domain\Exceptions\Interior\RepositoryException;
 use Psr\Log\LoggerInterface;
 

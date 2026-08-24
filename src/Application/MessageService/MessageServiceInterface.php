@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Services\MessageService;
+namespace App\Application\MessageService;
 
 use App\Application\BotManager\RequestDTO;
 use App\Domain\Entities\Message\Message;

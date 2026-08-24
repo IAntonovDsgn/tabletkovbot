@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Database\Dbal\Repositories;
 
-use App\Application\Persistence\OutboxRepositoryInterface;
+use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\State\EnumState;

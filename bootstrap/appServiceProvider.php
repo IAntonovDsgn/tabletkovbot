@@ -1,10 +1,10 @@
 <?php
 
-use App\Application\Persistence\OutboxRepositoryInterface;
-use App\Application\Persistence\UnitOfWorkInterface;
-use App\Application\Services\MessageBroker\MessageBrokerInterface;
-use App\Application\Services\MessageService\MessageServiceInterface;
-use App\Application\Services\OutboxRelay;
+use App\Application\MessageBroker\MessageBrokerInterface;
+use App\Application\MessageService\MessageServiceInterface;
+use App\Application\Outbox\OutboxRelay;
+use App\Application\Outbox\OutboxRepositoryInterface;
+use App\Application\UnitOfWork\UnitOfWorkInterface;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Session\SessionRepositoryInterface;

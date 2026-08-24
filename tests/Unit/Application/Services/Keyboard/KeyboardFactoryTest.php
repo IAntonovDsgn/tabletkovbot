@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Application\Services\Keyboard;
 
-use App\Application\Services\Keyboard\KeyboardFactory;
+use App\Application\Keyboard\KeyboardFactory;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\State\EnumState;
 use PHPUnit\Framework\TestCase;

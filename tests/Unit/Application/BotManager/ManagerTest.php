@@ -7,9 +7,9 @@ use App\Application\BotManager\RequestDTO;
 use App\Application\BotManager\StateHandlerFactory;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
-use App\Application\Persistence\OutboxRepositoryInterface;
-use App\Application\Persistence\UnitOfWorkInterface;
-use App\Application\Services\Keyboard\KeyboardFactory;
+use App\Application\Keyboard\KeyboardFactory;
+use App\Application\Outbox\OutboxRepositoryInterface;
+use App\Application\UnitOfWork\UnitOfWorkInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\Session;
@@ -18,8 +18,6 @@ use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\External\InvalidValueException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-
-use function DI\create;
 
 class ManagerTest extends TestCase
 {

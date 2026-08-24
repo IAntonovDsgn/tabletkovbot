@@ -23,7 +23,7 @@ use App\Application\BotManager\StateHandlers\StateNotificationEnabledHandler;
 use App\Application\BotManager\StateHandlers\StateNotificationsSelectedHandler;
 use App\Application\BotManager\StateHandlers\StateNotifiedHandler;
 use App\Application\BotManager\StateHandlers\StateSelectedMedicamentForDeleteHandler;
-use App\Application\Services\Keyboard\KeyboardFactory;
+use App\Application\Keyboard\KeyboardFactory;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Session\SessionRepositoryInterface;

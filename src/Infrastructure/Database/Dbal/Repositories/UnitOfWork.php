@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Database\Dbal\Repositories;
 
-use App\Application\Persistence\UnitOfWorkInterface;
+use App\Application\UnitOfWork\UnitOfWorkInterface;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 

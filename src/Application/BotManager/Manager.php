@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Application\BotManager;
 
-use App\Application\Persistence\OutboxRepositoryInterface;
-use App\Application\Persistence\UnitOfWorkInterface;
-use App\Application\Services\Keyboard\KeyboardFactory;
+use App\Application\Keyboard\KeyboardFactory;
+use App\Application\Outbox\OutboxRepositoryInterface;
+use App\Application\UnitOfWork\UnitOfWorkInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;

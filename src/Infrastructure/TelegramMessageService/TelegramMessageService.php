@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Infrastructure\TelegramMessageService;
 
 use App\Application\BotManager\RequestDTO;
-use App\Application\Services\MessageService\MessageServiceInterface;
-use App\Domain\Entities\Message\MessageButton;
+use App\Application\MessageService\MessageServiceInterface;
 use App\Domain\Entities\Message\Message;
+use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Exceptions\Interior\SendMessageException;
 use Exception;
 use Telegram\Bot\Api as TelegramBotApi;

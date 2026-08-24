@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Application\Services;
 
-use App\Application\Persistence\OutboxRepositoryInterface;
-use App\Application\Services\MessageBroker\MessageBrokerInterface;
-use App\Application\Services\OutboxRelay;
+use App\Application\MessageBroker\MessageBrokerInterface;
+use App\Application\Outbox\OutboxRelay;
+use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use PHPUnit\Framework\MockObject\MockObject;

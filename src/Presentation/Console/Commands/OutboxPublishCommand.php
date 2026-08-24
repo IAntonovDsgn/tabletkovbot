@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Presentation\Console\Commands;
 
-use App\Application\Services\OutboxRelay;
+use App\Application\Outbox\OutboxRelay;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+
 use function extension_loaded;
 use function pcntl_async_signals;
 use function pcntl_signal;
+
 use const SIGINT;
 use const SIGTERM;
 

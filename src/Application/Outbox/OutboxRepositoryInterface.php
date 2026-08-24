@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Persistence;
+namespace App\Application\Outbox;
 
 use App\Domain\Entities\Message\Message;
 use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;

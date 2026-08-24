@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\StateHandlers\StateNotificationEnabledHandler;
 use App\Application\BotManager\StateHandlerResponseDTO;
-use App\Application\Services\Keyboard\KeyboardFactory;
+use App\Application\BotManager\StateHandlers\StateNotificationEnabledHandler;
+use App\Application\Keyboard\KeyboardFactory;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
