@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Outbox;
 
-use App\Application\MessageBroker\MessageBrokerInterface;
+use App\Application\Message\MessageBrokerInterface;
 use App\Domain\Exceptions\Interior\RepositoryException;
 use Psr\Log\LoggerInterface;
 

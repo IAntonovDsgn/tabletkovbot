@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
+use App\Application\BotManager\KeyboardFactory;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Application\BotManager\StateHandlers\StateMenuHandler;
-use App\Application\Keyboard\KeyboardFactory;
 use App\Domain\Entities\Message\EnumMessageText;
 use PHPUnit\Framework\TestCase;
 

@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace App\Presentation\Console\Commands;
 
-use App\Application\MessageService\MessageServiceInterface;
-use App\Domain\Entities\Message\Message;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Throwable;
 
-class SendTelegramMessageCommand extends Command
+final class SendTelegramMessageCommand extends Command
 {
     public function __construct(
-        private readonly MessageServiceInterface $messageService,
+        private readonly \App\Application\Message\SendMessage\Handler $handler,
     ) {
         parent::__construct();
     }
@@ -29,8 +27,8 @@ class SendTelegramMessageCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $chatIdArg = $input->getArgument('chat_id');
-        if (!is_string($chatIdArg) || !is_numeric($chatIdArg)) {
+        $chatId = $input->getArgument('chat_id');
+        if (!is_string($chatId) || !is_numeric($chatId)) {
             $output->writeln('<error>chat_id must be numeric</error>');
             return self::FAILURE;
         }
@@ -42,7 +40,7 @@ class SendTelegramMessageCommand extends Command
         }
 
         try {
-            $this->messageService->sendMessage(Message::create((int) $chatIdArg, $message));
+            $this->handler->handle($chatId, $message);
             return self::SUCCESS;
         } catch (Throwable $e) {
             $output->writeln("<error>Failed to send message: " . $e->getMessage() . "</error>");

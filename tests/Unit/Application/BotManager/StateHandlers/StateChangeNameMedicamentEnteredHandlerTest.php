@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
+use App\Application\BotManager\KeyboardFactory;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Application\BotManager\StateHandlers\StateChangeNameMedicamentEnteredHandler;
-use App\Application\Keyboard\KeyboardFactory;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;

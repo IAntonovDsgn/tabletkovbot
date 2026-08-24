@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Application\BotManager;
 
+use App\Application\BotManager\KeyboardFactory;
 use App\Application\BotManager\Manager;
 use App\Application\BotManager\RequestDTO;
 use App\Application\BotManager\StateHandlerFactory;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
-use App\Application\Keyboard\KeyboardFactory;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
 use App\Domain\Entities\Message\EnumMessageText;

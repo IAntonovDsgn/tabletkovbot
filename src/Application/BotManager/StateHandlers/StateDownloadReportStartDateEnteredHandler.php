@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Application\BotManager\StateHandlers;
 
+use App\Application\BotManager\KeyboardFactory;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
-use App\Application\Keyboard\KeyboardFactory;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Report\Report;

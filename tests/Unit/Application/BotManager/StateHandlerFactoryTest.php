@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Application\BotManager;
 
+use App\Application\BotManager\KeyboardFactory;
 use App\Application\BotManager\StateHandlerFactory;
 use App\Application\BotManager\StateHandlers\StateAddMedicamentSelectedHandler;
 use App\Application\BotManager\StateHandlers\StateChangeMedicamentNameSelectedHandler;
@@ -23,7 +24,6 @@ use App\Application\BotManager\StateHandlers\StateNotificationEnabledHandler;
 use App\Application\BotManager\StateHandlers\StateNotificationsSelectedHandler;
 use App\Application\BotManager\StateHandlers\StateNotifiedHandler;
 use App\Application\BotManager\StateHandlers\StateSelectedMedicamentForDeleteHandler;
-use App\Application\Keyboard\KeyboardFactory;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Session\SessionRepositoryInterface;

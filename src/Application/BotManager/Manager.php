@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Application\BotManager;
 
-use App\Application\Keyboard\KeyboardFactory;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
 use App\Domain\Entities\Message\EnumMessageText;

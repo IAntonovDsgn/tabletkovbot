@@ -1,7 +1,7 @@
 <?php
 
-use App\Application\MessageBroker\MessageBrokerInterface;
-use App\Application\MessageService\MessageServiceInterface;
+use App\Application\Message\MessageBrokerInterface;
+use App\Application\Message\MessageServiceInterface;
 use App\Application\Outbox\OutboxRelay;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
