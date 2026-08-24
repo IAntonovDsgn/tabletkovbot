@@ -44,7 +44,8 @@ final class Version20260804135126 extends AbstractMigration
             'length' => 255,
         ]);
 
-        $table->setPrimaryKey([SessionRepository::CHAT_ID_COLUMN_NAME]);
+        $table->setPrimaryKey([SessionRepository::ID_COLUMN_NAME]);
+        $table->addUniqueIndex([SessionRepository::CHAT_ID_COLUMN_NAME]);
         $table->addOption('engine', 'InnoDB');
         $table->addOption('charset', 'utf8mb4');
         $table->addOption('collation', 'utf8mb4_unicode_ci');
