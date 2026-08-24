@@ -13,5 +13,5 @@ try {
     new Router($container)();
 } catch (Throwable $e) {
     Log::error($e);
-    http_response_code(500);
+    http_response_code(204);
 }
