@@ -39,7 +39,8 @@ class StateNotificationsSelectedHandlerTest extends TestCase
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::NOTIFICATIONS_ENABLE,
             [
-                new MessageButton(MessageButton::DISABLE_NOTIFICATIONS, EnumState::NOTIFICATION_DISABLED)
+                new MessageButton(MessageButton::DISABLE_NOTIFICATIONS, EnumState::NOTIFICATION_DISABLED),
+                new MessageButton(MessageButton::MENU, EnumState::MENU),
             ]
         );
 
@@ -62,7 +63,8 @@ class StateNotificationsSelectedHandlerTest extends TestCase
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::NOTIFICATIONS_DISABLE,
             [
-                new MessageButton(MessageButton::ENABLE_NOTIFICATIONS, EnumState::NOTIFICATION_ENABLED)
+                new MessageButton(MessageButton::ENABLE_NOTIFICATIONS, EnumState::NOTIFICATION_ENABLED),
+                new MessageButton(MessageButton::MENU, EnumState::MENU),
             ]
         );
 
@@ -78,13 +80,13 @@ class StateNotificationsSelectedHandlerTest extends TestCase
             ->with($chatId)
             ->willReturn(null);
 
-        // Should default to enabled
         $response = $this->handler->handle($chatId, null, null, null);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::NOTIFICATIONS_ENABLE,
             [
-                new MessageButton(MessageButton::DISABLE_NOTIFICATIONS, EnumState::NOTIFICATION_DISABLED)
+                new MessageButton(MessageButton::DISABLE_NOTIFICATIONS, EnumState::NOTIFICATION_DISABLED),
+                new MessageButton(MessageButton::MENU, EnumState::MENU),
             ]
         );
 
