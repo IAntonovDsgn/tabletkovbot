@@ -12,6 +12,7 @@ use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Exceptions\Interior\NotFoundEntityException;
+use Exception;
 
 final readonly class StateIntakeMarkHasMadeHandler implements StateHandlerInterface
 {
@@ -24,6 +25,7 @@ final readonly class StateIntakeMarkHasMadeHandler implements StateHandlerInterf
 
     /**
      * @throws NotFoundEntityException
+     * @throws Exception
      */
     public function handle(
         int $chatId,
@@ -37,7 +39,7 @@ final readonly class StateIntakeMarkHasMadeHandler implements StateHandlerInterf
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
 
-        $this->intakeMarkRepository->save(
+        $this->intakeMarkRepository->insert(
             IntakeMark::create($chatId, (int) $medicament->getId())
         );
 

@@ -6,6 +6,8 @@ namespace App\Infrastructure\Database\Dbal\Repositories;
 
 use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
+use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
+use App\Domain\Exceptions\Interior\NotFoundEntityException;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -26,11 +28,12 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
     ) {
     }
 
-    /**
-     * @throws Exception
-     */
-    public function save(IntakeMark $intakeMark): void
+    public function insert(IntakeMark $intakeMark): void
     {
+        if ($intakeMark->isExistInPersistence()) {
+            throw new EntityAlreadyExistInPersistenceException('IntakeMark isExistInPersistence = true');
+        }
+
         $data = [
             self::CHAT_ID_COLUMN_NAME => $intakeMark->getChatId(),
             self::MEDICAMENT_ID_COLUMN_NAME => $intakeMark->getMedicamentId(),
@@ -38,15 +41,30 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
             self::CREATED_AT_COLUMN_NAME => $intakeMark->getCreatedAt()->format(IntakeMark::DATE_TIME_FORMAT),
         ];
 
-        if ($intakeMark->getId() !== null) {
-            $this->connection->update(
-                self::INTAKE_MARKS_TABLE_NAME,
-                $data,
-                [self::ID_COLUMN_NAME => $intakeMark->getId()]
-            );
-        } else {
-            $this->connection->insert(self::INTAKE_MARKS_TABLE_NAME, $data);
+        $this->connection->insert(
+            self::INTAKE_MARKS_TABLE_NAME,
+            $data
+        );
+    }
+
+    public function update(IntakeMark $intakeMark): void
+    {
+        if (!$intakeMark->isExistInPersistence()) {
+            throw new NotFoundEntityException('IntakeMark isExistInPersistence = false');
         }
+
+        $data = [
+            self::CHAT_ID_COLUMN_NAME => $intakeMark->getChatId(),
+            self::MEDICAMENT_ID_COLUMN_NAME => $intakeMark->getMedicamentId(),
+            self::IS_ACTIVE_COLUMN_NAME => $intakeMark->isActive() ? 1 : 0,
+            self::CREATED_AT_COLUMN_NAME => $intakeMark->getCreatedAt()->format(IntakeMark::DATE_TIME_FORMAT),
+        ];
+
+        $this->connection->update(
+            self::INTAKE_MARKS_TABLE_NAME,
+            $data,
+            [self::ID_COLUMN_NAME => $intakeMark->getId()]
+        );
     }
 
     /**
@@ -58,7 +76,7 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
 
         $queryBuilder->select('*')
             ->from(self::INTAKE_MARKS_TABLE_NAME)
-            ->where(self::ID_COLUMN_NAME.' = :id')
+            ->where(self::ID_COLUMN_NAME . ' = :id')
             ->setParameter('id', $id);
 
         $row = $queryBuilder->executeQuery()->fetchAssociative();
@@ -66,7 +84,7 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
         if ($row === false) {
             $result = null;
         } else {
-            $result = $this->mapToDomain($row);
+            $result = $this->mapOrmToDomain($row);
         }
 
         return $result;
@@ -84,13 +102,13 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
 
         $queryBuilder->select('*')
             ->from(self::INTAKE_MARKS_TABLE_NAME)
-            ->where(self::CHAT_ID_COLUMN_NAME.' = :chat_id')
+            ->where(self::CHAT_ID_COLUMN_NAME . ' = :chat_id')
             ->setParameter('chat_id', $chatId);
 
         $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
 
         foreach ($rows as $row) {
-            $result[] = $this->mapToDomain($row);
+            $result[] = $this->mapOrmToDomain($row);
         }
 
         return $result;
@@ -99,7 +117,7 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
     /**
      * @param array<string, mixed> $row
      */
-    private function mapToDomain(array $row): IntakeMark
+    private function mapOrmToDomain(array $row): IntakeMark
     {
         return IntakeMark::restoreFromPersistence(
             $this->toInt($row[self::ID_COLUMN_NAME]),
