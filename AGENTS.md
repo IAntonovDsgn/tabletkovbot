@@ -40,7 +40,7 @@ Adding a conversation state: create `State<X>Handler` implementing `StateHandler
 
 - Repositories expose `insert(X $e): int` (returns DB id — never assign ids manually) and `update(X $e): void`. There is **no** `save()`.
 - Entities track their own persistence state: `Entity::create()` = new, `Entity::restoreFromPersistence(id, ...)` = existing (watch argument order — id comes first, then owner fields).
-- `Manager::process()` calls `findByChatId()` once, then persists the session **once, after the handler runs**: `insert` for a fresh session, `update` if `isExistInPersistence()`. On `InvalidValueException` → rollback + `errorHandler` (re-finds session, `resetState()`, `update`). On other `Throwable` → rollback + rethrow, nothing persisted.
+- `Manager::process()` calls `findByChatId()` once, then persists the session **once, after the handler runs**: `insert` for a fresh session, `update` if `isExistInPersistence()`. On `InvalidValueException` → rollback + `errorHandler` (re-finds session, `resetState()`, `update`). On other `Throwable` → rollback + best-effort `INTERNAL_ERROR` message to outbox (`notifyInternalError`, failures swallowed) + rethrow; nothing else persisted.
 - State handlers do their own lookups and must verify ownership: `$medicament->getChatId() !== $chatId` → throw `NotFoundEntityException`. Handlers like notifications expect the session to already exist and throw if `findByChatId()` returns null (the `Manager` creates missing sessions, handlers don't).
 
 ## Hard-earned quirks

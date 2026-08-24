@@ -80,7 +80,22 @@ final readonly class Manager
             $this->errorHandler($params->chatId, $e->getMessage());
         } catch (Throwable $e) {
             $this->unitOfWork->rollback();
+            $this->notifyInternalError($params->chatId);
             throw $e;
+        }
+    }
+
+    /**
+     * Queues a user-facing apology for an unhandled failure. Best effort:
+     * a failed notification must never mask the original exception.
+     */
+    private function notifyInternalError(int $chatId): void
+    {
+        try {
+            $this->outboxRepository->insert(
+                Message::create($chatId, EnumMessageText::INTERNAL_ERROR->value)
+            );
+        } catch (Throwable) {
         }
     }
 

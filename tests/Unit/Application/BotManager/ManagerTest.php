@@ -214,9 +214,45 @@ class ManagerTest extends TestCase
         // Ensure errorHandler is NOT called for general Throwables
         $this->sessionRepository->expects($this->never())->method('insert');
         $this->sessionRepository->expects($this->never())->method('update');
-        $this->outboxRepository->expects($this->never())->method('insert');
         $this->keyboardFactory->expects($this->never())->method('makeMenuKeyboard');
 
+        // The user is still notified about the internal error
+        $this->outboxRepository->expects($this->once())
+            ->method('insert')
+            ->with($this->callback(function (Message $message) use ($chatId) {
+                return $message->getChatId() === $chatId
+                    && $message->getText() === EnumMessageText::INTERNAL_ERROR->value;
+            }));
+
+        $this->expectException(get_class($expectedException));
+        $this->manager->process($requestDTO);
+    }
+
+    public function testProcessStillThrowsOriginalExceptionWhenNotificationFails(): void
+    {
+        $chatId = 123;
+        $requestDTO = new RequestDTO($chatId, 'error', null);
+        $existingSession = Session::create($chatId);
+        $expectedException = new class extends \Exception {};
+
+        $this->unitOfWork->expects($this->once())->method('rollback');
+
+        $this->sessionRepository->expects($this->once())
+            ->method('findByChatId')
+            ->with($chatId)
+            ->willReturn($existingSession);
+
+        $mockStateHandler = $this->createMock(StateHandlerInterface::class);
+        $this->factoryStateHandler->method('makeByState')->willReturn($mockStateHandler);
+
+        $mockStateHandler->expects($this->once())
+            ->method('handle')
+            ->willThrowException($expectedException);
+
+        // Outbox is down as well; the original exception must not be masked
+        $this->outboxRepository->expects($this->once())
+            ->method('insert')
+            ->willThrowException(new \RuntimeException('DB is down'));
 
         $this->expectException(get_class($expectedException));
         $this->manager->process($requestDTO);
