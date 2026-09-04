@@ -72,7 +72,7 @@ final readonly class SessionRepository implements SessionRepositoryInterface
                 [
                     self::CHAT_ID_COLUMN_NAME => $session->getChatId(),
                     self::PAYLOAD_COLUMN_NAME => $session->getPayload(),
-                    self::IS_NOTIFICATION_ENABLED_COLUMN_NAME => $session->isNotificationEnabled(),
+                    self::IS_NOTIFICATION_ENABLED_COLUMN_NAME => $session->isNotificationEnabled() ? 1 : 0,
                     self::STATE_COLUMN_NAME => $session->getState()->value,
                 ]
             );
@@ -98,7 +98,7 @@ final readonly class SessionRepository implements SessionRepositoryInterface
                 self::SESSION_TABLE_NAME,
                 [
                     self::PAYLOAD_COLUMN_NAME => $session->getPayload(),
-                    self::IS_NOTIFICATION_ENABLED_COLUMN_NAME => $session->isNotificationEnabled(),
+                    self::IS_NOTIFICATION_ENABLED_COLUMN_NAME => $session->isNotificationEnabled() ? 1 : 0,
                     self::STATE_COLUMN_NAME => $session->getState()->value,
                 ],
                 [

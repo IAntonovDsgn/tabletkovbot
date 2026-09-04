@@ -44,7 +44,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             self::CHAT_ID_COLUMN_NAME => $medicament->getChatId(),
             self::NOTIFICATION_TIME_COLUMN_NAME => $medicament->getNotificationTime()
                 ?->format(Medicament::TIME_FORMAT . ':s'),
-            self::IS_ACTIVE_COLUMN_NAME => $medicament->isActive(),
+            self::IS_ACTIVE_COLUMN_NAME => $medicament->isActive() ? 1 : 0,
         ];
 
         try {
@@ -70,7 +70,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             self::CHAT_ID_COLUMN_NAME => $medicament->getChatId(),
             self::NOTIFICATION_TIME_COLUMN_NAME => $medicament->getNotificationTime()
                 ?->format(Medicament::TIME_FORMAT . ':s'),
-            self::IS_ACTIVE_COLUMN_NAME => $medicament->isActive(),
+            self::IS_ACTIVE_COLUMN_NAME => $medicament->isActive() ? 1 : 0,
         ];
 
         try {

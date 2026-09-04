@@ -82,7 +82,7 @@ class StateTransitionRules
             EnumState::NOTIFIED,
         ],
         EnumState::DELETE_MEDICAMENT_SELECTED->value => [
-            EnumState::SELECTED_MEDICAMENT_FOR_CHANGE,
+            EnumState::SELECTED_MEDICAMENT_FOR_DELETE,
             EnumState::MENU,
             EnumState::NOTIFIED,
         ],

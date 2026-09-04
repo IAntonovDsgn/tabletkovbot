@@ -18,6 +18,7 @@ class MessageButton implements JsonSerializable
     public const string CHANGE_NAME = 'Изменить имя';
     public const string CHANGE_NOTIFICATION_TIME = 'Изменить время напоминаний';
     public const string MENU = 'Меню';
+    public const string CANCEL = 'Отмена';
     public const string CONFIRM = 'Подтвердить';
     public const string DISABLE_NOTIFICATIONS = 'Отключить напоминания';
     public const string ENABLE_NOTIFICATIONS = 'Включить напоминания';
