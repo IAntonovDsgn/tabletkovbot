@@ -27,7 +27,7 @@ enum EnumMessageText: string
     case NOTIFICATIONS_DISABLE = 'Напоминания о приеме медикаментов отключены. Хотите включить?';
     case SETTINGS_SAVED = 'Настройки сохранены! Чем еще я могу помочь?';
     case INTAKE_MARK_SAVED = 'Отметка о приеме сохранена! Чем еще я могу помочь?';
-    case NOT_FOUND_ACTIVE_MEDICAMENTS = 'Упс, кажется у Вас нет активных медикаментов';
+    case NOT_FOUND_ACTIVE_MEDICAMENTS = 'Упс, кажется у Вас нет активных медикаментов. Чем еще я могу помочь?';
     case INTERNAL_ERROR = 'Oops! Something broke. Please contact the administrator';
 
     public function isError(): bool
