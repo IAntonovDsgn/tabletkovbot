@@ -8,9 +8,13 @@ class StateTransitionRules
 {
     public function isTransitionToStateAllowed(EnumState $newState, EnumState $oldState): bool
     {
+        if (! isset(self::STRICKLY_ALLOWED_TRANSITIONS_TO_FROM[$newState->value])) {
+            return true;
+        }
+
         return in_array(
-            $newState,
-            self::ALLOWED_TRANSITIONS_FROM_TO[$oldState->value],
+            $oldState,
+            self::STRICKLY_ALLOWED_TRANSITIONS_TO_FROM[$newState->value],
             true
         );
     }
@@ -18,100 +22,52 @@ class StateTransitionRules
     /**
      * @return EnumState[]
      */
-    public function getAllowedStates(EnumState $state): array
+    public function getAllowedStates(EnumState $oldState): array
     {
-        return self::ALLOWED_TRANSITIONS_FROM_TO[$state->value];
+        $result = [];
+
+        /** @var string $newStateValue */
+        foreach (self::STRICKLY_ALLOWED_TRANSITIONS_TO_FROM as $newStateValue => $oldStates) {
+            if (in_array($oldState, $oldStates, true)) {
+                $result[] = EnumState::from($newStateValue);
+            }
+        }
+
+        return $result;
     }
 
-    private const array MENU_ALLOWED_STATES = [
-        EnumState::ADD_MEDICAMENT_SELECTED,
-        EnumState::CHANGE_MEDICAMENT_SELECTED,
-        EnumState::DELETE_MEDICAMENT_SELECTED,
-        EnumState::DOWNLOAD_REPORT_SELECTED,
-        EnumState::NOTIFICATIONS_SELECTED,
-        EnumState::MAKE_INTAKE_MARK_SELECTED,
-        EnumState::NOTIFIED,
-        EnumState::MENU,
-        EnumState::NOTIFIED,
-    ];
-
-    private const array ALLOWED_TRANSITIONS_FROM_TO = [
-        EnumState::MENU->value
-            => self::MENU_ALLOWED_STATES,
-        EnumState::MEDICAMENT_NOTIFICATION_TIME_ENTERED->value
-            => self::MENU_ALLOWED_STATES,
-        EnumState::CHANGE_MEDICAMENT_NAME_ENTERED->value
-            => self::MENU_ALLOWED_STATES,
-        EnumState::DOWNLOAD_REPORT_START_DATE_ENTERED->value
-            => self::MENU_ALLOWED_STATES,
-        EnumState::NOTIFICATION_ENABLED->value
-            => self::MENU_ALLOWED_STATES,
-        EnumState::NOTIFICATION_DISABLED->value
-            => self::MENU_ALLOWED_STATES,
-        EnumState::INTAKE_MARK_HAS_MADE->value
-            => self::MENU_ALLOWED_STATES,
-        EnumState::DELETE_MEDICAMENT_CONFIRMED->value
-            => self::MENU_ALLOWED_STATES,
-        EnumState::ADD_MEDICAMENT_SELECTED->value => [
-            EnumState::MENU,
-            EnumState::MEDICAMENT_NAME_ENTERED,
-            EnumState::NOTIFIED,
-        ],
+    private const array STRICKLY_ALLOWED_TRANSITIONS_TO_FROM = [
         EnumState::MEDICAMENT_NAME_ENTERED->value => [
-            EnumState::MEDICAMENT_NOTIFICATION_TIME_ENTERED,
-            EnumState::MENU,
-            EnumState::NOTIFIED,
+            EnumState::ADD_MEDICAMENT_SELECTED,
         ],
-        EnumState::CHANGE_MEDICAMENT_SELECTED->value => [
-            EnumState::SELECTED_MEDICAMENT_FOR_CHANGE,
-            EnumState::MENU,
-            EnumState::NOTIFIED,
+        EnumState::MEDICAMENT_NOTIFICATION_TIME_ENTERED->value => [
+            EnumState::MEDICAMENT_NAME_ENTERED,
+            EnumState::CHANGE_NOTIFICATION_TIME_SELECTED,
         ],
         EnumState::SELECTED_MEDICAMENT_FOR_CHANGE->value => [
-            EnumState::CHANGE_MEDICAMENT_NAME_SELECTED,
-            EnumState::CHANGE_NOTIFICATION_TIME_SELECTED,
-            EnumState::MENU,
-            EnumState::NOTIFIED,
+            EnumState::CHANGE_MEDICAMENT_SELECTED,
         ],
         EnumState::CHANGE_MEDICAMENT_NAME_SELECTED->value => [
-            EnumState::CHANGE_MEDICAMENT_NAME_ENTERED,
-            EnumState::MENU,
-            EnumState::NOTIFIED,
+            EnumState::SELECTED_MEDICAMENT_FOR_CHANGE,
         ],
         EnumState::CHANGE_NOTIFICATION_TIME_SELECTED->value => [
-            EnumState::MEDICAMENT_NOTIFICATION_TIME_ENTERED,
-            EnumState::MENU,
-            EnumState::NOTIFIED,
+            EnumState::SELECTED_MEDICAMENT_FOR_CHANGE,
         ],
-        EnumState::DELETE_MEDICAMENT_SELECTED->value => [
-            EnumState::SELECTED_MEDICAMENT_FOR_DELETE,
-            EnumState::MENU,
-            EnumState::NOTIFIED,
+        EnumState::CHANGE_MEDICAMENT_NAME_ENTERED->value => [
+            EnumState::CHANGE_MEDICAMENT_NAME_SELECTED,
         ],
         EnumState::SELECTED_MEDICAMENT_FOR_DELETE->value => [
-            EnumState::DELETE_MEDICAMENT_CONFIRMED,
-            EnumState::MENU,
-            EnumState::NOTIFIED,
+            EnumState::DELETE_MEDICAMENT_SELECTED,
         ],
-        EnumState::DOWNLOAD_REPORT_SELECTED->value => [
-            EnumState::DOWNLOAD_REPORT_START_DATE_ENTERED,
-            EnumState::MENU,
-            EnumState::NOTIFIED,
+        EnumState::DELETE_MEDICAMENT_CONFIRMED->value => [
+            EnumState::SELECTED_MEDICAMENT_FOR_DELETE,
         ],
-        EnumState::NOTIFICATIONS_SELECTED->value => [
-            EnumState::NOTIFICATION_ENABLED,
-            EnumState::NOTIFICATION_DISABLED,
-            EnumState::MENU,
-            EnumState::NOTIFIED,
+        EnumState::DOWNLOAD_REPORT_START_DATE_ENTERED->value => [
+            EnumState::DOWNLOAD_REPORT_SELECTED,
         ],
-        EnumState::MAKE_INTAKE_MARK_SELECTED->value => [
-            EnumState::INTAKE_MARK_HAS_MADE,
-            EnumState::MENU,
+        EnumState::INTAKE_MARK_HAS_MADE->value => [
+            EnumState::MAKE_INTAKE_MARK_SELECTED,
             EnumState::NOTIFIED,
-        ],
-        EnumState::NOTIFIED->value => [
-            EnumState::INTAKE_MARK_HAS_MADE,
-            EnumState::MENU,
         ],
     ];
 }

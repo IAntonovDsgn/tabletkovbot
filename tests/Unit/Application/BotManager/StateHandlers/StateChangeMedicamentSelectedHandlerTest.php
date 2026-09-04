@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
+use App\Application\BotManager\KeyboardFactory;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Application\BotManager\StateHandlers\StateChangeMedicamentSelectedHandler;
 use App\Domain\Entities\Medicament\Medicament;
@@ -21,7 +22,7 @@ class StateChangeMedicamentSelectedHandlerTest extends TestCase
     {
         parent::setUp();
         $this->medicamentRepository = $this->createMock(MedicamentRepositoryInterface::class);
-        $this->handler = new StateChangeMedicamentSelectedHandler($this->medicamentRepository);
+        $this->handler = new StateChangeMedicamentSelectedHandler($this->medicamentRepository, new KeyboardFactory());
     }
 
     public function testHandleSuccessWithMedicaments(): void

@@ -47,7 +47,7 @@ class StateHandlerFactoryTest extends TestCase
             $medicamentRepository,
             $keyboardFactory
         );
-        $changeMedicamentSelectedHandler = new StateChangeMedicamentSelectedHandler($medicamentRepository);
+        $changeMedicamentSelectedHandler = new StateChangeMedicamentSelectedHandler($medicamentRepository, $keyboardFactory);
         $medicamentNameEnteredHandler = new StateMedicamentNameEnteredHandler($medicamentRepository);
         $addMedicamentSelectedHandler = new StateAddMedicamentSelectedHandler();
         $medicamentNotificationTimeEnteredHandler = new StateMedicamentNotificationTimeEnteredHandler(
