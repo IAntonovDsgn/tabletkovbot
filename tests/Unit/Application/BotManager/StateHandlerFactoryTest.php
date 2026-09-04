@@ -73,7 +73,7 @@ class StateHandlerFactoryTest extends TestCase
         $notificationsSelectedHandler = new StateNotificationsSelectedHandler($sessionRepository);
         $notificationEnabledHandler = new StateNotificationEnabledHandler($sessionRepository, $keyboardFactory);
         $notificationDisabledHandler = new StateNotificationDisabledHandler($sessionRepository, $keyboardFactory);
-        $makeIntakeMarkSelectedHandler = new StateMakeIntakeMarkSelectedHandler($medicamentRepository);
+        $makeIntakeMarkSelectedHandler = new StateMakeIntakeMarkSelectedHandler($medicamentRepository, $keyboardFactory);
         $intakeMarkHasMadeHandler = new StateIntakeMarkHasMadeHandler(
             $medicamentRepository,
             $intakeMarkRepository,

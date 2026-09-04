@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\BotManager\StateHandlers;
 
+use App\Application\BotManager\KeyboardFactory;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
@@ -16,6 +17,7 @@ final readonly class StateMakeIntakeMarkSelectedHandler implements StateHandlerI
 {
     public function __construct(
         private MedicamentRepositoryInterface $medicamentRepository,
+        private KeyboardFactory $keyboardFactory,
     ) {}
 
     /**
@@ -35,15 +37,25 @@ final readonly class StateMakeIntakeMarkSelectedHandler implements StateHandlerI
         }
 
         foreach ($medicaments as $medicament) {
-            $buttons[] = new MessageButton(
-                $medicament->getName(),
-                EnumState::INTAKE_MARK_HAS_MADE,
-                (string) $medicament->getId(),
-            );
+            if ($medicament->isActive()) {
+                $buttons[] = new MessageButton(
+                    $medicament->getName(),
+                    EnumState::INTAKE_MARK_HAS_MADE,
+                    (string) $medicament->getId(),
+                );
+            }
         }
 
-        $buttons[] = new MessageButton(MessageButton::MENU, EnumState::MENU);
+        if (empty($buttons)) {
+            $result = new StateHandlerResponseDTO(
+                EnumMessageText::NOT_FOUND_ACTIVE_MEDICAMENTS,
+                $this->keyboardFactory->makeMenuKeyboard()
+            );
+        } else {
+            $buttons[] = new MessageButton(MessageButton::MENU, EnumState::MENU);
+            $result = new StateHandlerResponseDTO(EnumMessageText::CHOOSE_MEDICAMENT, $buttons);
+        }
 
-        return new StateHandlerResponseDTO(EnumMessageText::CHOOSE_MEDICAMENT, $buttons);
+        return $result;
     }
 }

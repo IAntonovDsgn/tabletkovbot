@@ -10,7 +10,7 @@ class StateTransitionRules
     {
         return in_array(
             $newState,
-            self::ALLOWED_TRANSITIONS_FROM_TO[$oldState->value] ?? [],
+            self::ALLOWED_TRANSITIONS_FROM_TO[$oldState->value],
             true
         );
     }
@@ -20,7 +20,7 @@ class StateTransitionRules
      */
     public function getAllowedStates(EnumState $state): array
     {
-        return self::ALLOWED_TRANSITIONS_FROM_TO[$state->value] ?? [];
+        return self::ALLOWED_TRANSITIONS_FROM_TO[$state->value];
     }
 
     private const array MENU_ALLOWED_STATES = [
@@ -49,6 +49,8 @@ class StateTransitionRules
         EnumState::NOTIFICATION_DISABLED->value
             => self::MENU_ALLOWED_STATES,
         EnumState::INTAKE_MARK_HAS_MADE->value
+            => self::MENU_ALLOWED_STATES,
+        EnumState::DELETE_MEDICAMENT_CONFIRMED->value
             => self::MENU_ALLOWED_STATES,
         EnumState::ADD_MEDICAMENT_SELECTED->value => [
             EnumState::MENU,
