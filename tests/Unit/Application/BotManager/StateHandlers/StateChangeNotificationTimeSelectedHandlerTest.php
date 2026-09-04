@@ -6,6 +6,7 @@ use App\Application\BotManager\StateHandlers\StateChangeNotificationTimeSelected
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
+use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\State\EnumState;
 use PHPUnit\Framework\TestCase;
 
@@ -15,7 +16,8 @@ class StateChangeNotificationTimeSelectedHandlerTest extends TestCase
     {
         $handler = new StateChangeNotificationTimeSelectedHandler();
 
-        $response = $handler->handle(12345, null, '1', null);
+        $session = Session::create(12345, payload: '1');
+        $response = $handler->handle($session, null, null);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::ENTER_TIME,

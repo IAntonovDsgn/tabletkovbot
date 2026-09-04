@@ -7,69 +7,35 @@ use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Application\BotManager\StateHandlers\StateNotificationDisabledHandler;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\Session;
-use App\Domain\Entities\Session\SessionRepositoryInterface;
-use App\Domain\Exceptions\NotFoundEntityException;
 use PHPUnit\Framework\TestCase;
 
 class StateNotificationDisabledHandlerTest extends TestCase
 {
-    private SessionRepositoryInterface $sessionRepository;
     private KeyboardFactory $keyboardFactory;
     private StateNotificationDisabledHandler $handler;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->sessionRepository = $this->createMock(SessionRepositoryInterface::class);
         $this->keyboardFactory = new KeyboardFactory();
         $this->handler = new StateNotificationDisabledHandler(
-            $this->sessionRepository,
             $this->keyboardFactory
         );
     }
 
-    public function testHandleWithExistingSession(): void
+    public function testHandleReturnsNotificationDisabled(): void
     {
-        $chatId = 12345;
-        $session = Session::create($chatId);
-        $session->enableNotifications();
+        $session = Session::create(12345);
+        $this->assertTrue($session->isNotificationEnabled());
 
-        $this->sessionRepository->expects($this->once())
-            ->method('findByChatId')
-            ->with($chatId)
-            ->willReturn($session);
-
-        $this->sessionRepository->expects($this->once())
-            ->method('update')
-            ->with($this->callback(function (Session $savedSession) {
-                return !$savedSession->isNotificationEnabled();
-            }));
-
-        $response = $this->handler->handle($chatId, null, null, null);
+        $response = $this->handler->handle($session, null, null);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::SETTINGS_SAVED,
-            $this->keyboardFactory->makeMenuKeyboard()
+            $this->keyboardFactory->makeMenuKeyboard(),
         );
 
         $this->assertEquals($expectedResponse, $response);
-    }
-
-    public function testHandleThrowsExceptionIfSessionNotFound(): void
-    {
-        $chatId = 12345;
-
-        $this->sessionRepository->expects($this->once())
-            ->method('findByChatId')
-            ->with($chatId)
-            ->willReturn(null);
-
-        $this->sessionRepository->expects($this->never())->method('insert');
-        $this->sessionRepository->expects($this->never())->method('update');
-
-        $this->expectException(NotFoundEntityException::class);
-        $this->expectExceptionMessage("Session not found with chatId = $chatId");
-
-        $this->handler->handle($chatId, null, null, null);
+        $this->assertFalse($session->isNotificationEnabled());
     }
 }

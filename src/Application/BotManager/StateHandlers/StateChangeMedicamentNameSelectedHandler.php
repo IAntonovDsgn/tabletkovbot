@@ -7,13 +7,13 @@ namespace App\Application\BotManager\StateHandlers;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Entities\Session\Session;
 
 class StateChangeMedicamentNameSelectedHandler implements StateHandlerInterface
 {
     public function handle(
-        int $chatId,
+        Session $session,
         ?string $messageText,
-        ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
         return new StateHandlerResponseDTO(

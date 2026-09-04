@@ -6,6 +6,7 @@ use App\Application\BotManager\StateHandlers\StateSelectedMedicamentForDeleteHan
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
+use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\State\EnumState;
 use PHPUnit\Framework\TestCase;
 
@@ -16,7 +17,7 @@ class StateSelectedMedicamentForDeleteHandlerTest extends TestCase
         $handler = new StateSelectedMedicamentForDeleteHandler();
         $medicamentId = '42';
 
-        $response = $handler->handle(12345, null, null, $medicamentId);
+        $response = $handler->handle(Session::create(12345), null, $medicamentId);
 
         $expectedButtons = [
             new MessageButton(MessageButton::CONFIRM, EnumState::DELETE_MEDICAMENT_CONFIRMED),

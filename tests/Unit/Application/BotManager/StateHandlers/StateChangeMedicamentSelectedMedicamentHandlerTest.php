@@ -8,6 +8,7 @@ use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
+use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\NotFoundEntityException;
 use DateTimeImmutable;
@@ -42,7 +43,8 @@ class StateChangeMedicamentSelectedMedicamentHandlerTest extends TestCase
             ->with($chatId)
             ->willReturn($medicaments);
 
-        $response = $this->handler->handle($chatId, null, null, (string) $medicamentIdToChange);
+        $session = Session::create($chatId);
+        $response = $this->handler->handle($session, null, (string) $medicamentIdToChange);
 
         $expectedButtons = [
             new MessageButton(MessageButton::CHANGE_NAME, EnumState::CHANGE_MEDICAMENT_NAME_SELECTED),
@@ -74,6 +76,7 @@ class StateChangeMedicamentSelectedMedicamentHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle($chatId, null, null, (string) $invalidMedicamentId);
+        $session = Session::create($chatId);
+        $this->handler->handle($session, null, (string) $invalidMedicamentId);
     }
 }

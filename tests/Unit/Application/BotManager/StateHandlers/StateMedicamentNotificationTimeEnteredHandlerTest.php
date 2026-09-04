@@ -9,6 +9,7 @@ use App\Application\BotManager\StateHandlers\StateMedicamentNotificationTimeEnte
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Entities\Session\Session;
 use App\Domain\Exceptions\NotFoundEntityException;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
@@ -59,7 +60,7 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
                 return $savedMedicament->getNotificationTime()?->format('H:i') === $time;
             }));
 
-        $response = $this->handler->handle($chatId, $time, (string) $medicamentId, null);
+        $response = $this->handler->handle(Session::create($chatId, payload: (string) $medicamentId), $time, null);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::MEDICAMENT_ADDED_SUCCESS,
@@ -77,7 +78,7 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
         $this->expectException(InvalidValueException::class);
         $this->expectExceptionMessage(EnumMessageText::FORMAT_TIME_ERROR->value);
 
-        $this->handler->handle(12345, 'invalid-time', '1', null);
+        $this->handler->handle(Session::create(12345, payload: '1'), 'invalid-time', null);
     }
 
     /**
@@ -88,7 +89,7 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
         $this->expectException(InvalidValueException::class);
         $this->expectExceptionMessage(EnumMessageText::FORMAT_TIME_ERROR->value);
 
-        $this->handler->handle(12345, null, '1', null);
+        $this->handler->handle(Session::create(12345, payload: '1'), null, null);
     }
 
     /**
@@ -105,7 +106,7 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle(12345, '09:30', (string) $medicamentId, null);
+        $this->handler->handle(Session::create(12345, payload: (string) $medicamentId), '09:30', null);
     }
 
     /**
@@ -133,6 +134,6 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle($chatId, '09:30', (string) $medicamentId, null);
+        $this->handler->handle(Session::create($chatId, payload: (string) $medicamentId), '09:30', null);
     }
 }

@@ -10,6 +10,7 @@ use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Report\Report;
+use App\Domain\Entities\Session\Session;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 
@@ -45,7 +46,8 @@ class StateDownloadReportStartDateEnteredHandlerTest extends TestCase
             ->with($chatId)
             ->willReturn($intakeMarks);
 
-        $response = $this->handler->handle($chatId, $date, null, null);
+        $session = Session::create($chatId);
+        $response = $this->handler->handle($session, $date, null);
 
         $expectedReport = new Report($startDate, $intakeMarks);
         $expectedResponse = new StateHandlerResponseDTO(
@@ -67,7 +69,8 @@ class StateDownloadReportStartDateEnteredHandlerTest extends TestCase
             ->with($chatId)
             ->willReturn([]);
 
-        $response = $this->handler->handle($chatId, $date, null, null);
+        $session = Session::create($chatId);
+        $response = $this->handler->handle($session, $date, null);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::INTAKE_MARKS_NOT_FOUND,
@@ -82,7 +85,8 @@ class StateDownloadReportStartDateEnteredHandlerTest extends TestCase
         $this->expectException(InvalidValueException::class);
         $this->expectExceptionMessage(EnumMessageText::FORMAT_DATE_ERROR->value);
 
-        $this->handler->handle(12345, 'invalid-date', null, null);
+        $session = Session::create(12345);
+        $this->handler->handle($session, 'invalid-date', null);
     }
 
     public function testHandleThrowsExceptionForNullDate(): void
@@ -90,6 +94,7 @@ class StateDownloadReportStartDateEnteredHandlerTest extends TestCase
         $this->expectException(InvalidValueException::class);
         $this->expectExceptionMessage(EnumMessageText::FORMAT_DATE_ERROR->value);
 
-        $this->handler->handle(12345, null, null, null);
+        $session = Session::create(12345);
+        $this->handler->handle($session, null, null);
     }
 }

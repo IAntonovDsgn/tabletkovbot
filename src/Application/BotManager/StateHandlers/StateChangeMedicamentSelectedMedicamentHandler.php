@@ -9,6 +9,7 @@ use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
+use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\NotFoundEntityException;
 
@@ -22,13 +23,12 @@ final readonly class StateChangeMedicamentSelectedMedicamentHandler implements S
      * @throws NotFoundEntityException
      */
     public function handle(
-        int $chatId,
+        Session $session,
         ?string $messageText,
-        ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
         $medicamentId = null;
-        $medicaments = $this->medicamentRepository->findByChatId($chatId);
+        $medicaments = $this->medicamentRepository->findByChatId($session->getChatId());
         foreach ($medicaments as $medicament) {
             if ((string) $medicament->getId() === $buttonPayload) {
                 $medicamentId = $medicament->getId();

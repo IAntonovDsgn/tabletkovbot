@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Presentation\Api;
 
-use App\Application\BotManager\KeyboardFactory;
 use App\Application\BotManager\Manager;
 use App\Application\BotManager\StateHandlerFactory;
 use App\Application\BotManager\StateHandlerInterface;
@@ -44,7 +43,6 @@ class WebhookControllerTest extends TestCase
         $this->stateHandlerFactory = $this->createMock(StateHandlerFactory::class);
         $this->sessionRepository = $this->createMock(SessionRepositoryInterface::class);
         $this->outboxRepository = $this->createMock(OutboxRepositoryInterface::class);
-        $keyboardFactory = new KeyboardFactory();
         $this->unitOfWork = $this->createMock(UnitOfWorkInterface::class);
         $this->logger = $this->createMock(LoggerInterface::class);
 
@@ -52,8 +50,7 @@ class WebhookControllerTest extends TestCase
             $this->stateHandlerFactory,
             $this->sessionRepository,
             $this->outboxRepository,
-            $keyboardFactory,
-            $this->unitOfWork
+            $this->unitOfWork,
         );
 
         $this->controller = new WebhookController($this->telegramApi, $manager, $this->logger);
@@ -117,7 +114,11 @@ class WebhookControllerTest extends TestCase
 
         $stateHandler->expects($this->once())
             ->method('handle')
-            ->with($chatId, 'start', null, null)
+            ->with(
+                $this->callback(fn(Session $s) => $s->getChatId() === $chatId && $s->getState() === EnumState::MENU),
+                'start',
+                null,
+            )
             ->willReturn(new StateHandlerResponseDTO(EnumMessageText::MENU, []));
 
         $this->sessionRepository->expects($this->once())
@@ -167,7 +168,11 @@ class WebhookControllerTest extends TestCase
 
         $stateHandler->expects($this->once())
             ->method('handle')
-            ->with($chatId, null, null, null)
+            ->with(
+                $this->callback(fn(Session $s) => $s->getChatId() === $chatId && $s->getState() === EnumState::ADD_MEDICAMENT_SELECTED),
+                null,
+                null,
+            )
             ->willReturn(new StateHandlerResponseDTO(EnumMessageText::ENTER_NEW_NAME, []));
 
         $this->sessionRepository->expects($this->once())

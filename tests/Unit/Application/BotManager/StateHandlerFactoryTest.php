@@ -39,7 +39,6 @@ class StateHandlerFactoryTest extends TestCase
         parent::setUp();
         $medicamentRepository = $this->createMock(MedicamentRepositoryInterface::class);
         $intakeMarkRepository = $this->createMock(IntakeMarkRepositoryInterface::class);
-        $sessionRepository = $this->createMock(SessionRepositoryInterface::class);
         $keyboardFactory = new KeyboardFactory();
 
         $menuHandler = new StateMenuHandler($keyboardFactory);
@@ -70,9 +69,9 @@ class StateHandlerFactoryTest extends TestCase
             $intakeMarkRepository,
             $keyboardFactory
         );
-        $notificationsSelectedHandler = new StateNotificationsSelectedHandler($sessionRepository);
-        $notificationEnabledHandler = new StateNotificationEnabledHandler($sessionRepository, $keyboardFactory);
-        $notificationDisabledHandler = new StateNotificationDisabledHandler($sessionRepository, $keyboardFactory);
+        $notificationsSelectedHandler = new StateNotificationsSelectedHandler();
+        $notificationEnabledHandler = new StateNotificationEnabledHandler($keyboardFactory);
+        $notificationDisabledHandler = new StateNotificationDisabledHandler($keyboardFactory);
         $makeIntakeMarkSelectedHandler = new StateMakeIntakeMarkSelectedHandler($medicamentRepository, $keyboardFactory);
         $intakeMarkHasMadeHandler = new StateIntakeMarkHasMadeHandler(
             $medicamentRepository,

@@ -9,6 +9,7 @@ use App\Application\BotManager\StateHandlers\StateChangeNameMedicamentEnteredHan
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Entities\Session\Session;
 use App\Domain\Exceptions\NotFoundEntityException;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
@@ -59,7 +60,8 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
                 return $savedMedicament->getName() === $newName;
             }));
 
-        $response = $this->handler->handle($chatId, $newName, (string) $medicamentId, null);
+        $session = Session::create($chatId, payload: (string) $medicamentId);
+        $response = $this->handler->handle($session, $newName, null);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::MEDICAMENT_RENAMED_SUCCESS,
@@ -77,7 +79,8 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
         $this->expectException(InvalidValueException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_EMPTY_NAME_ERROR->value);
 
-        $this->handler->handle(12345, null, '1', null);
+        $session = Session::create(12345, payload: '1');
+        $this->handler->handle($session, null, null);
     }
 
     /**
@@ -93,7 +96,8 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle(12345, 'New Name', '1', null);
+        $session = Session::create(12345, payload: '1');
+        $this->handler->handle($session, 'New Name', null);
     }
 
     /**
@@ -121,6 +125,7 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle($chatId, 'New Name', (string) $medicamentId, null);
+        $session = Session::create($chatId, payload: (string) $medicamentId);
+        $this->handler->handle($session, 'New Name', null);
     }
 }

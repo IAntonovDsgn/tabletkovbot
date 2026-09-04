@@ -11,6 +11,7 @@ use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
+use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\State\EnumState;
 
 final readonly class StateMedicamentNameEnteredHandler implements StateHandlerInterface
@@ -23,16 +24,15 @@ final readonly class StateMedicamentNameEnteredHandler implements StateHandlerIn
      * @throws InvalidValueException
      */
     public function handle(
-        int $chatId,
+        Session $session,
         ?string $messageText,
-        ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
         if (is_null($messageText)) {
             throw new InvalidValueException(EnumMessageText::MEDICAMENT_EMPTY_NAME_ERROR->value);
         }
 
-        $medicament = Medicament::create($messageText, $chatId);
+        $medicament = Medicament::create($messageText, $session->getChatId());
         $medicamentId = $this->medicamentRepository->insert($medicament);
 
         return new StateHandlerResponseDTO(

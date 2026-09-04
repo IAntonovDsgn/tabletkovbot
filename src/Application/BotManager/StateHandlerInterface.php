@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Application\BotManager;
 
+use App\Domain\Entities\Session\Session;
+
 interface StateHandlerInterface
 {
     public function handle(
-        int $chatId,
+        Session $session,
         ?string $messageText,
-        ?string $sessionPayload,
-        ?string $buttonPayload
+        ?string $buttonPayload,
     ): StateHandlerResponseDTO;
 }

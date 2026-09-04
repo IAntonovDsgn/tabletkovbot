@@ -22,7 +22,6 @@ final readonly class Manager
         private StateHandlerFactory $factoryStateHandler,
         private SessionRepositoryInterface $sessionRepository,
         private OutboxRepositoryInterface $outboxRepository,
-        private KeyboardFactory $keyboardFactory,
         private UnitOfWorkInterface $unitOfWork,
     ) {}
 
@@ -45,9 +44,8 @@ final readonly class Manager
             $session->transitionToState($nextState);
 
             $handlerResponseDTO = $stateHandler->handle(
-                $params->chatId,
+                $session,
                 $params->messageText,
-                $session->getPayload(),
                 $requestPayloadArr[1] ?? null,
             );
 
@@ -72,7 +70,7 @@ final readonly class Manager
             $this->unitOfWork->commit();
         } catch (InvalidValueException|TransitionStateNotAllowedException $e) {
             $this->unitOfWork->rollback();
-            $this->errorHandler($params->chatId, $e->getMessage());
+            $this->notifyClientError($params->chatId, $e->getMessage());
             throw $e;
         } catch (Throwable $e) {
             $this->unitOfWork->rollback();
@@ -91,25 +89,15 @@ final readonly class Manager
         }
     }
 
-    private function errorHandler(int $chatId, ?string $message = null): void
+    private function notifyClientError(int $chatId, ?string $message = null): void
     {
-        $session = $this->sessionRepository->findByChatId($chatId);
-        if ($session !== null) {
-            $session->resetState();
-            $this->sessionRepository->update($session);
-        }
-
         $this->outboxRepository->insert(
-            Message::create(
-                $chatId,
-                $message ?? EnumMessageText::ERROR->value,
-                $this->keyboardFactory->makeMenuKeyboard()
-            )
+            Message::create($chatId, $message ?? EnumMessageText::ERROR->value)
         );
     }
 
     /**
-     * @param list<string> $requestPayload
+     * @param string[] $requestPayload
      * @throws InvalidValueException
      */
     private function getNextState(array $requestPayload, Session $session): EnumState

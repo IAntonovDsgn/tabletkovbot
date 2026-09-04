@@ -11,6 +11,7 @@ use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Report\Report;
+use App\Domain\Entities\Session\Session;
 use DateTimeImmutable;
 
 final readonly class StateDownloadReportStartDateEnteredHandler implements StateHandlerInterface
@@ -24,9 +25,8 @@ final readonly class StateDownloadReportStartDateEnteredHandler implements State
      * @throws InvalidValueException
      */
     public function handle(
-        int $chatId,
+        Session $session,
         ?string $messageText,
-        ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
         if ($messageText === null) {
@@ -38,7 +38,7 @@ final readonly class StateDownloadReportStartDateEnteredHandler implements State
             throw new InvalidValueException(EnumMessageText::FORMAT_DATE_ERROR->value);
         }
 
-        $intakeMarks = $this->intakeMarkRepository->findByChatId($chatId);
+        $intakeMarks = $this->intakeMarkRepository->findByChatId($session->getChatId());
         if (empty($intakeMarks)) {
             $result = new StateHandlerResponseDTO(
                 EnumMessageText::INTAKE_MARKS_NOT_FOUND,

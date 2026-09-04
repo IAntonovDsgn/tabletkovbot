@@ -9,6 +9,7 @@ use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
+use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\State\EnumState;
 use PHPUnit\Framework\TestCase;
 
@@ -33,7 +34,7 @@ class StateMedicamentNameEnteredHandlerTest extends TestCase
             }))
             ->willReturn($newMedicamentId);
 
-        $response = $handler->handle($chatId, $medicamentName, null, null);
+        $response = $handler->handle(Session::create($chatId), $medicamentName, null);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::ENTER_TIME,
@@ -54,6 +55,6 @@ class StateMedicamentNameEnteredHandlerTest extends TestCase
         $this->expectException(InvalidValueException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_EMPTY_NAME_ERROR->value);
 
-        $handler->handle(12345, null, null, null);
+        $handler->handle(Session::create(12345), null, null);
     }
 }

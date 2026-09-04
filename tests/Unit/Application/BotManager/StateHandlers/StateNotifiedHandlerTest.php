@@ -10,6 +10,7 @@ use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Entities\Session\Session;
 use App\Domain\Exceptions\NotFoundEntityException;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
@@ -63,7 +64,7 @@ class StateNotifiedHandlerTest extends TestCase
                 })
             );
 
-        $response = $this->handler->handle($chatId, (string) $medicamentId, null, null);
+        $response = $this->handler->handle(Session::create($chatId), (string) $medicamentId, null);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::INTAKE_MARK_SAVED,
@@ -86,7 +87,7 @@ class StateNotifiedHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle(12345, (string) $medicamentId, null, null);
+        $this->handler->handle(Session::create(12345), (string) $medicamentId, null);
     }
 
     public function testHandleThrowsExceptionIfMedicamentBelongsToAnotherChat(): void
@@ -113,7 +114,7 @@ class StateNotifiedHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle($chatId, (string) $medicamentId, null, null);
+        $this->handler->handle(Session::create($chatId), (string) $medicamentId, null);
     }
 
     public function testHandleThrowsExceptionIfTextIsNull(): void
@@ -124,6 +125,6 @@ class StateNotifiedHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle(12345, null, null, null);
+        $this->handler->handle(Session::create(12345), null, null);
     }
 }

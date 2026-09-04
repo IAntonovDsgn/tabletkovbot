@@ -8,6 +8,7 @@ use App\Application\BotManager\KeyboardFactory;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Entities\Session\Session;
 
 final readonly class StateMenuHandler implements StateHandlerInterface
 {
@@ -16,9 +17,8 @@ final readonly class StateMenuHandler implements StateHandlerInterface
     ) {}
 
     public function handle(
-        int $chatId,
+        Session $session,
         ?string $messageText,
-        ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
         return new StateHandlerResponseDTO(

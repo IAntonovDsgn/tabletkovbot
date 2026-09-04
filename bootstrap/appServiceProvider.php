@@ -35,9 +35,8 @@ use function DI\autowire;
 use function DI\get;
 
 return [
-
     /*==========================================
-        Log
+        Logger
     ==========================================*/
     LoggerInterface::class => function () {
         $config = require __DIR__ . '/../config/logging.php';

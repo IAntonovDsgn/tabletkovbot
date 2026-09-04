@@ -8,6 +8,7 @@ use App\Application\BotManager\StateHandlers\StateDeleteMedicamentConfirmedHandl
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Entities\Session\Session;
 use App\Domain\Exceptions\NotFoundEntityException;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
@@ -58,7 +59,8 @@ class StateDeleteMedicamentConfirmedHandlerTest extends TestCase
                 return !$savedMedicament->isActive();
             }));
 
-        $response = $this->handler->handle($chatId, null, (string) $medicamentId, null);
+        $session = Session::create($chatId, payload: (string) $medicamentId);
+        $response = $this->handler->handle($session, null, null);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::MEDICAMENT_DELETED,
@@ -78,7 +80,8 @@ class StateDeleteMedicamentConfirmedHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle(12345, null, '1', null);
+        $session = Session::create(12345, payload: '1');
+        $this->handler->handle($session, null, null);
     }
 
     public function testHandleThrowsExceptionIfMedicamentBelongsToAnotherChat(): void
@@ -103,6 +106,7 @@ class StateDeleteMedicamentConfirmedHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle($chatId, null, (string) $medicamentId, null);
+        $session = Session::create($chatId, payload: (string) $medicamentId);
+        $this->handler->handle($session, null, null);
     }
 }

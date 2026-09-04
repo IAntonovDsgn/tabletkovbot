@@ -8,23 +8,19 @@ use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
-use App\Domain\Entities\Session\SessionRepositoryInterface;
+use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\State\EnumState;
 
 final readonly class StateNotificationsSelectedHandler implements StateHandlerInterface
 {
-    public function __construct(
-        private SessionRepositoryInterface $sessionRepository,
-    ) {}
+    public function __construct() {}
 
     public function handle(
-        int $chatId,
+        Session $session,
         ?string $messageText,
-        ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
-        $session = $this->sessionRepository->findByChatId($chatId);
-        $isNotificationEnabled = $session?->isNotificationEnabled() ?? true;
+        $isNotificationEnabled = $session->isNotificationEnabled();
 
         if ($isNotificationEnabled) {
             $result = new StateHandlerResponseDTO(

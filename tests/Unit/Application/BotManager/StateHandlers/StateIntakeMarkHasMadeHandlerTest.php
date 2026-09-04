@@ -10,6 +10,7 @@ use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Entities\Session\Session;
 use App\Domain\Exceptions\NotFoundEntityException;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
@@ -61,7 +62,7 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
                 return $intakeMark->getChatId() === $chatId && $intakeMark->getMedicamentId() === $medicamentId;
             }));
 
-        $response = $this->handler->handle($chatId, null, null, (string) $medicamentId);
+        $response = $this->handler->handle(Session::create($chatId), null, (string) $medicamentId);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::INTAKE_MARK_SAVED,
@@ -84,7 +85,7 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle(12345, null, null, (string) $medicamentId);
+        $this->handler->handle(Session::create(12345), null, (string) $medicamentId);
     }
 
     public function testHandleThrowsExceptionIfMedicamentBelongsToAnotherChat(): void
@@ -111,6 +112,6 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle($chatId, null, null, (string) $medicamentId);
+        $this->handler->handle(Session::create($chatId), null, (string) $medicamentId);
     }
 }

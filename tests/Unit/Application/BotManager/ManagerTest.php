@@ -3,7 +3,6 @@
 namespace Tests\Unit\Application\BotManager;
 
 use App\Application\BotManager\Exceptions\InvalidValueException;
-use App\Application\BotManager\KeyboardFactory;
 use App\Application\BotManager\Manager;
 use App\Application\BotManager\RequestDTO;
 use App\Application\BotManager\StateHandlerFactory;
@@ -37,15 +36,13 @@ class ManagerTest extends TestCase
         $this->factoryStateHandler = $this->createMock(StateHandlerFactory::class);
         $this->sessionRepository = $this->createMock(SessionRepositoryInterface::class);
         $this->outboxRepository = $this->createMock(OutboxRepositoryInterface::class);
-        $keyboardFactory = new KeyboardFactory();
         $this->unitOfWork = $this->createMock(UnitOfWorkInterface::class);
 
         $this->manager = new Manager(
             $this->factoryStateHandler,
             $this->sessionRepository,
             $this->outboxRepository,
-            $keyboardFactory,
-            $this->unitOfWork
+            $this->unitOfWork,
         );
     }
 
@@ -77,7 +74,11 @@ class ManagerTest extends TestCase
         $handlerResponseDTO = new StateHandlerResponseDTO(EnumMessageText::MENU, []);
         $mockStateHandler->expects($this->once())
             ->method('handle')
-            ->with($chatId, 'start', null, null)
+            ->with(
+                $this->callback(fn(Session $s) => $s->getChatId() === $chatId && $s->getState() === EnumState::MENU && $s->getPayload() === null),
+                'start',
+                null,
+            )
             ->willReturn($handlerResponseDTO);
 
         $this->sessionRepository->expects($this->once())
@@ -126,7 +127,11 @@ class ManagerTest extends TestCase
         $handlerResponseDTO = new StateHandlerResponseDTO(EnumMessageText::ENTER_NEW_NAME, [], 'new_payload_data');
         $mockStateHandler->expects($this->once())
             ->method('handle')
-            ->with($chatId, 'some_text', null, null)
+            ->with(
+                $this->callback(fn(Session $s) => $s->getChatId() === $chatId && $s->getState() === $payloadState),
+                'some_text',
+                null,
+            )
             ->willReturn($handlerResponseDTO);
 
         $this->sessionRepository->expects($this->once())
@@ -163,10 +168,10 @@ class ManagerTest extends TestCase
         $this->unitOfWork->expects($this->never())->method('commit');
         $this->unitOfWork->expects($this->once())->method('rollback');
 
-        $this->sessionRepository->expects($this->exactly(2))
+        $this->sessionRepository->expects($this->once())
              ->method('findByChatId')
              ->with($chatId)
-             ->willReturnOnConsecutiveCalls($existingSession, $existingSession);
+             ->willReturn($existingSession);
 
         $mockStateHandler = $this->createMock(StateHandlerInterface::class);
         $this->factoryStateHandler->method('makeByState')->willReturn($mockStateHandler);
@@ -176,11 +181,7 @@ class ManagerTest extends TestCase
             ->willThrowException(new InvalidValueException('Error message'));
 
         $this->sessionRepository->expects($this->never())->method('insert');
-        $this->sessionRepository->expects($this->once())
-             ->method('update')
-             ->with($this->callback(function (Session $session) {
-                 return $session->getState() === EnumState::MENU && $session->getPayload() === null;
-             }));
+        $this->sessionRepository->expects($this->never())->method('update');
 
         $this->outboxRepository->expects($this->once())
             ->method('insert')
@@ -283,10 +284,10 @@ class ManagerTest extends TestCase
         $this->unitOfWork->expects($this->never())->method('commit');
         $this->unitOfWork->expects($this->once())->method('rollback');
 
-        $this->sessionRepository->expects($this->exactly(2))
+        $this->sessionRepository->expects($this->once())
             ->method('findByChatId')
             ->with($chatId)
-            ->willReturnOnConsecutiveCalls($existingSession, $existingSession);
+            ->willReturn($existingSession);
 
         $mockStateHandler = $this->createMock(StateHandlerInterface::class);
         $this->factoryStateHandler->expects($this->never())
@@ -295,11 +296,7 @@ class ManagerTest extends TestCase
         $mockStateHandler->expects($this->never())
             ->method('handle');
 
-        $this->sessionRepository->expects($this->once())
-             ->method('update')
-             ->with($this->callback(function (Session $session) {
-                 return $session->getState() === EnumState::MENU && $session->getPayload() === null;
-             }));
+        $this->sessionRepository->expects($this->never())->method('update');
 
         $this->outboxRepository->expects($this->once())
             ->method('insert')

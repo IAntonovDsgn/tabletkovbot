@@ -9,6 +9,7 @@ use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
+use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Exceptions\NotFoundEntityException;
 use PHPUnit\Framework\TestCase;
@@ -41,7 +42,7 @@ class StateMakeIntakeMarkSelectedHandlerTest extends TestCase
             ->with($chatId)
             ->willReturn($medicaments);
 
-        $response = $this->handler->handle($chatId, null, null, null);
+        $response = $this->handler->handle(Session::create($chatId), null, null);
 
         $expectedButtons = [
             new MessageButton('Aspirin', EnumState::INTAKE_MARK_HAS_MADE, '1'),
@@ -68,6 +69,6 @@ class StateMakeIntakeMarkSelectedHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle($chatId, null, null, null);
+        $this->handler->handle(Session::create($chatId), null, null);
     }
 }
