@@ -43,14 +43,16 @@ class StateHandlerFactoryTest extends TestCase
         $keyboardFactory = new KeyboardFactory();
 
         $menuHandler = new StateMenuHandler($keyboardFactory);
-        $changeNameMedicamentEnteredHandler = new StateChangeNameMedicamentEnteredHandler($medicamentRepository,
+        $changeNameMedicamentEnteredHandler = new StateChangeNameMedicamentEnteredHandler(
+            $medicamentRepository,
             $keyboardFactory
         );
         $changeMedicamentSelectedHandler = new StateChangeMedicamentSelectedHandler($medicamentRepository);
         $medicamentNameEnteredHandler = new StateMedicamentNameEnteredHandler($medicamentRepository);
         $addMedicamentSelectedHandler = new StateAddMedicamentSelectedHandler();
         $medicamentNotificationTimeEnteredHandler = new StateMedicamentNotificationTimeEnteredHandler(
-            $medicamentRepository, $keyboardFactory
+            $medicamentRepository,
+            $keyboardFactory
         );
         $changeMedicamentSelectedMedicamentHandler = new StateChangeMedicamentSelectedMedicamentHandler(
             $medicamentRepository
@@ -59,19 +61,23 @@ class StateHandlerFactoryTest extends TestCase
         $changeNotificationTimeSelectedHandler = new StateChangeNotificationTimeSelectedHandler();
         $deleteMedicamentSelectedHandler = new StateDeleteMedicamentSelectedHandler($medicamentRepository);
         $selectedMedicamentForDeleteHandler = new StateSelectedMedicamentForDeleteHandler();
-        $deleteMedicamentConfirmedHandler = new StateDeleteMedicamentConfirmedHandler($medicamentRepository,
+        $deleteMedicamentConfirmedHandler = new StateDeleteMedicamentConfirmedHandler(
+            $medicamentRepository,
             $keyboardFactory
         );
         $downloadReportSelectedHandler = new StateDownloadReportSelectedHandler();
-        $downloadReportStartDateEnteredHandler = new StateDownloadReportStartDateEnteredHandler($intakeMarkRepository,
+        $downloadReportStartDateEnteredHandler = new StateDownloadReportStartDateEnteredHandler(
+            $intakeMarkRepository,
             $keyboardFactory
         );
         $notificationsSelectedHandler = new StateNotificationsSelectedHandler($sessionRepository);
         $notificationEnabledHandler = new StateNotificationEnabledHandler($sessionRepository, $keyboardFactory);
         $notificationDisabledHandler = new StateNotificationDisabledHandler($sessionRepository, $keyboardFactory);
         $makeIntakeMarkSelectedHandler = new StateMakeIntakeMarkSelectedHandler($medicamentRepository);
-        $intakeMarkHasMadeHandler = new StateIntakeMarkHasMadeHandler($medicamentRepository,
-            $intakeMarkRepository, $keyboardFactory
+        $intakeMarkHasMadeHandler = new StateIntakeMarkHasMadeHandler(
+            $medicamentRepository,
+            $intakeMarkRepository,
+            $keyboardFactory
         );
         $notifiedHandler = new StateNotifiedHandler($medicamentRepository, $intakeMarkRepository, $keyboardFactory);
 

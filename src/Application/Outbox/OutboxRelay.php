@@ -108,6 +108,9 @@ final class OutboxRelay
         $this->stopRequested = true;
     }
 
+    /**
+     * @param array<string, string|int|null> $context
+     */
     private function report(Throwable $e, array $context, ?Closure $onError = null): void
     {
         if ($onError !== null) {
