@@ -32,8 +32,7 @@ final class RabbitMqQueueConsumer implements QueueConsumerInterface
         private readonly string $queue,
         private readonly int $pollIntervalMs = 1000,
         private readonly AmqpConnectionFactoryInterface $connectionFactory = new AmqpConnectionFactory(),
-    ) {
-    }
+    ) {}
 
     public function run(Closure $onMessage): void
     {
@@ -52,9 +51,7 @@ final class RabbitMqQueueConsumer implements QueueConsumerInterface
                     usleep($this->pollIntervalMs * 1000);
                 }
             } catch (Throwable $e) {
-                $this->logger->warning('Queue consumer connection lost, will reconnect', [
-                    'error' => $e->getMessage(),
-                ]);
+                $this->logger->warning($e, ['phase' => 'connection_lost']);
                 $this->close();
                 usleep($this->pollIntervalMs * 1000);
             }
@@ -75,14 +72,16 @@ final class RabbitMqQueueConsumer implements QueueConsumerInterface
             if ($this->channel instanceof AMQPChannel && $this->channel->is_open()) {
                 $this->channel->close();
             }
-        } catch (\Exception) {
+        } catch (Throwable $e) {
+            $this->logger->warning($e, ['phase' => 'close_channel']);
         }
 
         try {
             if ($this->connection instanceof AMQPStreamConnection && $this->connection->isConnected()) {
                 $this->connection->close();
             }
-        } catch (\Exception) {
+        } catch (Throwable $e) {
+            $this->logger->warning($e, ['phase' => 'close_connection']);
         }
 
         $this->channel = null;
@@ -114,9 +113,9 @@ final class RabbitMqQueueConsumer implements QueueConsumerInterface
         try {
             $message = $this->deserializer->deserialize($amqpMessage->getBody());
         } catch (Throwable $e) {
-            $this->logger->error('Dropping malformed queue message', [
+            $this->logger->error($e, [
                 'payload' => substr($amqpMessage->getBody(), 0, 500),
-                'error' => $e->getMessage(),
+                'phase' => 'deserialize',
             ]);
             $amqpMessage->nack();
             return;
@@ -126,10 +125,10 @@ final class RabbitMqQueueConsumer implements QueueConsumerInterface
             $onMessage($message);
             $amqpMessage->ack();
         } catch (Throwable $e) {
-            $this->logger->error('Dropping queue message after failed delivery', [
+            $this->logger->error($e, [
                 'id' => $message->getId(),
                 'chat_id' => $message->getChatId(),
-                'error' => $e->getMessage(),
+                'phase' => 'delivery',
             ]);
             $amqpMessage->nack();
         }

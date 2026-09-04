@@ -5,3 +5,4 @@ run-phpstan-from-docker.sh
 /.php-cs-fixer.cache
 /composer.lock
 /.idea
+/.php-cs-fixer.php

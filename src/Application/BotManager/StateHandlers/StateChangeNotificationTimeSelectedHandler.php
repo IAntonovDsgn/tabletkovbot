@@ -21,7 +21,7 @@ class StateChangeNotificationTimeSelectedHandler implements StateHandlerInterfac
         return new StateHandlerResponseDTO(
             EnumMessageText::ENTER_TIME,
             [
-                new MessageButton(MessageButton::MENU, EnumState::MENU)
+                new MessageButton(MessageButton::MENU, EnumState::MENU),
             ]
         );
     }

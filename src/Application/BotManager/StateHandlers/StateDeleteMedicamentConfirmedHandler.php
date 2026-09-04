@@ -16,8 +16,7 @@ final readonly class StateDeleteMedicamentConfirmedHandler implements StateHandl
     public function __construct(
         private MedicamentRepositoryInterface $medicamentRepository,
         private KeyboardFactory $keyboardFactory,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws NotFoundEntityException
@@ -28,7 +27,7 @@ final readonly class StateDeleteMedicamentConfirmedHandler implements StateHandl
         ?string $sessionPayload,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
-        $medicament = $this->medicamentRepository->findById((int)$sessionPayload);
+        $medicament = $this->medicamentRepository->findById((int) $sessionPayload);
 
         if (is_null($medicament) || $medicament->getChatId() !== $chatId) {
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
@@ -37,7 +36,8 @@ final readonly class StateDeleteMedicamentConfirmedHandler implements StateHandl
         $medicament->deactivate();
         $this->medicamentRepository->update($medicament);
         return new StateHandlerResponseDTO(
-            EnumMessageText::MEDICAMENT_DELETED, $this->keyboardFactory->makeMenuKeyboard()
+            EnumMessageText::MEDICAMENT_DELETED,
+            $this->keyboardFactory->makeMenuKeyboard()
         );
     }
 }

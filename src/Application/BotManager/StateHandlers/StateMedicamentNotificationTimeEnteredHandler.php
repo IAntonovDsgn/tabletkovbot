@@ -20,8 +20,7 @@ final readonly class StateMedicamentNotificationTimeEnteredHandler implements St
     public function __construct(
         private MedicamentRepositoryInterface $medicamentRepository,
         private KeyboardFactory $keyboardFactory,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws InvalidValueException
@@ -46,7 +45,7 @@ final readonly class StateMedicamentNotificationTimeEnteredHandler implements St
             throw new InvalidValueException(EnumMessageText::FORMAT_TIME_ERROR->value);
         }
 
-        $medicament = $this->medicamentRepository->findById((int)$sessionPayload);
+        $medicament = $this->medicamentRepository->findById((int) $sessionPayload);
         if (is_null($medicament) || $medicament->getChatId() !== $chatId) {
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
@@ -54,7 +53,8 @@ final readonly class StateMedicamentNotificationTimeEnteredHandler implements St
         $medicament->setNotificationTime($notificationTime);
         $this->medicamentRepository->update($medicament);
         return new StateHandlerResponseDTO(
-            EnumMessageText::MEDICAMENT_ADDED_SUCCESS, $this->keyboardFactory->makeMenuKeyboard()
+            EnumMessageText::MEDICAMENT_ADDED_SUCCESS,
+            $this->keyboardFactory->makeMenuKeyboard()
         );
     }
 }

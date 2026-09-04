@@ -24,8 +24,8 @@ class OutboxPublishCommandTest extends TestCase
         $this->broker = $this->createMock(MessageBrokerInterface::class);
         $this->logger = new FakeLogger();
 
-        $relay = new OutboxRelay($this->outboxRepository, $this->broker, $this->logger, 10, 0);
-        $command = new OutboxPublishCommand($relay);
+        $relay = new OutboxRelay($this->outboxRepository, $this->broker, 10, 0);
+        $command = new OutboxPublishCommand($relay, $this->logger);
 
         $pending = Message::restoreFromPersistence(9, 77, 'hello');
         $this->outboxRepository->method('getPendingMessages')
@@ -50,8 +50,6 @@ class OutboxPublishCommandTest extends TestCase
         $statusCode = $tester->execute([]);
 
         self::assertSame(0, $statusCode);
-        self::assertTrue($this->logger->hasMessage('Outbox relay started'));
-        self::assertTrue($this->logger->hasMessage('Outbox relay stopped gracefully'));
         self::assertSame(0, $this->logger->countMessages('Failed to relay outbox message'));
     }
 }

@@ -17,18 +17,20 @@ final readonly class SessionRepository implements SessionRepositoryInterface
 {
     use HydrateRowsTrait;
 
-    const string SESSION_TABLE_NAME = 'sessions';
-    const string CHAT_ID_COLUMN_NAME = 'chat_id';
-    const string ID_COLUMN_NAME = 'id';
-    const string IS_NOTIFICATION_ENABLED_COLUMN_NAME = 'is_notification_enabled';
-    const string PAYLOAD_COLUMN_NAME = 'payload';
-    const string STATE_COLUMN_NAME = 'state';
+    public const string SESSION_TABLE_NAME = 'sessions';
+    public const string CHAT_ID_COLUMN_NAME = 'chat_id';
+    public const string ID_COLUMN_NAME = 'id';
+    public const string IS_NOTIFICATION_ENABLED_COLUMN_NAME = 'is_notification_enabled';
+    public const string PAYLOAD_COLUMN_NAME = 'payload';
+    public const string STATE_COLUMN_NAME = 'state';
 
     public function __construct(
         private Connection $connection,
-    ) {
-    }
+    ) {}
 
+    /**
+     * @throws RepositoryException
+     */
     public function findByChatId(int $chatId): ?Session
     {
         $queryBuilder = $this->connection->createQueryBuilder();
@@ -41,7 +43,7 @@ final readonly class SessionRepository implements SessionRepositoryInterface
         try {
             $row = $queryBuilder->executeQuery()->fetchAssociative();
         } catch (Exception $e) {
-            throw new RepositoryException($e->getMessage());
+            throw new RepositoryException($e->getMessage(), 0, $e);
         }
 
 
@@ -54,6 +56,10 @@ final readonly class SessionRepository implements SessionRepositoryInterface
         return $result;
     }
 
+    /**
+     * @throws RepositoryException
+     * @throws AlreadyExistInPersistenceException
+     */
     public function insert(Session $session): int
     {
         if ($session->isExistInPersistence()) {
@@ -71,12 +77,16 @@ final readonly class SessionRepository implements SessionRepositoryInterface
                 ]
             );
 
-            return (int)$this->connection->lastInsertId();
+            return (int) $this->connection->lastInsertId();
         } catch (Exception $e) {
-            throw new RepositoryException($e->getMessage());
+            throw new RepositoryException($e->getMessage(), 0, $e);
         }
     }
 
+    /**
+     * @throws RepositoryException
+     * @throws NotFoundEntityException
+     */
     public function update(Session $session): void
     {
         if (!$session->isExistInPersistence()) {
@@ -96,7 +106,7 @@ final readonly class SessionRepository implements SessionRepositoryInterface
                 ]
             );
         } catch (Exception $e) {
-            throw new RepositoryException($e->getMessage());
+            throw new RepositoryException($e->getMessage(), 0, $e);
         }
     }
 

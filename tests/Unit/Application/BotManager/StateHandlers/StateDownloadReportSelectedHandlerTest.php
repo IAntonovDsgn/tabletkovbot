@@ -20,7 +20,7 @@ class StateDownloadReportSelectedHandlerTest extends TestCase
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::ENTER_DATE,
             [
-                new MessageButton(MessageButton::MENU, EnumState::MENU)
+                new MessageButton(MessageButton::MENU, EnumState::MENU),
             ]
         );
 

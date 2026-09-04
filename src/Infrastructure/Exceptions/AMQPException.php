@@ -4,5 +4,4 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Exceptions;
 
-class AMQPException extends \Exception
-{}
+class AMQPException extends \Exception {}

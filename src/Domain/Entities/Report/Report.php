@@ -9,7 +9,7 @@ use DateTimeImmutable;
 
 final readonly class Report
 {
-    const string DATE_FORMAT = 'd.m.Y';
+    public const string DATE_FORMAT = 'd.m.Y';
 
     /**
      * @param IntakeMark[] $intakeMarks
@@ -17,8 +17,7 @@ final readonly class Report
     public function __construct(
         private DateTimeImmutable $startDate,
         private array $intakeMarks,
-    ) {
-    }
+    ) {}
 
     public function getStartDate(): DateTimeImmutable
     {

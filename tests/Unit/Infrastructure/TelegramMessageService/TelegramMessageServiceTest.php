@@ -130,7 +130,6 @@ class TelegramMessageServiceTest extends TestCase
 
         $update1 = new Update(['message' => $telegramMessage1]);
         $update2 = new Update(['message' => $telegramMessage2]);
-        // Update with no message
         $update3 = new Update(['update_id' => 3]);
 
         $this->telegramApi->expects($this->once())

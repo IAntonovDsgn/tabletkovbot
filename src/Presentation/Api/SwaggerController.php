@@ -12,7 +12,7 @@ final readonly class SwaggerController
     {
         $pathsToScan = [
             __DIR__,
-            dirname(__DIR__, 2) . '/Application/BotManager'
+            dirname(__DIR__, 2) . '/Application/BotManager',
         ];
 
         $generator = new Generator();

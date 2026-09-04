@@ -10,9 +10,11 @@ use App\Domain\Entities\Message\Message;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+
 use function extension_loaded;
 use function pcntl_async_signals;
 use function pcntl_signal;
+
 use const SIGINT;
 use const SIGTERM;
 

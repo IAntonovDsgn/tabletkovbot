@@ -4,5 +4,4 @@ declare(strict_types=1);
 
 namespace App\Domain\Exceptions;
 
-class TransitionStateNotAllowedException extends \Exception
-{}
+class TransitionStateNotAllowedException extends \Exception {}

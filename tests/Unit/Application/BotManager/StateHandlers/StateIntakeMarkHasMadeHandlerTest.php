@@ -11,6 +11,7 @@ use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Exceptions\NotFoundEntityException;
+use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 
 class StateIntakeMarkHasMadeHandlerTest extends TestCase
@@ -33,6 +34,9 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
         );
     }
 
+    /**
+     * @throws NotFoundEntityException
+     */
     public function testHandleSuccess(): void
     {
         $chatId = 12345;
@@ -42,7 +46,7 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
             $medicamentId,
             'Aspirin',
             $chatId,
-            new \DateTimeImmutable(),
+            new DateTimeImmutable(),
             true
         );
 
@@ -57,7 +61,7 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
                 return $intakeMark->getChatId() === $chatId && $intakeMark->getMedicamentId() === $medicamentId;
             }));
 
-        $response = $this->handler->handle($chatId, null, null, (string)$medicamentId);
+        $response = $this->handler->handle($chatId, null, null, (string) $medicamentId);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::INTAKE_MARK_SAVED,
@@ -80,7 +84,7 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle(12345, null, null, (string)$medicamentId);
+        $this->handler->handle(12345, null, null, (string) $medicamentId);
     }
 
     public function testHandleThrowsExceptionIfMedicamentBelongsToAnotherChat(): void
@@ -93,7 +97,7 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
             $medicamentId,
             'Aspirin',
             $anotherChatId,
-            new \DateTimeImmutable(),
+            new DateTimeImmutable(),
             true
         );
 
@@ -107,6 +111,6 @@ class StateIntakeMarkHasMadeHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle($chatId, null, null, (string)$medicamentId);
+        $this->handler->handle($chatId, null, null, (string) $medicamentId);
     }
 }

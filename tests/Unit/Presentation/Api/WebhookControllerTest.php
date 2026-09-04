@@ -24,6 +24,7 @@ use Telegram\Bot\Objects\CallbackQuery;
 use Telegram\Bot\Objects\Chat;
 use Telegram\Bot\Objects\Message as TelegramMessage;
 use Telegram\Bot\Objects\Update;
+use Throwable;
 
 class WebhookControllerTest extends TestCase
 {
@@ -31,8 +32,8 @@ class WebhookControllerTest extends TestCase
     private MockObject $stateHandlerFactory;
     private MockObject $sessionRepository;
     private MockObject $outboxRepository;
-    private MockObject $keyboardFactory;
     private MockObject $unitOfWork;
+    private MockObject $logger;
     private WebhookController $controller;
 
     protected function setUp(): void
@@ -43,7 +44,7 @@ class WebhookControllerTest extends TestCase
         $this->stateHandlerFactory = $this->createMock(StateHandlerFactory::class);
         $this->sessionRepository = $this->createMock(SessionRepositoryInterface::class);
         $this->outboxRepository = $this->createMock(OutboxRepositoryInterface::class);
-        $this->keyboardFactory = $this->createMock(KeyboardFactory::class);
+        $keyboardFactory = new KeyboardFactory();
         $this->unitOfWork = $this->createMock(UnitOfWorkInterface::class);
         $this->logger = $this->createMock(LoggerInterface::class);
 
@@ -51,11 +52,11 @@ class WebhookControllerTest extends TestCase
             $this->stateHandlerFactory,
             $this->sessionRepository,
             $this->outboxRepository,
-            $this->keyboardFactory,
+            $keyboardFactory,
             $this->unitOfWork
         );
 
-        $this->controller = new WebhookController($this->telegramApi, $manager);
+        $this->controller = new WebhookController($this->telegramApi, $manager, $this->logger);
     }
 
     private function givenWebhookUpdate(Update $update): void
@@ -63,22 +64,22 @@ class WebhookControllerTest extends TestCase
         $this->telegramApi->method('getWebhookUpdate')->willReturn($update);
     }
 
-    private function messageUpdate(int $chatId, ?string $text): Update
+    private function messageUpdate(int $chatId): Update
     {
         return new Update([
             'message' => new TelegramMessage([
                 'message_id' => 1,
                 'chat' => new Chat(['id' => $chatId]),
-                'text' => $text,
+                'text' => 'start',
             ]),
         ]);
     }
 
-    private function callbackQueryUpdate(int $chatId, string $callbackQueryId, string $data): Update
+    private function callbackQueryUpdate(int $chatId, string $data): Update
     {
         return new Update([
             'callback_query' => new CallbackQuery([
-                'id' => $callbackQueryId,
+                'id' => 'cb-1',
                 'from' => ['id' => $chatId],
                 'message' => new TelegramMessage([
                     'message_id' => 5,
@@ -89,10 +90,13 @@ class WebhookControllerTest extends TestCase
         ]);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testHandleRoutesTextMessageToManager(): void
     {
         $chatId = 123;
-        $this->givenWebhookUpdate($this->messageUpdate($chatId, 'start'));
+        $this->givenWebhookUpdate($this->messageUpdate($chatId));
 
         $this->unitOfWork->expects($this->once())->method('begin');
         $this->unitOfWork->expects($this->once())->method('commit');
@@ -132,11 +136,14 @@ class WebhookControllerTest extends TestCase
         $this->controller->handle();
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testHandleRoutesCallbackQueryWithAnswerAndPayload(): void
     {
         $chatId = 123;
         $payload = EnumState::ADD_MEDICAMENT_SELECTED->value;
-        $this->givenWebhookUpdate($this->callbackQueryUpdate($chatId, 'cb-1', $payload));
+        $this->givenWebhookUpdate($this->callbackQueryUpdate($chatId, $payload));
 
         $this->telegramApi->expects($this->once())
             ->method('answerCallbackQuery')
@@ -174,6 +181,9 @@ class WebhookControllerTest extends TestCase
         $this->controller->handle();
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testHandleIgnoresCallbackQueryWithoutMessage(): void
     {
         $this->givenWebhookUpdate(new Update([
@@ -189,6 +199,9 @@ class WebhookControllerTest extends TestCase
         $this->controller->handle();
     }
 
+    /**
+     * @throws Throwable
+     */
     public function testHandleIgnoresUpdateWithoutMessageAndCallbackQuery(): void
     {
         $this->givenWebhookUpdate(new Update(['update_id' => 3]));
@@ -200,10 +213,13 @@ class WebhookControllerTest extends TestCase
         $this->controller->handle();
     }
 
-    public function testHandleRethrowsManagerExceptionAfterRollback(): void
+    /**
+     * @throws Throwable
+     */
+    public function testHandleLogsManagerExceptionAfterRollback(): void
     {
         $chatId = 123;
-        $this->givenWebhookUpdate($this->messageUpdate($chatId, 'start'));
+        $this->givenWebhookUpdate($this->messageUpdate($chatId));
 
         $this->unitOfWork->expects($this->once())->method('begin');
         $this->unitOfWork->expects($this->never())->method('commit');
@@ -215,7 +231,6 @@ class WebhookControllerTest extends TestCase
         $this->stateHandlerFactory->method('makeByState')->willReturn($stateHandler);
         $stateHandler->method('handle')->willThrowException(new RuntimeException('boom'));
 
-        // notifyInternalError fallback message is persisted best-effort
         $this->outboxRepository->expects($this->once())
             ->method('insert')
             ->with($this->callback(function (Message $message) use ($chatId) {
@@ -223,8 +238,7 @@ class WebhookControllerTest extends TestCase
                     && $message->getText() === EnumMessageText::INTERNAL_ERROR->value;
             }));
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('boom');
+        $this->logger->expects($this->once())->method('error');
 
         $this->controller->handle();
     }

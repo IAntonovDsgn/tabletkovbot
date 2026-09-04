@@ -41,8 +41,8 @@ return [
     ==========================================*/
     LoggerInterface::class => function () {
         $config = require __DIR__ . '/../config/logging.php';
-        $path = (string)($config['path'] ?? __DIR__ . '/../storage/logs/app.log');
-        $channel = (string)($config['channel'] ?? 'app');
+        $path = (string) ($config['path'] ?? __DIR__ . '/../storage/logs/app.log');
+        $channel = (string) ($config['channel'] ?? 'app');
         $formatterFactory = function () {
             return new LineFormatter(
                 null,
@@ -82,18 +82,19 @@ return [
     /*==========================================
         Message broker (RabbitMQ)
     ==========================================*/
-    MessageBrokerInterface::class => function () {
+    MessageBrokerInterface::class => function (ContainerInterface $c) {
         $config = require __DIR__ . '/../config/rabbitmq.php';
         return new RabbitMqMessageBroker(
             new MessagePayloadSerializer(),
-            (string)($config['host'] ?? 'rabbitmq'),
-            (int)($config['port'] ?? 5672),
-            (string)($config['vhost'] ?? '/'),
-            (string)($config['user'] ?? 'guest'),
-            (string)($config['password'] ?? 'guest'),
-            (string)($config['exchange'] ?? 'outbox'),
-            (string)($config['queue'] ?? 'telegram.send-message'),
-            (float)($config['confirm_timeout_seconds'] ?? 5.0),
+            $c->get(LoggerInterface::class),
+            (string) ($config['host'] ?? 'rabbitmq'),
+            (int) ($config['port'] ?? 5672),
+            (string) ($config['vhost'] ?? '/'),
+            (string) ($config['user'] ?? 'guest'),
+            (string) ($config['password'] ?? 'guest'),
+            (string) ($config['exchange'] ?? 'outbox'),
+            (string) ($config['queue'] ?? 'telegram.send-message'),
+            (float) ($config['confirm_timeout_seconds'] ?? 5.0),
         );
     },
 
@@ -102,14 +103,14 @@ return [
         return new RabbitMqQueueConsumer(
             new MessagePayloadDeserializer(),
             $c->get(LoggerInterface::class),
-            (string)($config['host'] ?? 'rabbitmq'),
-            (int)($config['port'] ?? 5672),
-            (string)($config['vhost'] ?? '/'),
-            (string)($config['user'] ?? 'guest'),
-            (string)($config['password'] ?? 'guest'),
-            (string)($config['exchange'] ?? 'outbox'),
-            (string)($config['queue'] ?? 'telegram.send-message'),
-            max(1, (int)($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
+            (string) ($config['host'] ?? 'rabbitmq'),
+            (int) ($config['port'] ?? 5672),
+            (string) ($config['vhost'] ?? '/'),
+            (string) ($config['user'] ?? 'guest'),
+            (string) ($config['password'] ?? 'guest'),
+            (string) ($config['exchange'] ?? 'outbox'),
+            (string) ($config['queue'] ?? 'telegram.send-message'),
+            max(1, (int) ($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
         );
     },
 
@@ -117,10 +118,9 @@ return [
         return new OutboxRelay(
             $c->get(OutboxRepositoryInterface::class),
             $c->get(MessageBrokerInterface::class),
-            $c->get(LoggerInterface::class),
-            max(1, (int)($_ENV['OUTBOX_BATCH_SIZE'] ?? 50)),
-            max(1, (int)($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
-            max(1, (int)($_ENV['OUTBOX_MAX_ATTEMPTS'] ?? 4)),
+            max(1, (int) ($_ENV['OUTBOX_BATCH_SIZE'] ?? 50)),
+            max(1, (int) ($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
+            max(1, (int) ($_ENV['OUTBOX_MAX_ATTEMPTS'] ?? 4)),
         );
     },
 

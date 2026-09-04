@@ -13,11 +13,9 @@ use App\Domain\Entities\Session\State\EnumState;
 
 final readonly class StateNotificationsSelectedHandler implements StateHandlerInterface
 {
-
     public function __construct(
         private SessionRepositoryInterface $sessionRepository,
-    ) {
-    }
+    ) {}
 
     public function handle(
         int $chatId,

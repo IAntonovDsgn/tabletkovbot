@@ -10,6 +10,5 @@ final readonly class RequestDTO
         public int $chatId,
         public ?string $messageText = null,
         public ?string $payload = null,
-    ) {
-    }
+    ) {}
 }

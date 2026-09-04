@@ -13,8 +13,7 @@ final readonly class StateMenuHandler implements StateHandlerInterface
 {
     public function __construct(
         private KeyboardFactory $keyboardFactory,
-    ) {
-    }
+    ) {}
 
     public function handle(
         int $chatId,
@@ -23,7 +22,8 @@ final readonly class StateMenuHandler implements StateHandlerInterface
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
         return new StateHandlerResponseDTO(
-            EnumMessageText::MENU, $this->keyboardFactory->makeMenuKeyboard(),
+            EnumMessageText::MENU,
+            $this->keyboardFactory->makeMenuKeyboard(),
         );
     }
 }

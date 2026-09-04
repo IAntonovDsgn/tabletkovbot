@@ -10,6 +10,7 @@ use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Exceptions\NotFoundEntityException;
+use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 
 class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
@@ -29,6 +30,10 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
         );
     }
 
+    /**
+     * @throws InvalidValueException
+     * @throws NotFoundEntityException
+     */
     public function testHandleSuccess(): void
     {
         $chatId = 12345;
@@ -39,7 +44,7 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
             $medicamentId,
             'Aspirin',
             $chatId,
-            new \DateTimeImmutable(),
+            new DateTimeImmutable(),
             true
         );
 
@@ -54,7 +59,7 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
                 return $savedMedicament->getName() === $newName;
             }));
 
-        $response = $this->handler->handle($chatId, $newName, (string)$medicamentId, null);
+        $response = $this->handler->handle($chatId, $newName, (string) $medicamentId, null);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::MEDICAMENT_RENAMED_SUCCESS,
@@ -64,6 +69,9 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
+    /**
+     * @throws NotFoundEntityException
+     */
     public function testHandleThrowsExceptionOnNullName(): void
     {
         $this->expectException(InvalidValueException::class);
@@ -72,6 +80,9 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
         $this->handler->handle(12345, null, '1', null);
     }
 
+    /**
+     * @throws InvalidValueException
+     */
     public function testHandleThrowsExceptionIfMedicamentNotFound(): void
     {
         $this->medicamentRepository->expects($this->once())
@@ -85,6 +96,9 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
         $this->handler->handle(12345, 'New Name', '1', null);
     }
 
+    /**
+     * @throws InvalidValueException
+     */
     public function testHandleThrowsExceptionIfMedicamentBelongsToAnotherChat(): void
     {
         $chatId = 12345;
@@ -95,7 +109,7 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
             $medicamentId,
             'Aspirin',
             $anotherChatId,
-            new \DateTimeImmutable(),
+            new DateTimeImmutable(),
             true
         );
 
@@ -107,6 +121,6 @@ class StateChangeNameMedicamentEnteredHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle($chatId, 'New Name', (string)$medicamentId, null);
+        $this->handler->handle($chatId, 'New Name', (string) $medicamentId, null);
     }
 }

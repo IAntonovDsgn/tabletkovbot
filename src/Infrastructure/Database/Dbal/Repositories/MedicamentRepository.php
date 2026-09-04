@@ -12,23 +12,27 @@ use App\Infrastructure\Exceptions\RepositoryException;
 use DateTimeImmutable;
 use DateTimeZone;
 use Doctrine\DBAL\Connection;
+use Exception;
 
 final readonly class MedicamentRepository implements MedicamentRepositoryInterface
 {
     use HydrateRowsTrait;
 
-    const string MEDICAMENT_TABLE_NAME = 'medicaments';
-    const string NAME_COLUMN_NAME = 'name';
-    const string CHAT_ID_COLUMN_NAME = 'chat_id';
-    const string NOTIFICATION_TIME_COLUMN_NAME = 'notification_time';
-    const string IS_ACTIVE_COLUMN_NAME = 'is_active';
-    const string ID_COLUMN_NAME = 'id';
+    public const string MEDICAMENT_TABLE_NAME = 'medicaments';
+    public const string NAME_COLUMN_NAME = 'name';
+    public const string CHAT_ID_COLUMN_NAME = 'chat_id';
+    public const string NOTIFICATION_TIME_COLUMN_NAME = 'notification_time';
+    public const string IS_ACTIVE_COLUMN_NAME = 'is_active';
+    public const string ID_COLUMN_NAME = 'id';
 
     public function __construct(
         private Connection $connection,
-    ) {
-    }
+    ) {}
 
+    /**
+     * @throws RepositoryException
+     * @throws AlreadyExistInPersistenceException
+     */
     public function insert(Medicament $medicament): int
     {
         if ($medicament->isExistInPersistence()) {
@@ -45,12 +49,16 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
 
         try {
             $this->connection->insert(self::MEDICAMENT_TABLE_NAME, $data);
-            return (int)$this->connection->lastInsertId();
-        } catch (\Exception $e) {
-            throw new RepositoryException($e->getMessage());
+            return (int) $this->connection->lastInsertId();
+        } catch (Exception $e) {
+            throw new RepositoryException($e->getMessage(), 0, $e);
         }
     }
 
+    /**
+     * @throws RepositoryException
+     * @throws NotFoundEntityException
+     */
     public function update(Medicament $medicament): void
     {
         if (!$medicament->isExistInPersistence()) {
@@ -71,8 +79,8 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
                 $data,
                 [self::ID_COLUMN_NAME => $medicament->getId()]
             );
-        } catch (\Exception $e) {
-            throw new RepositoryException($e->getMessage());
+        } catch (Exception $e) {
+            throw new RepositoryException($e->getMessage(), 0, $e);
         }
     }
 
@@ -92,8 +100,8 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
 
         try {
             $row = $queryBuilder->executeQuery()->fetchAssociative();
-        } catch (\Exception $e) {
-            throw new RepositoryException($e->getMessage());
+        } catch (Exception $e) {
+            throw new RepositoryException($e->getMessage(), 0, $e);
         }
 
         if ($row === false) {
@@ -119,8 +127,8 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
 
         try {
             $row = $queryBuilder->executeQuery()->fetchAssociative();
-        } catch (\Exception $e) {
-            throw new RepositoryException($e->getMessage());
+        } catch (Exception $e) {
+            throw new RepositoryException($e->getMessage(), 0, $e);
         }
 
         if ($row === false) {
@@ -148,8 +156,8 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
 
         try {
             $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
-        } catch (\Exception $e) {
-            throw new RepositoryException($e->getMessage());
+        } catch (Exception $e) {
+            throw new RepositoryException($e->getMessage(), 0, $e);
         }
 
         foreach ($rows as $row) {

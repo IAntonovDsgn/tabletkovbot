@@ -15,13 +15,14 @@ use DateTimeImmutable;
 
 final readonly class StateDownloadReportStartDateEnteredHandler implements StateHandlerInterface
 {
-
     public function __construct(
         private IntakeMarkRepositoryInterface $intakeMarkRepository,
         private KeyboardFactory $keyboardFactory,
-    ) {
-    }
+    ) {}
 
+    /**
+     * @throws InvalidValueException
+     */
     public function handle(
         int $chatId,
         ?string $messageText,
@@ -40,12 +41,15 @@ final readonly class StateDownloadReportStartDateEnteredHandler implements State
         $intakeMarks = $this->intakeMarkRepository->findByChatId($chatId);
         if (empty($intakeMarks)) {
             $result = new StateHandlerResponseDTO(
-                EnumMessageText::INTAKE_MARKS_NOT_FOUND, $this->keyboardFactory->makeMenuKeyboard()
+                EnumMessageText::INTAKE_MARKS_NOT_FOUND,
+                $this->keyboardFactory->makeMenuKeyboard()
             );
         } else {
             $report = new Report($startDate, $intakeMarks);
             $result = new StateHandlerResponseDTO(
-                EnumMessageText::REPORT_READY, $this->keyboardFactory->makeMenuKeyboard(), report: $report
+                EnumMessageText::REPORT_READY,
+                $this->keyboardFactory->makeMenuKeyboard(),
+                report: $report
             );
         }
 

@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Presentation\Console\Commands;
 
 use App\Application\Outbox\OutboxRelay;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
 use function extension_loaded;
 use function pcntl_async_signals;
@@ -20,6 +22,7 @@ class OutboxPublishCommand extends Command
 {
     public function __construct(
         private readonly OutboxRelay $relay,
+        private readonly LoggerInterface $logger,
     ) {
         parent::__construct();
     }
@@ -34,7 +37,9 @@ class OutboxPublishCommand extends Command
     {
         $this->registerSignalHandlers();
 
-        $this->relay->run();
+        $this->relay->run(function (Throwable $e, array $context): void {
+            $this->logger->error($e, $context);
+        });
 
         return self::SUCCESS;
     }

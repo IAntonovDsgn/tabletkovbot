@@ -22,8 +22,7 @@ final readonly class TelegramMessageService implements MessageServiceInterface
 
     public function __construct(
         private TelegramBotApi $telegramApi,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws SendMessageException

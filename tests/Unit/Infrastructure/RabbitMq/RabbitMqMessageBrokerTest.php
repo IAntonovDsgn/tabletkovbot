@@ -8,16 +8,19 @@ use App\Infrastructure\Exceptions\AMQPException;
 use App\Infrastructure\RabbitMq\AmqpConnectionFactoryInterface;
 use App\Infrastructure\RabbitMq\MessagePayloadSerializer;
 use App\Infrastructure\RabbitMq\RabbitMqMessageBroker;
+use JsonException;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Exception\AMQPTimeoutException;
 use PhpAmqpLib\Message\AMQPMessage;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 class RabbitMqMessageBrokerTest extends TestCase
 {
     private MessagePayloadSerializer $serializer;
+    private MockObject $logger;
     private MockObject $connectionFactory;
     private MockObject $connection;
     private MockObject $channel;
@@ -26,6 +29,7 @@ class RabbitMqMessageBrokerTest extends TestCase
     {
         parent::setUp();
         $this->serializer = new MessagePayloadSerializer();
+        $this->logger = $this->createMock(LoggerInterface::class);
         $this->connectionFactory = $this->createMock(AmqpConnectionFactoryInterface::class);
         $this->connection = $this->createMock(AMQPStreamConnection::class);
         $this->channel = $this->createMock(AMQPChannel::class);
@@ -40,6 +44,7 @@ class RabbitMqMessageBrokerTest extends TestCase
     {
         return new RabbitMqMessageBroker(
             $this->serializer,
+            $this->logger,
             'rabbitmq-host',
             5672,
             '/',
@@ -57,6 +62,10 @@ class RabbitMqMessageBrokerTest extends TestCase
         return Message::restoreFromPersistence(7, 42, EnumMessageText::MENU->value);
     }
 
+    /**
+     * @throws AMQPException
+     * @throws JsonException
+     */
     public function testFirstPublishDeclaresTopologyConfirmsAndPublishesPersistentMessage(): void
     {
         $this->channel->expects($this->once())
@@ -91,6 +100,10 @@ class RabbitMqMessageBrokerTest extends TestCase
         self::assertSame(AMQPMessage::DELIVERY_MODE_PERSISTENT, $publishedMessage->get('delivery_mode'));
     }
 
+    /**
+     * @throws AMQPException
+     * @throws JsonException
+     */
     public function testSecondPublishReusesChannelWithoutRedeclaringTopology(): void
     {
         $this->channel->method('is_open')->willReturn(true);
@@ -110,6 +123,10 @@ class RabbitMqMessageBrokerTest extends TestCase
         $broker->publish($this->makeMessage());
     }
 
+    /**
+     * @throws AMQPException
+     * @throws JsonException
+     */
     public function testPublishFailsWhenBrokerDoesNotConfirm(): void
     {
         $this->channel->method('is_open')->willReturn(true);
@@ -121,6 +138,10 @@ class RabbitMqMessageBrokerTest extends TestCase
         $this->makeBroker()->publish($this->makeMessage());
     }
 
+    /**
+     * @throws AMQPException
+     * @throws JsonException
+     */
     public function testDeadChannelTriggersNewConnectionOnNextPublish(): void
     {
         $isOpen = true;
@@ -138,6 +159,9 @@ class RabbitMqMessageBrokerTest extends TestCase
         $broker->publish($this->makeMessage());
     }
 
+    /**
+     * @throws JsonException
+     */
     public function testFactoryFailureIsWrappedIntoAmqpException(): void
     {
         $this->connectionFactory->method('create')
@@ -149,6 +173,10 @@ class RabbitMqMessageBrokerTest extends TestCase
         $this->makeBroker()->publish($this->makeMessage());
     }
 
+    /**
+     * @throws AMQPException
+     * @throws JsonException
+     */
     public function testCloseClosesChannelAndConnectionAndIsIdempotent(): void
     {
         $closeChannelCalls = 0;
@@ -177,7 +205,6 @@ class RabbitMqMessageBrokerTest extends TestCase
 
     public function testCloseWithoutConnectionIsANoop(): void
     {
-        // Must not throw even though nothing was ever connected.
         $this->makeBroker()->close();
         $this->addToAssertionCount(1);
     }

@@ -9,6 +9,7 @@ use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Exceptions\NotFoundEntityException;
+use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 
 class StateDeleteMedicamentConfirmedHandlerTest extends TestCase
@@ -28,6 +29,9 @@ class StateDeleteMedicamentConfirmedHandlerTest extends TestCase
         );
     }
 
+    /**
+     * @throws NotFoundEntityException
+     */
     public function testHandleSuccess(): void
     {
         $chatId = 12345;
@@ -37,11 +41,11 @@ class StateDeleteMedicamentConfirmedHandlerTest extends TestCase
             $medicamentId,
             'Aspirin',
             $chatId,
-            new \DateTimeImmutable(),
+            new DateTimeImmutable(),
             true
         );
 
-        $this->assertTrue($medicament->isActive()); // Pre-condition
+        $this->assertTrue($medicament->isActive());
 
         $this->medicamentRepository->expects($this->once())
             ->method('findById')
@@ -51,10 +55,10 @@ class StateDeleteMedicamentConfirmedHandlerTest extends TestCase
         $this->medicamentRepository->expects($this->once())
             ->method('update')
             ->with($this->callback(function (Medicament $savedMedicament) {
-                return !$savedMedicament->isActive(); // Check that it was deactivated
+                return !$savedMedicament->isActive();
             }));
 
-        $response = $this->handler->handle($chatId, null, (string)$medicamentId, null);
+        $response = $this->handler->handle($chatId, null, (string) $medicamentId, null);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::MEDICAMENT_DELETED,
@@ -87,7 +91,7 @@ class StateDeleteMedicamentConfirmedHandlerTest extends TestCase
             $medicamentId,
             'Aspirin',
             $anotherChatId,
-            new \DateTimeImmutable(),
+            new DateTimeImmutable(),
             true
         );
 
@@ -99,6 +103,6 @@ class StateDeleteMedicamentConfirmedHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle($chatId, null, (string)$medicamentId, null);
+        $this->handler->handle($chatId, null, (string) $medicamentId, null);
     }
 }

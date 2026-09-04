@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Application\BotManager;
 
-use App\Application\BotManager\Exceptions\BotManagerRuntimeException;
 use App\Application\BotManager\Exceptions\InvalidValueException;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
@@ -25,8 +24,7 @@ final readonly class Manager
         private OutboxRepositoryInterface $outboxRepository,
         private KeyboardFactory $keyboardFactory,
         private UnitOfWorkInterface $unitOfWork,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws TransitionStateNotAllowedException
@@ -72,7 +70,7 @@ final readonly class Manager
             );
 
             $this->unitOfWork->commit();
-        } catch (InvalidValueException | TransitionStateNotAllowedException $e) {
+        } catch (InvalidValueException|TransitionStateNotAllowedException $e) {
             $this->unitOfWork->rollback();
             $this->errorHandler($params->chatId, $e->getMessage());
             throw $e;

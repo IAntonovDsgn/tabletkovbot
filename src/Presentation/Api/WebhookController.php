@@ -22,8 +22,7 @@ final readonly class WebhookController
         private Api $telegramApi,
         private Manager $manager,
         private LoggerInterface $logger,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws Throwable
@@ -42,8 +41,8 @@ final readonly class WebhookController
                 "message" => [
                     "message_id" => 1,
                     "chat" => ["id" => 123456789, "type" => "private"],
-                    "text" => "test message"
-                ]
+                    "text" => "test message",
+                ],
             ]
         )
     )]
@@ -66,7 +65,7 @@ final readonly class WebhookController
             }
 
             $this->telegramApi->answerCallbackQuery([
-                'callback_query_id' => $callbackQuery->id
+                'callback_query_id' => $callbackQuery->id,
             ]);
 
             $chatId = $callbackQuery->message->chat->id;
@@ -85,8 +84,8 @@ final readonly class WebhookController
 
         try {
             $this->manager->process($requestDTO);
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+        } catch (Throwable $e) {
+            $this->logger->error($e);
         }
 
     }

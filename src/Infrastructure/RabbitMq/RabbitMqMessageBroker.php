@@ -11,6 +11,8 @@ use JsonException;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 final class RabbitMqMessageBroker implements MessageBrokerInterface
 {
@@ -21,6 +23,7 @@ final class RabbitMqMessageBroker implements MessageBrokerInterface
 
     public function __construct(
         private readonly MessagePayloadSerializer $serializer,
+        private readonly LoggerInterface $logger,
         private readonly string $host,
         private readonly int $port,
         private readonly string $vhost,
@@ -30,8 +33,7 @@ final class RabbitMqMessageBroker implements MessageBrokerInterface
         private readonly string $queue,
         private readonly float $confirmTimeoutSeconds = 5.0,
         private readonly AmqpConnectionFactoryInterface $connectionFactory = new AmqpConnectionFactory(),
-    ) {
-    }
+    ) {}
 
     /**
      * @throws JsonException
@@ -58,14 +60,16 @@ final class RabbitMqMessageBroker implements MessageBrokerInterface
             if ($this->channel instanceof AMQPChannel && $this->channel->is_open()) {
                 $this->channel->close();
             }
-        } catch (\Exception) {
+        } catch (Throwable $e) {
+            $this->logger->warning($e, ['phase' => 'close_channel']);
         }
 
         try {
             if ($this->connection instanceof AMQPStreamConnection && $this->connection->isConnected()) {
                 $this->connection->close();
             }
-        } catch (\Exception) {
+        } catch (Throwable $e) {
+            $this->logger->warning($e, ['phase' => 'close_connection']);
         }
 
         $this->channel = null;

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Entities\Session\State;
 
-enum EnumState: string {
+enum EnumState: string
+{
     case MENU = 'menu';
     case ADD_MEDICAMENT_SELECTED = 'add_medicament_selected';
     case MEDICAMENT_NAME_ENTERED = 'medicament_name_entered';

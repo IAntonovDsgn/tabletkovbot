@@ -17,8 +17,7 @@ final readonly class StateMedicamentNameEnteredHandler implements StateHandlerIn
 {
     public function __construct(
         private MedicamentRepositoryInterface $medicamentRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws InvalidValueException
@@ -39,9 +38,9 @@ final readonly class StateMedicamentNameEnteredHandler implements StateHandlerIn
         return new StateHandlerResponseDTO(
             EnumMessageText::ENTER_TIME,
             [
-                new MessageButton(MessageButton::MENU, EnumState::MENU)
+                new MessageButton(MessageButton::MENU, EnumState::MENU),
             ],
-            (string)$medicamentId
+            (string) $medicamentId
         );
     }
 }

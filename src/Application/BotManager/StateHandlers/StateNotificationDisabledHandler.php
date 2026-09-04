@@ -16,8 +16,7 @@ final readonly class StateNotificationDisabledHandler implements StateHandlerInt
     public function __construct(
         private SessionRepositoryInterface $sessionRepository,
         private KeyboardFactory $keyboardFactory,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws NotFoundEntityException
@@ -38,7 +37,8 @@ final readonly class StateNotificationDisabledHandler implements StateHandlerInt
         $this->sessionRepository->update($session);
 
         return new StateHandlerResponseDTO(
-            EnumMessageText::SETTINGS_SAVED, $this->keyboardFactory->makeMenuKeyboard()
+            EnumMessageText::SETTINGS_SAVED,
+            $this->keyboardFactory->makeMenuKeyboard()
         );
     }
 }

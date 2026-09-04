@@ -6,9 +6,7 @@ namespace App\Application\BotManager\StateHandlers;
 
 use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
-use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Message\EnumMessageText;
-use App\Domain\Entities\Session\State\EnumState;
 
 class StateChangeMedicamentNameSelectedHandler implements StateHandlerInterface
 {
@@ -19,7 +17,8 @@ class StateChangeMedicamentNameSelectedHandler implements StateHandlerInterface
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
         return new StateHandlerResponseDTO(
-            EnumMessageText::ENTER_NEW_NAME, []
+            EnumMessageText::ENTER_NEW_NAME,
+            []
         );
     }
 }

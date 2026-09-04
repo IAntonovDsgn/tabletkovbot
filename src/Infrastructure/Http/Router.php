@@ -19,8 +19,7 @@ final readonly class Router
 {
     public function __construct(
         private Container $container
-    ) {
-    }
+    ) {}
 
     private function routes(RouteCollector $routes): void
     {

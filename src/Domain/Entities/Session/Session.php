@@ -46,8 +46,7 @@ final class Session
         bool $isNotificationEnable,
         EnumState $state,
         ?string $payload = null,
-    ): Session
-    {
+    ): Session {
         return new self(
             $id,
             $chatId,

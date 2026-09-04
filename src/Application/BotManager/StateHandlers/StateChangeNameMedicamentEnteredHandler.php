@@ -17,8 +17,7 @@ final readonly class StateChangeNameMedicamentEnteredHandler implements StateHan
     public function __construct(
         private MedicamentRepositoryInterface $medicamentRepository,
         private KeyboardFactory $keyboardFactory,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws InvalidValueException
@@ -45,7 +44,8 @@ final readonly class StateChangeNameMedicamentEnteredHandler implements StateHan
         $this->medicamentRepository->update($medicament);
 
         return new StateHandlerResponseDTO(
-            EnumMessageText::MEDICAMENT_RENAMED_SUCCESS, $this->keyboardFactory->makeMenuKeyboard()
+            EnumMessageText::MEDICAMENT_RENAMED_SUCCESS,
+            $this->keyboardFactory->makeMenuKeyboard()
         );
     }
 }

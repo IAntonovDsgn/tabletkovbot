@@ -23,13 +23,17 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
     {
         parent::setUp();
         $this->medicamentRepository = $this->createMock(MedicamentRepositoryInterface::class);
-        $this->keyboardFactory = new KeyboardFactory(); // Real factory as it has no external dependencies
+        $this->keyboardFactory = new KeyboardFactory();
         $this->handler = new StateMedicamentNotificationTimeEnteredHandler(
             $this->medicamentRepository,
             $this->keyboardFactory
         );
     }
 
+    /**
+     * @throws InvalidValueException
+     * @throws NotFoundEntityException
+     */
     public function testHandleSuccess(): void
     {
         $chatId = 12345;
@@ -38,7 +42,8 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
 
         $medicament = Medicament::restoreFromPersistence(
             $medicamentId,
-            'Test', $chatId,
+            'Test',
+            $chatId,
             new DateTimeImmutable(),
             true
         );
@@ -54,7 +59,7 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
                 return $savedMedicament->getNotificationTime()?->format('H:i') === $time;
             }));
 
-        $response = $this->handler->handle($chatId, $time, (string)$medicamentId, null);
+        $response = $this->handler->handle($chatId, $time, (string) $medicamentId, null);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::MEDICAMENT_ADDED_SUCCESS,
@@ -64,6 +69,9 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
         $this->assertEquals($expectedResponse, $response);
     }
 
+    /**
+     * @throws NotFoundEntityException
+     */
     public function testHandleThrowsExceptionForInvalidTimeFormat(): void
     {
         $this->expectException(InvalidValueException::class);
@@ -72,6 +80,9 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
         $this->handler->handle(12345, 'invalid-time', '1', null);
     }
 
+    /**
+     * @throws NotFoundEntityException
+     */
     public function testHandleThrowsExceptionForNullTime(): void
     {
         $this->expectException(InvalidValueException::class);
@@ -80,6 +91,9 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
         $this->handler->handle(12345, null, '1', null);
     }
 
+    /**
+     * @throws InvalidValueException
+     */
     public function testHandleThrowsExceptionIfMedicamentNotFound(): void
     {
         $medicamentId = 1;
@@ -91,9 +105,12 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle(12345, '09:30', (string)$medicamentId, null);
+        $this->handler->handle(12345, '09:30', (string) $medicamentId, null);
     }
 
+    /**
+     * @throws InvalidValueException
+     */
     public function testHandleThrowsExceptionIfMedicamentBelongsToAnotherChat(): void
     {
         $chatId = 12345;
@@ -116,6 +133,6 @@ class StateMedicamentNotificationTimeEnteredHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle($chatId, '09:30', (string)$medicamentId, null);
+        $this->handler->handle($chatId, '09:30', (string) $medicamentId, null);
     }
 }

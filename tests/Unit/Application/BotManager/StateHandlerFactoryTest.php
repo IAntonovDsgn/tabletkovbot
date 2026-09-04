@@ -28,48 +28,53 @@ use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class StateHandlerFactoryTest extends TestCase
 {
     private StateHandlerFactory $factory;
-    private MockObject $medicamentRepository;
-    private MockObject $intakeMarkRepository;
-    private MockObject $sessionRepository;
-    private MockObject $keyboardFactory;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->medicamentRepository = $this->createMock(MedicamentRepositoryInterface::class);
-        $this->intakeMarkRepository = $this->createMock(IntakeMarkRepositoryInterface::class);
-        $this->sessionRepository = $this->createMock(SessionRepositoryInterface::class);
-        $this->keyboardFactory = $this->createMock(KeyboardFactory::class);
+        $medicamentRepository = $this->createMock(MedicamentRepositoryInterface::class);
+        $intakeMarkRepository = $this->createMock(IntakeMarkRepositoryInterface::class);
+        $sessionRepository = $this->createMock(SessionRepositoryInterface::class);
+        $keyboardFactory = new KeyboardFactory();
 
-        // Instantiate all handlers with mocks
-        $menuHandler = new StateMenuHandler($this->keyboardFactory);
-        $changeNameMedicamentEnteredHandler = new StateChangeNameMedicamentEnteredHandler($this->medicamentRepository, $this->keyboardFactory);
-        $changeMedicamentSelectedHandler = new StateChangeMedicamentSelectedHandler($this->medicamentRepository);
-        $medicamentNameEnteredHandler = new StateMedicamentNameEnteredHandler($this->medicamentRepository);
+        $menuHandler = new StateMenuHandler($keyboardFactory);
+        $changeNameMedicamentEnteredHandler = new StateChangeNameMedicamentEnteredHandler($medicamentRepository,
+            $keyboardFactory
+        );
+        $changeMedicamentSelectedHandler = new StateChangeMedicamentSelectedHandler($medicamentRepository);
+        $medicamentNameEnteredHandler = new StateMedicamentNameEnteredHandler($medicamentRepository);
         $addMedicamentSelectedHandler = new StateAddMedicamentSelectedHandler();
-        $medicamentNotificationTimeEnteredHandler = new StateMedicamentNotificationTimeEnteredHandler($this->medicamentRepository, $this->keyboardFactory);
-        $changeMedicamentSelectedMedicamentHandler = new StateChangeMedicamentSelectedMedicamentHandler($this->medicamentRepository);
+        $medicamentNotificationTimeEnteredHandler = new StateMedicamentNotificationTimeEnteredHandler(
+            $medicamentRepository, $keyboardFactory
+        );
+        $changeMedicamentSelectedMedicamentHandler = new StateChangeMedicamentSelectedMedicamentHandler(
+            $medicamentRepository
+        );
         $changeMedicamentNameSelectedHandler = new StateChangeMedicamentNameSelectedHandler();
         $changeNotificationTimeSelectedHandler = new StateChangeNotificationTimeSelectedHandler();
-        $deleteMedicamentSelectedHandler = new StateDeleteMedicamentSelectedHandler($this->medicamentRepository);
+        $deleteMedicamentSelectedHandler = new StateDeleteMedicamentSelectedHandler($medicamentRepository);
         $selectedMedicamentForDeleteHandler = new StateSelectedMedicamentForDeleteHandler();
-        $deleteMedicamentConfirmedHandler = new StateDeleteMedicamentConfirmedHandler($this->medicamentRepository, $this->keyboardFactory);
+        $deleteMedicamentConfirmedHandler = new StateDeleteMedicamentConfirmedHandler($medicamentRepository,
+            $keyboardFactory
+        );
         $downloadReportSelectedHandler = new StateDownloadReportSelectedHandler();
-        $downloadReportStartDateEnteredHandler = new StateDownloadReportStartDateEnteredHandler($this->intakeMarkRepository, $this->keyboardFactory);
-        $notificationsSelectedHandler = new StateNotificationsSelectedHandler($this->sessionRepository);
-        $notificationEnabledHandler = new StateNotificationEnabledHandler($this->sessionRepository, $this->keyboardFactory);
-        $notificationDisabledHandler = new StateNotificationDisabledHandler($this->sessionRepository, $this->keyboardFactory);
-        $makeIntakeMarkSelectedHandler = new StateMakeIntakeMarkSelectedHandler($this->medicamentRepository);
-        $intakeMarkHasMadeHandler = new StateIntakeMarkHasMadeHandler($this->medicamentRepository, $this->intakeMarkRepository, $this->keyboardFactory);
-        $notifiedHandler = new StateNotifiedHandler($this->medicamentRepository, $this->intakeMarkRepository, $this->keyboardFactory);
+        $downloadReportStartDateEnteredHandler = new StateDownloadReportStartDateEnteredHandler($intakeMarkRepository,
+            $keyboardFactory
+        );
+        $notificationsSelectedHandler = new StateNotificationsSelectedHandler($sessionRepository);
+        $notificationEnabledHandler = new StateNotificationEnabledHandler($sessionRepository, $keyboardFactory);
+        $notificationDisabledHandler = new StateNotificationDisabledHandler($sessionRepository, $keyboardFactory);
+        $makeIntakeMarkSelectedHandler = new StateMakeIntakeMarkSelectedHandler($medicamentRepository);
+        $intakeMarkHasMadeHandler = new StateIntakeMarkHasMadeHandler($medicamentRepository,
+            $intakeMarkRepository, $keyboardFactory
+        );
+        $notifiedHandler = new StateNotifiedHandler($medicamentRepository, $intakeMarkRepository, $keyboardFactory);
 
-        // Instantiate the factory with all the real handlers
         $this->factory = new StateHandlerFactory(
             $menuHandler,
             $changeNameMedicamentEnteredHandler,
@@ -100,7 +105,7 @@ class StateHandlerFactoryTest extends TestCase
             $state = $dataSet[0];
             $expectedHandlerClass = $dataSet[1];
             $handler = $this->factory->makeByState($state);
-            $this->assertInstanceOf($expectedHandlerClass, $handler, "Failed for state: {$state->value}");
+            $this->assertInstanceOf($expectedHandlerClass, $handler, "Failed for state: $state->value");
         }
     }
 

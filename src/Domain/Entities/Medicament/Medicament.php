@@ -8,8 +8,8 @@ use DateTimeImmutable;
 
 class Medicament
 {
-    const string TIME_FORMAT = 'H:i';
-    const string DATE_TIME_ZONE = 'Asia/Yekaterinburg';
+    public const string TIME_FORMAT = 'H:i';
+    public const string DATE_TIME_ZONE = 'Asia/Yekaterinburg';
 
     private function __construct(
         private readonly ?int $id,
@@ -18,8 +18,7 @@ class Medicament
         private readonly int $chatId,
         private ?DateTimeImmutable $notificationTime,
         private bool $isActive,
-    ) {
-    }
+    ) {}
 
     public static function create(
         string $name,
@@ -42,7 +41,7 @@ class Medicament
         int $chatId,
         ?DateTimeImmutable $notificationTime,
         bool $isActive,
-    ):Medicament {
+    ): Medicament {
         return new self(
             $id,
             $name,

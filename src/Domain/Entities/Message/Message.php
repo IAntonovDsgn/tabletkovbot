@@ -15,8 +15,7 @@ final readonly class Message
         private int $chatId,
         private ?string $text,
         private array $buttons,
-    ) {
-    }
+    ) {}
 
     /**
      * @param MessageButton[] $buttons

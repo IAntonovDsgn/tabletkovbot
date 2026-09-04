@@ -12,8 +12,7 @@ final readonly class UnitOfWork implements UnitOfWorkInterface
 {
     public function __construct(
         private Connection $connection
-    ) {
-    }
+    ) {}
 
     /**
      * @throws Exception

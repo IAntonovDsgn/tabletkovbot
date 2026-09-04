@@ -32,24 +32,24 @@ class StateTransitionRules
         EnumState::MAKE_INTAKE_MARK_SELECTED,
         EnumState::NOTIFIED,
         EnumState::MENU,
-        EnumState::NOTIFIED
+        EnumState::NOTIFIED,
     ];
 
     private const array ALLOWED_TRANSITIONS_FROM_TO = [
-        EnumState::MENU->value =>
-            self::MENU_ALLOWED_STATES,
-        EnumState::MEDICAMENT_NOTIFICATION_TIME_ENTERED->value =>
-            self::MENU_ALLOWED_STATES,
-        EnumState::CHANGE_MEDICAMENT_NAME_ENTERED->value =>
-            self::MENU_ALLOWED_STATES,
-        EnumState::DOWNLOAD_REPORT_START_DATE_ENTERED->value =>
-            self::MENU_ALLOWED_STATES,
-        EnumState::NOTIFICATION_ENABLED->value =>
-            self::MENU_ALLOWED_STATES,
-        EnumState::NOTIFICATION_DISABLED->value =>
-            self::MENU_ALLOWED_STATES,
-        EnumState::INTAKE_MARK_HAS_MADE->value =>
-            self::MENU_ALLOWED_STATES,
+        EnumState::MENU->value
+            => self::MENU_ALLOWED_STATES,
+        EnumState::MEDICAMENT_NOTIFICATION_TIME_ENTERED->value
+            => self::MENU_ALLOWED_STATES,
+        EnumState::CHANGE_MEDICAMENT_NAME_ENTERED->value
+            => self::MENU_ALLOWED_STATES,
+        EnumState::DOWNLOAD_REPORT_START_DATE_ENTERED->value
+            => self::MENU_ALLOWED_STATES,
+        EnumState::NOTIFICATION_ENABLED->value
+            => self::MENU_ALLOWED_STATES,
+        EnumState::NOTIFICATION_DISABLED->value
+            => self::MENU_ALLOWED_STATES,
+        EnumState::INTAKE_MARK_HAS_MADE->value
+            => self::MENU_ALLOWED_STATES,
         EnumState::ADD_MEDICAMENT_SELECTED->value => [
             EnumState::MENU,
             EnumState::MEDICAMENT_NAME_ENTERED,
@@ -109,7 +109,7 @@ class StateTransitionRules
         ],
         EnumState::NOTIFIED->value => [
             EnumState::INTAKE_MARK_HAS_MADE,
-            EnumState::MENU
+            EnumState::MENU,
         ],
     ];
 }

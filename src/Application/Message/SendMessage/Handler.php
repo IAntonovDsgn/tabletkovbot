@@ -12,8 +12,7 @@ final readonly class Handler
 {
     public function __construct(
         private MessageServiceInterface $messageService,
-    ) {
-    }
+    ) {}
 
     /**
      * @param MessageButton[] $messageButtons

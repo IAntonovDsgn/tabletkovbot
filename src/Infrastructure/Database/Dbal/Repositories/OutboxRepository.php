@@ -18,20 +18,23 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
 {
     use HydrateRowsTrait;
 
-    const string MESSAGE_OUTBOX_TABLE_NAME = 'message_outbox';
-    const string ID_COLUMN_NAME = 'id';
-    const string CHAT_ID_COLUMN_NAME = 'chat_id';
-    const string TEXT_COLUMN_NAME = 'text';
-    const string BUTTONS_COLUMN_NAME = 'buttons';
-    const string STATUS_COLUMN_NAME = 'status';
-    const string ATTEMPTS_COLUMN_NAME = 'attempts';
-    const string PENDING_STATUS = 'pending';
+    public const string MESSAGE_OUTBOX_TABLE_NAME = 'message_outbox';
+    public const string ID_COLUMN_NAME = 'id';
+    public const string CHAT_ID_COLUMN_NAME = 'chat_id';
+    public const string TEXT_COLUMN_NAME = 'text';
+    public const string BUTTONS_COLUMN_NAME = 'buttons';
+    public const string STATUS_COLUMN_NAME = 'status';
+    public const string ATTEMPTS_COLUMN_NAME = 'attempts';
+    public const string PENDING_STATUS = 'pending';
 
     public function __construct(
         private Connection $connection
-    ) {
-    }
+    ) {}
 
+    /**
+     * @throws RepositoryException
+     * @throws AlreadyExistInPersistenceException
+     */
     public function insert(Message $message): void
     {
         if ($message->isExistInPersistence()) {
@@ -44,18 +47,21 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
                 [
                     self::CHAT_ID_COLUMN_NAME => $message->getChatId(),
                     self::TEXT_COLUMN_NAME => $message->getText(),
-                    self::BUTTONS_COLUMN_NAME =>
-                        (!empty($message->getButtons()))
+                    self::BUTTONS_COLUMN_NAME
+                        => (!empty($message->getButtons()))
                             ? json_encode($message->getButtons(), JSON_UNESCAPED_UNICODE)
                             : null,
                     self::STATUS_COLUMN_NAME => self::PENDING_STATUS,
                 ]
             );
         } catch (Exception $e) {
-            throw new RepositoryException($e->getMessage());
+            throw new RepositoryException($e->getMessage(), 0, $e);
         }
     }
 
+    /**
+     * @throws RepositoryException
+     */
     public function getPendingMessages(int $limit): array
     {
         $result = [];
@@ -71,7 +77,7 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
         try {
             $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
         } catch (Exception $e) {
-            throw new RepositoryException($e->getMessage());
+            throw new RepositoryException($e->getMessage(), 0, $e);
         }
 
 
@@ -120,7 +126,7 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
                 ['id' => $message->getId()],
             );
         } catch (Exception $e) {
-            throw new RepositoryException($e->getMessage());
+            throw new RepositoryException($e->getMessage(), 0, $e);
         }
 
         if ($attempts === false) {
@@ -130,6 +136,10 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
         return $this->toInt($attempts);
     }
 
+    /**
+     * @throws RepositoryException
+     * @throws NotFoundEntityException
+     */
     public function delete(Message $message): void
     {
         if (!$message->isExistInPersistence()) {
@@ -142,7 +152,7 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
                 [self::ID_COLUMN_NAME => $message->getId()]
             );
         } catch (Exception $e) {
-            throw new RepositoryException($e->getMessage());
+            throw new RepositoryException($e->getMessage(), 0, $e);
         }
     }
 

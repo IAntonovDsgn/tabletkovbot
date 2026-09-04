@@ -15,13 +15,12 @@ class StateChangeNotificationTimeSelectedHandlerTest extends TestCase
     {
         $handler = new StateChangeNotificationTimeSelectedHandler();
 
-        // The handler is stateless and does not use any arguments, so they can be dummy values.
         $response = $handler->handle(12345, null, '1', null);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::ENTER_TIME,
             [
-                new MessageButton(MessageButton::MENU, EnumState::MENU)
+                new MessageButton(MessageButton::MENU, EnumState::MENU),
             ]
         );
 

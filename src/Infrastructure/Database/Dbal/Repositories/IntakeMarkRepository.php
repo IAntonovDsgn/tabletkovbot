@@ -17,18 +17,21 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
 {
     use HydrateRowsTrait;
 
-    const string INTAKE_MARKS_TABLE_NAME = 'intake_marks';
-    const string CHAT_ID_COLUMN_NAME = 'chat_id';
-    const string MEDICAMENT_ID_COLUMN_NAME = 'medicament_id';
-    const string IS_ACTIVE_COLUMN_NAME = 'is_active';
-    const string CREATED_AT_COLUMN_NAME = 'created_at';
-    const string ID_COLUMN_NAME = 'id';
+    public const string INTAKE_MARKS_TABLE_NAME = 'intake_marks';
+    public const string CHAT_ID_COLUMN_NAME = 'chat_id';
+    public const string MEDICAMENT_ID_COLUMN_NAME = 'medicament_id';
+    public const string IS_ACTIVE_COLUMN_NAME = 'is_active';
+    public const string CREATED_AT_COLUMN_NAME = 'created_at';
+    public const string ID_COLUMN_NAME = 'id';
 
     public function __construct(
         private Connection $connection,
-    ) {
-    }
+    ) {}
 
+    /**
+     * @throws AlreadyExistInPersistenceException
+     * @throws RepositoryException
+     */
     public function insert(IntakeMark $intakeMark): int
     {
         if ($intakeMark->isExistInPersistence()) {
@@ -44,12 +47,16 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
 
         try {
             $this->connection->insert(self::INTAKE_MARKS_TABLE_NAME, $data);
-            return (int)$this->connection->lastInsertId();
+            return (int) $this->connection->lastInsertId();
         } catch (Exception $e) {
-            throw new RepositoryException($e->getMessage());
+            throw new RepositoryException($e->getMessage(), 0, $e);
         }
     }
 
+    /**
+     * @throws RepositoryException
+     * @throws NotFoundEntityException
+     */
     public function update(IntakeMark $intakeMark): void
     {
         if (!$intakeMark->isExistInPersistence()) {
@@ -70,7 +77,7 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
                 [self::ID_COLUMN_NAME => $intakeMark->getId()]
             );
         } catch (Exception $e) {
-            throw new RepositoryException($e->getMessage());
+            throw new RepositoryException($e->getMessage(), 0, $e);
         }
     }
 

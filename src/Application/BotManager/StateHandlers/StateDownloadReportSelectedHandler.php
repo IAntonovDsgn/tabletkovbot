@@ -21,7 +21,7 @@ final readonly class StateDownloadReportSelectedHandler implements StateHandlerI
         return new StateHandlerResponseDTO(
             EnumMessageText::ENTER_DATE,
             [
-                new MessageButton(MessageButton::MENU, EnumState::MENU)
+                new MessageButton(MessageButton::MENU, EnumState::MENU),
             ]
         );
     }

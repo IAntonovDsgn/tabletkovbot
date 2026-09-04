@@ -8,7 +8,7 @@ use DateTimeImmutable;
 
 class IntakeMark
 {
-    const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
+    public const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
 
     private function __construct(
         private readonly ?int $id,

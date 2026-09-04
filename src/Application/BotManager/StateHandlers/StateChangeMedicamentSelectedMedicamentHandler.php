@@ -16,8 +16,7 @@ final readonly class StateChangeMedicamentSelectedMedicamentHandler implements S
 {
     public function __construct(
         private MedicamentRepositoryInterface $medicamentRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws NotFoundEntityException
@@ -46,7 +45,7 @@ final readonly class StateChangeMedicamentSelectedMedicamentHandler implements S
             [
                 new MessageButton(MessageButton::CHANGE_NAME, EnumState::CHANGE_MEDICAMENT_NAME_SELECTED),
                 new MessageButton(MessageButton::CHANGE_NOTIFICATION_TIME, EnumState::CHANGE_NOTIFICATION_TIME_SELECTED),
-                new MessageButton(MessageButton::MENU, EnumState::MENU)
+                new MessageButton(MessageButton::MENU, EnumState::MENU),
             ],
             (string) $medicamentId
         );

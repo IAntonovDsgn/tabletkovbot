@@ -20,7 +20,7 @@ class StateSelectedMedicamentForDeleteHandlerTest extends TestCase
 
         $expectedButtons = [
             new MessageButton(MessageButton::CONFIRM, EnumState::DELETE_MEDICAMENT_CONFIRMED),
-            new MessageButton(MessageButton::MENU, EnumState::MENU)
+            new MessageButton(MessageButton::MENU, EnumState::MENU),
         ];
 
         $expectedResponse = new StateHandlerResponseDTO(

@@ -16,8 +16,7 @@ final readonly class StateMakeIntakeMarkSelectedHandler implements StateHandlerI
 {
     public function __construct(
         private MedicamentRepositoryInterface $medicamentRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws NotFoundEntityException

@@ -9,14 +9,13 @@ use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use RuntimeException;
+use Throwable;
 
 class OutboxRelayTest extends TestCase
 {
     private MockObject $outboxRepository;
     private MockObject $broker;
-    private MockObject $logger;
     private OutboxRelay $relay;
 
     protected function setUp(): void
@@ -24,8 +23,7 @@ class OutboxRelayTest extends TestCase
         parent::setUp();
         $this->outboxRepository = $this->createMock(OutboxRepositoryInterface::class);
         $this->broker = $this->createMock(MessageBrokerInterface::class);
-        $this->logger = $this->createMock(LoggerInterface::class);
-        $this->relay = new OutboxRelay($this->outboxRepository, $this->broker, $this->logger, 10, 1000, 4);
+        $this->relay = new OutboxRelay($this->outboxRepository, $this->broker, 10, 1000, 4);
     }
 
     private function makePendingMessage(int $id, int $chatId): Message
@@ -43,7 +41,6 @@ class OutboxRelayTest extends TestCase
             ->with(10)
             ->willReturn([$first, $second]);
 
-        // Successful delivery must not touch the attempts counter.
         $this->outboxRepository->expects($this->never())->method('markAttempt');
 
         $publishedChatIds = [];
@@ -81,18 +78,21 @@ class OutboxRelayTest extends TestCase
             ->with($message)
             ->willReturn(1);
 
-        // The row must stay pending below the attempts threshold.
         $this->outboxRepository->expects($this->never())->method('delete');
 
-        $this->logger->expects($this->atLeastOnce())->method('error');
+        /** @var list<array{Throwable, array<string, mixed>}> $errors */
+        $errors = [];
+        $onError = function (Throwable $e, array $context) use (&$errors): void {
+            $errors[] = [$e, $context];
+        };
 
-        // Nothing was relayed, so the caller should back off before retrying
-        $this->assertFalse($this->relay->processBatch());
+        $this->assertFalse($this->relay->processBatch($onError));
+        $this->assertNotEmpty($errors);
     }
 
     public function testProcessBatchDropsMessageAfterMaxAttemptsReached(): void
     {
-        $relay = new OutboxRelay($this->outboxRepository, $this->broker, $this->logger, 10, 1000, 2);
+        $relay = new OutboxRelay($this->outboxRepository, $this->broker, 10, 1000, 2);
         $message = $this->makePendingMessage(1, 111);
 
         $this->outboxRepository->method('getPendingMessages')->willReturn([$message]);
@@ -106,23 +106,21 @@ class OutboxRelayTest extends TestCase
 
         $this->outboxRepository->expects($this->once())->method('delete')->with($message);
 
-        /** @var list<array{string, array<string, mixed>}> $errors */
+        /** @var list<array{Throwable, array<string, mixed>}> $errors */
         $errors = [];
-        $this->logger->method('error')->willReturnCallback(
-            function (string $logMessage, array $context) use (&$errors): void {
-                $errors[] = [$logMessage, $context];
-            }
-        );
+        $onError = function (Throwable $e, array $context) use (&$errors): void {
+            $errors[] = [$e, $context];
+        };
 
-        $this->assertFalse($relay->processBatch());
+        $this->assertFalse($relay->processBatch($onError));
 
         $drops = array_values(array_filter(
             $errors,
-            static fn (array $record): bool => $record[0] === 'Dropping outbox message after repeated failures'
+            static fn(array $record): bool => $record[1]['phase'] === 'drop_after_max_attempts'
         ));
         self::assertCount(1, $drops);
         self::assertSame(2, $drops[0][1]['attempts']);
-        self::assertSame('broker is down', $drops[0][1]['last_error']);
+        self::assertSame('broker is down', $drops[0][0]->getMessage());
     }
 
     public function testProcessBatchKeepsRowWhenMarkAttemptFails(): void
@@ -137,25 +135,22 @@ class OutboxRelayTest extends TestCase
             ->method('markAttempt')
             ->willThrowException(new RuntimeException('db is down'));
 
-        // Counter update failed: the row must stay pending for the next cycle.
         $this->outboxRepository->expects($this->never())->method('delete');
 
-        /** @var list<array{string, array<string, mixed>}> $warnings */
+        /** @var list<array{Throwable, array<string, mixed>}> $warnings */
         $warnings = [];
-        $this->logger->method('warning')->willReturnCallback(
-            function (string $logMessage, array $context) use (&$warnings): void {
-                $warnings[] = [$logMessage, $context];
-            }
-        );
+        $onError = function (Throwable $e, array $context) use (&$warnings): void {
+            $warnings[] = [$e, $context];
+        };
 
-        $this->assertFalse($this->relay->processBatch());
+        $this->assertFalse($this->relay->processBatch($onError));
 
         $failures = array_values(array_filter(
             $warnings,
-            static fn (array $record): bool => $record[0] === 'Failed to register outbox delivery attempt'
+            static fn(array $record): bool => $record[1]['phase'] === 'register_attempt'
         ));
         self::assertCount(1, $failures);
-        self::assertSame('db is down', $failures[0][1]['error']);
+        self::assertSame('db is down', $failures[0][0]->getMessage());
     }
 
     public function testProcessBatchDoesNotFailWhenDeleteFailsAfterConfirmedPublish(): void
@@ -176,9 +171,14 @@ class OutboxRelayTest extends TestCase
                 }
             });
 
-        $this->logger->expects($this->atLeastOnce())->method('error');
+        /** @var list<array{Throwable, array<string, mixed>}> $errors */
+        $errors = [];
+        $onError = function (Throwable $e, array $context) use (&$errors): void {
+            $errors[] = [$e, $context];
+        };
 
-        $this->assertTrue($this->relay->processBatch());
+        $this->assertTrue($this->relay->processBatch($onError));
+        $this->assertNotEmpty($errors);
     }
 
     public function testProcessBatchReturnsFalseAndSkipsBrokerWhenOutboxIsEmpty(): void
@@ -206,8 +206,6 @@ class OutboxRelayTest extends TestCase
         $published = 0;
         $this->broker->expects($this->once())->method('publish')
             ->willReturnCallback(function () use (&$published) {
-                // Request stop during the first publish: the current message is
-                // finished (delete included), then the batch must stop.
                 $published++;
                 $this->relay->requestStop();
             });

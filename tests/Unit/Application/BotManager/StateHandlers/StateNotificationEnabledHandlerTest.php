@@ -32,7 +32,7 @@ class StateNotificationEnabledHandlerTest extends TestCase
     {
         $chatId = 12345;
         $session = Session::create($chatId);
-        $session->disableNotifications(); // Start with them disabled
+        $session->disableNotifications();
 
         $this->sessionRepository->expects($this->once())
             ->method('findByChatId')

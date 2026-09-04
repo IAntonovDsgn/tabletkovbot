@@ -11,6 +11,7 @@ use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Exceptions\NotFoundEntityException;
+use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 
 class StateNotifiedHandlerTest extends TestCase
@@ -33,6 +34,9 @@ class StateNotifiedHandlerTest extends TestCase
         );
     }
 
+    /**
+     * @throws NotFoundEntityException
+     */
     public function testHandleSuccess(): void
     {
         $chatId = 12345;
@@ -42,7 +46,7 @@ class StateNotifiedHandlerTest extends TestCase
             $medicamentId,
             'Aspirin',
             $chatId,
-            new \DateTimeImmutable(),
+            new DateTimeImmutable(),
             true
         );
 
@@ -59,7 +63,7 @@ class StateNotifiedHandlerTest extends TestCase
                 })
             );
 
-        $response = $this->handler->handle($chatId, (string)$medicamentId, null, null);
+        $response = $this->handler->handle($chatId, (string) $medicamentId, null, null);
 
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::INTAKE_MARK_SAVED,
@@ -82,7 +86,7 @@ class StateNotifiedHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle(12345, (string)$medicamentId, null, null);
+        $this->handler->handle(12345, (string) $medicamentId, null, null);
     }
 
     public function testHandleThrowsExceptionIfMedicamentBelongsToAnotherChat(): void
@@ -95,7 +99,7 @@ class StateNotifiedHandlerTest extends TestCase
             $medicamentId,
             'Aspirin',
             $anotherChatId,
-            new \DateTimeImmutable(),
+            new DateTimeImmutable(),
             true
         );
 
@@ -109,12 +113,9 @@ class StateNotifiedHandlerTest extends TestCase
         $this->expectException(NotFoundEntityException::class);
         $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
 
-        $this->handler->handle($chatId, (string)$medicamentId, null, null);
+        $this->handler->handle($chatId, (string) $medicamentId, null, null);
     }
 
-    // This handler is bugged. It doesn't check for null text.
-    // It will fail with "findById(null)"
-    // I will add a test to document this.
     public function testHandleThrowsExceptionIfTextIsNull(): void
     {
         $this->medicamentRepository->expects($this->never())->method('findById');

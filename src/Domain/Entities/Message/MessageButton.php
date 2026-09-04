@@ -9,26 +9,25 @@ use JsonSerializable;
 
 class MessageButton implements JsonSerializable
 {
-    const string ADD_MEDICAMENT_BUTTON_TITLE = 'Добавить медикамент';
-    const string CHANGE_MEDICAMENT_BUTTON_TITLE = 'Изменить медикамент';
-    const string DELETE_MEDICAMENT_BUTTON_TITLE = 'Удалить медикамент';
-    const string DOWNLOAD_REPORT_BUTTON_TITLE = 'Скачать отчет';
-    const string NOTIFICATIONS_BUTTON_TITLE = 'Напоминания';
-    const string MAKE_INTAKE_MARK_BUTTON_TITLE = 'Принять медикамент';
-    const string CHANGE_NAME = 'Изменить имя';
-    const string CHANGE_NOTIFICATION_TIME = 'Изменить время напоминаний';
-    const string MENU = 'Меню';
-    const string CONFIRM = 'Подтвердить';
-    const string DISABLE_NOTIFICATIONS = 'Отключить напоминания';
-    const string ENABLE_NOTIFICATIONS = 'Включить напоминания';
-    const string PAYLOAD_SEPARATOR = '|';
+    public const string ADD_MEDICAMENT_BUTTON_TITLE = 'Добавить медикамент';
+    public const string CHANGE_MEDICAMENT_BUTTON_TITLE = 'Изменить медикамент';
+    public const string DELETE_MEDICAMENT_BUTTON_TITLE = 'Удалить медикамент';
+    public const string DOWNLOAD_REPORT_BUTTON_TITLE = 'Скачать отчет';
+    public const string NOTIFICATIONS_BUTTON_TITLE = 'Напоминания';
+    public const string MAKE_INTAKE_MARK_BUTTON_TITLE = 'Принять медикамент';
+    public const string CHANGE_NAME = 'Изменить имя';
+    public const string CHANGE_NOTIFICATION_TIME = 'Изменить время напоминаний';
+    public const string MENU = 'Меню';
+    public const string CONFIRM = 'Подтвердить';
+    public const string DISABLE_NOTIFICATIONS = 'Отключить напоминания';
+    public const string ENABLE_NOTIFICATIONS = 'Включить напоминания';
+    public const string PAYLOAD_SEPARATOR = '|';
 
     public function __construct(
         private readonly string $title,
         private readonly EnumState $newState,
         private readonly ?string $additionalPayload = null,
-    ) {
-    }
+    ) {}
 
     public function getTitle(): string
     {

@@ -16,8 +16,7 @@ final readonly class StateChangeMedicamentSelectedHandler implements StateHandle
 {
     public function __construct(
         private MedicamentRepositoryInterface $medicamentRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws NotFoundEntityException

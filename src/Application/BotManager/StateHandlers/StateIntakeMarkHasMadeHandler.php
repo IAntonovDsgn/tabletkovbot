@@ -20,8 +20,7 @@ final readonly class StateIntakeMarkHasMadeHandler implements StateHandlerInterf
         private MedicamentRepositoryInterface $medicamentRepository,
         private IntakeMarkRepositoryInterface $intakeMarkRepository,
         private KeyboardFactory $keyboardFactory,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws NotFoundEntityException
@@ -44,7 +43,8 @@ final readonly class StateIntakeMarkHasMadeHandler implements StateHandlerInterf
         );
 
         return new StateHandlerResponseDTO(
-            EnumMessageText::INTAKE_MARK_SAVED, $this->keyboardFactory->makeMenuKeyboard()
+            EnumMessageText::INTAKE_MARK_SAVED,
+            $this->keyboardFactory->makeMenuKeyboard()
         );
     }
 }

@@ -49,8 +49,7 @@ readonly class StateHandlerFactory
         private StateMakeIntakeMarkSelectedHandler $makeIntakeMarkSelectedHandler,
         private StateIntakeMarkHasMadeHandler $intakeMarkHasMadeHandler,
         private StateNotifiedHandler $notifiedHandler,
-    ) {
-    }
+    ) {}
 
     public function makeByState(EnumState $state): StateHandlerInterface
     {

@@ -18,6 +18,5 @@ final readonly class StateHandlerResponseDTO
         public array $buttons,
         public ?string $newSessionPayload = null,
         public ?Report $report = null,
-    ) {
-    }
+    ) {}
 }

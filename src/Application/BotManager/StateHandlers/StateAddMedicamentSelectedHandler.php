@@ -21,7 +21,7 @@ final class StateAddMedicamentSelectedHandler implements StateHandlerInterface
         return new StateHandlerResponseDTO(
             EnumMessageText::ENTER_NEW_NAME,
             [
-                new MessageButton(MessageButton::MENU, EnumState::MENU)
+                new MessageButton(MessageButton::MENU, EnumState::MENU),
             ]
         );
     }

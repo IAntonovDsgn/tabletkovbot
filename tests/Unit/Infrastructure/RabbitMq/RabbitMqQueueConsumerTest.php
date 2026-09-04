@@ -7,6 +7,7 @@ use App\Infrastructure\RabbitMq\AmqpConnectionFactoryInterface;
 use App\Infrastructure\RabbitMq\MessagePayloadDeserializer;
 use App\Infrastructure\RabbitMq\MessagePayloadSerializer;
 use App\Infrastructure\RabbitMq\RabbitMqQueueConsumer;
+use JsonException;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -106,10 +107,13 @@ class RabbitMqQueueConsumerTest extends TestCase
             });
     }
 
-    private function validPayload(int $id, int $chatId): string
+    /**
+     * @throws JsonException
+     */
+    private function validPayload(int $id): string
     {
         return new MessagePayloadSerializer()
-            ->serialize(Message::restoreFromPersistence($id, $chatId, 'hello'));
+            ->serialize(Message::restoreFromPersistence($id, 42, 'hello'));
     }
 
     public function testRunWithStopRequestedNeverConnects(): void
@@ -126,10 +130,13 @@ class RabbitMqQueueConsumerTest extends TestCase
         self::assertTrue($this->logger->hasMessage('Queue consumer stopped gracefully'));
     }
 
+    /**
+     * @throws JsonException
+     */
     public function testSuccessfulDeliveryPassesMessageToCallbackAndAcks(): void
     {
         $consumer = $this->makeConsumer();
-        $this->channelWillDeliver($consumer, [$this->validPayload(7, 42)]);
+        $this->channelWillDeliver($consumer, [$this->validPayload(7)]);
 
         $this->channel->expects($this->once())->method('basic_ack')->with(11);
 
@@ -143,15 +150,6 @@ class RabbitMqQueueConsumerTest extends TestCase
         self::assertSame(7, $received->getId());
         self::assertSame(42, $received->getChatId());
         self::assertSame('hello', $received->getText());
-
-        $delivered = 0;
-        foreach ($this->logger->records as $record) {
-            if ($record['message'] === 'Queue message delivered') {
-                $delivered++;
-                self::assertSame(['id' => 7, 'chat_id' => 42], $record['context']);
-            }
-        }
-        self::assertSame(1, $delivered);
     }
 
     public function testMalformedPayloadIsNackedWithoutCallingCallback(): void
@@ -165,14 +163,16 @@ class RabbitMqQueueConsumerTest extends TestCase
             self::fail('Callback must not be invoked for malformed payloads.');
         });
 
-        self::assertTrue($this->logger->hasMessage('Dropping malformed queue message'));
-        self::assertFalse($this->logger->hasMessage('Queue message delivered'));
+        self::assertTrue($this->logger->hasRecordWithContext('phase', 'deserialize'));
     }
 
+    /**
+     * @throws JsonException
+     */
     public function testFailingCallbackIsLoggedAndMessageIsDropped(): void
     {
         $consumer = $this->makeConsumer();
-        $this->channelWillDeliver($consumer, [$this->validPayload(7, 42)]);
+        $this->channelWillDeliver($consumer, [$this->validPayload(7)]);
 
         $this->channel->expects($this->once())->method('basic_nack')->with(11, false, false);
 
@@ -182,7 +182,7 @@ class RabbitMqQueueConsumerTest extends TestCase
 
         $dropRecords = [];
         foreach ($this->logger->records as $record) {
-            if ($record['message'] === 'Dropping queue message after failed delivery') {
+            if (isset($record['context']['phase']) && $record['context']['phase'] === 'delivery') {
                 $dropRecords[] = $record;
             }
         }
@@ -190,19 +190,20 @@ class RabbitMqQueueConsumerTest extends TestCase
         self::assertCount(1, $dropRecords);
         self::assertSame(7, $dropRecords[0]['context']['id']);
         self::assertSame(42, $dropRecords[0]['context']['chat_id']);
-        self::assertSame('Bad Request: chat not found', $dropRecords[0]['context']['error']);
     }
 
+    /**
+     * @throws JsonException
+     */
     public function testBacklogIsDrainedWithoutExtraSubscriptions(): void
     {
         $consumer = $this->makeConsumer();
         $this->channelWillDeliver($consumer, [
-            $this->validPayload(1, 42),
-            $this->validPayload(2, 42),
-            $this->validPayload(3, 42),
+            $this->validPayload(1),
+            $this->validPayload(2),
+            $this->validPayload(3),
         ]);
 
-        // One subscription despite several loop iterations and deliveries.
         $this->channel->expects($this->once())->method('basic_consume');
         $this->channel->expects($this->exactly(3))->method('basic_ack');
 
@@ -215,7 +216,6 @@ class RabbitMqQueueConsumerTest extends TestCase
         });
 
         self::assertSame([1, 2, 3], $processedIds);
-        self::assertSame(3, $this->logger->countMessages('Queue message delivered'));
     }
 
     public function testConnectionLossLogsWarningAndReconnects(): void
@@ -229,7 +229,7 @@ class RabbitMqQueueConsumerTest extends TestCase
             self::fail('Callback must not be invoked when the connection dies.');
         });
 
-        self::assertTrue($this->logger->hasMessage('Queue consumer connection lost, will reconnect'));
+        self::assertTrue($this->logger->hasRecordWithContext('phase', 'connection_lost'));
         self::assertTrue($this->logger->hasMessage('Queue consumer stopped gracefully'));
     }
 }

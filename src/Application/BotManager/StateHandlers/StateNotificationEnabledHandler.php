@@ -11,15 +11,12 @@ use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Exceptions\NotFoundEntityException;
 
-
 final readonly class StateNotificationEnabledHandler implements StateHandlerInterface
 {
-
     public function __construct(
         private SessionRepositoryInterface $sessionRepository,
         private KeyboardFactory $keyboardFactory,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws NotFoundEntityException
@@ -40,7 +37,8 @@ final readonly class StateNotificationEnabledHandler implements StateHandlerInte
         $this->sessionRepository->update($session);
 
         return new StateHandlerResponseDTO(
-            EnumMessageText::SETTINGS_SAVED, $this->keyboardFactory->makeMenuKeyboard()
+            EnumMessageText::SETTINGS_SAVED,
+            $this->keyboardFactory->makeMenuKeyboard()
         );
     }
 }

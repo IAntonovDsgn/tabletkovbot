@@ -14,6 +14,9 @@ use PHPUnit\Framework\TestCase;
 
 class StateMedicamentNameEnteredHandlerTest extends TestCase
 {
+    /**
+     * @throws InvalidValueException
+     */
     public function testHandleSuccess(): void
     {
         $medicamentRepository = $this->createMock(MedicamentRepositoryInterface::class);
@@ -35,7 +38,7 @@ class StateMedicamentNameEnteredHandlerTest extends TestCase
         $expectedResponse = new StateHandlerResponseDTO(
             EnumMessageText::ENTER_TIME,
             [
-                new MessageButton(MessageButton::MENU, EnumState::MENU)
+                new MessageButton(MessageButton::MENU, EnumState::MENU),
             ],
             (string) $newMedicamentId
         );
