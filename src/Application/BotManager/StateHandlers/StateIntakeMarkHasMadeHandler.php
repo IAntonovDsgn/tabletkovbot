@@ -11,7 +11,7 @@ use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
-use App\Domain\Exceptions\Interior\NotFoundEntityException;
+use App\Domain\Exceptions\NotFoundEntityException;
 use Exception;
 
 final readonly class StateIntakeMarkHasMadeHandler implements StateHandlerInterface

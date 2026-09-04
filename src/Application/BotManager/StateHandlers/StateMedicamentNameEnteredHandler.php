@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\BotManager\StateHandlers;
 
+use App\Application\BotManager\Exceptions\InvalidValueException;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Medicament\Medicament;
@@ -11,9 +12,6 @@ use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\External\InvalidValueException;
-use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
-use App\Domain\Exceptions\Interior\RepositoryException;
 
 final readonly class StateMedicamentNameEnteredHandler implements StateHandlerInterface
 {
@@ -24,8 +22,6 @@ final readonly class StateMedicamentNameEnteredHandler implements StateHandlerIn
 
     /**
      * @throws InvalidValueException
-     * @throws EntityAlreadyExistInPersistenceException
-     * @throws RepositoryException
      */
     public function handle(
         int $chatId,

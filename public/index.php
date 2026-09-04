@@ -3,7 +3,6 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 use App\Infrastructure\Http\Router;
-
 use DI\Container;
 use Illuminate\Support\Facades\Log;
 

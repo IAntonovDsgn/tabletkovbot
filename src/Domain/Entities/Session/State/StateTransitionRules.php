@@ -6,17 +6,50 @@ namespace App\Domain\Entities\Session\State;
 
 class StateTransitionRules
 {
+    public function isTransitionToStateAllowed(EnumState $newState, EnumState $oldState): bool
+    {
+        return in_array(
+            $newState,
+            self::ALLOWED_TRANSITIONS_FROM_TO[$oldState->value] ?? [],
+            true
+        );
+    }
+
+    /**
+     * @return EnumState[]
+     */
+    public function getAllowedStates(EnumState $state): array
+    {
+        return self::ALLOWED_TRANSITIONS_FROM_TO[$state->value] ?? [];
+    }
+
+    private const array MENU_ALLOWED_STATES = [
+        EnumState::ADD_MEDICAMENT_SELECTED,
+        EnumState::CHANGE_MEDICAMENT_SELECTED,
+        EnumState::DELETE_MEDICAMENT_SELECTED,
+        EnumState::DOWNLOAD_REPORT_SELECTED,
+        EnumState::NOTIFICATIONS_SELECTED,
+        EnumState::MAKE_INTAKE_MARK_SELECTED,
+        EnumState::NOTIFIED,
+        EnumState::MENU,
+        EnumState::NOTIFIED
+    ];
+
     private const array ALLOWED_TRANSITIONS_FROM_TO = [
-        EnumState::MENU->value => [
-            EnumState::ADD_MEDICAMENT_SELECTED,
-            EnumState::CHANGE_MEDICAMENT_SELECTED,
-            EnumState::DELETE_MEDICAMENT_SELECTED,
-            EnumState::DOWNLOAD_REPORT_SELECTED,
-            EnumState::NOTIFICATIONS_SELECTED,
-            EnumState::MAKE_INTAKE_MARK_SELECTED,
-            EnumState::NOTIFIED,
-            EnumState::MENU,
-        ],
+        EnumState::MENU->value =>
+            self::MENU_ALLOWED_STATES,
+        EnumState::MEDICAMENT_NOTIFICATION_TIME_ENTERED->value =>
+            self::MENU_ALLOWED_STATES,
+        EnumState::CHANGE_MEDICAMENT_NAME_ENTERED->value =>
+            self::MENU_ALLOWED_STATES,
+        EnumState::DOWNLOAD_REPORT_START_DATE_ENTERED->value =>
+            self::MENU_ALLOWED_STATES,
+        EnumState::NOTIFICATION_ENABLED->value =>
+            self::MENU_ALLOWED_STATES,
+        EnumState::NOTIFICATION_DISABLED->value =>
+            self::MENU_ALLOWED_STATES,
+        EnumState::INTAKE_MARK_HAS_MADE->value =>
+            self::MENU_ALLOWED_STATES,
         EnumState::ADD_MEDICAMENT_SELECTED->value => [
             EnumState::MENU,
             EnumState::MEDICAMENT_NAME_ENTERED,
@@ -24,10 +57,6 @@ class StateTransitionRules
         ],
         EnumState::MEDICAMENT_NAME_ENTERED->value => [
             EnumState::MEDICAMENT_NOTIFICATION_TIME_ENTERED,
-            EnumState::MENU,
-            EnumState::NOTIFIED,
-        ],
-        EnumState::MEDICAMENT_NOTIFICATION_TIME_ENTERED->value => [
             EnumState::MENU,
             EnumState::NOTIFIED,
         ],
@@ -52,10 +81,6 @@ class StateTransitionRules
             EnumState::MENU,
             EnumState::NOTIFIED,
         ],
-        EnumState::CHANGE_MEDICAMENT_NAME_ENTERED->value => [
-            EnumState::MENU,
-            EnumState::NOTIFIED,
-        ],
         EnumState::DELETE_MEDICAMENT_SELECTED->value => [
             EnumState::SELECTED_MEDICAMENT_FOR_CHANGE,
             EnumState::MENU,
@@ -71,21 +96,9 @@ class StateTransitionRules
             EnumState::MENU,
             EnumState::NOTIFIED,
         ],
-        EnumState::DOWNLOAD_REPORT_START_DATE_ENTERED->value => [
-            EnumState::MENU,
-            EnumState::NOTIFIED,
-        ],
         EnumState::NOTIFICATIONS_SELECTED->value => [
             EnumState::NOTIFICATION_ENABLED,
             EnumState::NOTIFICATION_DISABLED,
-            EnumState::MENU,
-            EnumState::NOTIFIED,
-        ],
-        EnumState::NOTIFICATION_ENABLED->value => [
-            EnumState::MENU,
-            EnumState::NOTIFIED,
-        ],
-        EnumState::NOTIFICATION_DISABLED->value => [
             EnumState::MENU,
             EnumState::NOTIFIED,
         ],
@@ -98,26 +111,5 @@ class StateTransitionRules
             EnumState::INTAKE_MARK_HAS_MADE,
             EnumState::MENU
         ],
-        EnumState::INTAKE_MARK_HAS_MADE->value => [
-            EnumState::MENU,
-        ]
     ];
-
-    public function isTransitionToStateAllowed(EnumState $newState, EnumState $oldState): bool
-    {
-        return in_array(
-            $newState,
-            self::ALLOWED_TRANSITIONS_FROM_TO[$oldState->value] ?? [],
-            true
-        );
-    }
-
-
-    /**
-     * @return EnumState[]
-     */
-    public function getAllowedStates(EnumState $state): array
-    {
-        return self::ALLOWED_TRANSITIONS_FROM_TO[$state->value] ?? [];
-    }
 }

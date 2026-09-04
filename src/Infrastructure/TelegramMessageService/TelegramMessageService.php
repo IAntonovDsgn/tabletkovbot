@@ -9,7 +9,7 @@ use App\Application\Message\MessageServiceInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
-use App\Domain\Exceptions\Interior\SendMessageException;
+use App\Infrastructure\Exceptions\SendMessageException;
 use Exception;
 use Telegram\Bot\Api as TelegramBotApi;
 use Telegram\Bot\Exceptions\TelegramSDKException;

@@ -4,7 +4,7 @@ namespace Tests\Unit\Infrastructure\RabbitMq;
 
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
-use App\Domain\Exceptions\Interior\AMQPException;
+use App\Infrastructure\Exceptions\AMQPException;
 use App\Infrastructure\RabbitMq\AmqpConnectionFactoryInterface;
 use App\Infrastructure\RabbitMq\MessagePayloadSerializer;
 use App\Infrastructure\RabbitMq\RabbitMqMessageBroker;

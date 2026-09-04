@@ -6,7 +6,6 @@ namespace App\Application\Outbox;
 
 use App\Application\Message\MessageBrokerInterface;
 use App\Domain\Entities\Message\Message;
-use App\Domain\Exceptions\Interior\RepositoryException;
 use Psr\Log\LoggerInterface;
 
 final class OutboxRelay
@@ -48,9 +47,6 @@ final class OutboxRelay
         $this->logger->info('Outbox relay stopped gracefully');
     }
 
-    /**
-     * @throws RepositoryException
-     */
     public function processBatch(): bool
     {
         $messages = $this->outboxRepository->getPendingMessages($this->batchSize);
@@ -83,7 +79,6 @@ final class OutboxRelay
         try {
             $attempts = $this->outboxRepository->markAttempt($message);
         } catch (\Exception $e) {
-            // Counter update failed: keep the row pending, it will be retried.
             $this->logger->warning('Failed to register outbox delivery attempt', [
                 'message_id' => $message->getId(),
                 'chat_id' => $message->getChatId(),
@@ -107,7 +102,6 @@ final class OutboxRelay
         try {
             $this->outboxRepository->delete($message);
         } catch (\Exception $e) {
-            // Same best-effort policy as delete-after-publish.
             $this->logger->warning('Failed to delete dropped outbox message', [
                 'message_id' => $message->getId(),
                 'chat_id' => $message->getChatId(),

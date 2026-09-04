@@ -9,8 +9,7 @@ use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
-use App\Domain\Exceptions\Interior\NotFoundEntityException;
-use App\Domain\Exceptions\Interior\RepositoryException;
+use App\Domain\Exceptions\NotFoundEntityException;
 
 
 final readonly class StateNotificationEnabledHandler implements StateHandlerInterface
@@ -24,7 +23,6 @@ final readonly class StateNotificationEnabledHandler implements StateHandlerInte
 
     /**
      * @throws NotFoundEntityException
-     * @throws RepositoryException
      */
     public function handle(
         int $chatId,

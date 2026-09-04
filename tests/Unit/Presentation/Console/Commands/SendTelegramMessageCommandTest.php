@@ -5,7 +5,7 @@ namespace Tests\Unit\Presentation\Console\Commands;
 use App\Application\Message\MessageServiceInterface;
 use App\Application\Message\SendMessage\Handler;
 use App\Domain\Entities\Message\Message;
-use App\Domain\Exceptions\Interior\SendMessageException;
+use App\Infrastructure\Exceptions\SendMessageException;
 use App\Presentation\Console\Commands\SendTelegramMessageCommand;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

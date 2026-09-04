@@ -10,7 +10,7 @@ use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
-use App\Domain\Exceptions\Interior\NotFoundEntityException;
+use App\Domain\Exceptions\NotFoundEntityException;
 use PHPUnit\Framework\TestCase;
 
 class StateNotifiedHandlerTest extends TestCase

@@ -6,9 +6,9 @@ namespace App\Infrastructure\Database\Dbal\Repositories;
 
 use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
-use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
-use App\Domain\Exceptions\Interior\NotFoundEntityException;
-use App\Domain\Exceptions\Interior\RepositoryException;
+use App\Domain\Exceptions\NotFoundEntityException;
+use App\Infrastructure\Exceptions\AlreadyExistInPersistenceException;
+use App\Infrastructure\Exceptions\RepositoryException;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -32,7 +32,7 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
     public function insert(IntakeMark $intakeMark): int
     {
         if ($intakeMark->isExistInPersistence()) {
-            throw new EntityAlreadyExistInPersistenceException('IntakeMark isExistInPersistence = true');
+            throw new AlreadyExistInPersistenceException('IntakeMark isExistInPersistence = true');
         }
 
         $data = [

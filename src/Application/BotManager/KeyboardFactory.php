@@ -7,7 +7,7 @@ namespace App\Application\BotManager;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\State\EnumState;
 
-class KeyboardFactory
+final readonly class KeyboardFactory
 {
     /**
      * @return MessageButton[]

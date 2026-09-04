@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Application\BotManager;
 
+use App\Application\BotManager\Exceptions\InvalidValueException;
 use App\Application\BotManager\KeyboardFactory;
 use App\Application\BotManager\Manager;
 use App\Application\BotManager\RequestDTO;
@@ -15,7 +16,6 @@ use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\External\InvalidValueException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\BotManager;
 
+use App\Application\BotManager\Exceptions\BotManagerRuntimeException;
+use App\Application\BotManager\Exceptions\InvalidValueException;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
 use App\Domain\Entities\Message\EnumMessageText;
@@ -12,11 +14,7 @@ use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\External\InvalidValueException;
-use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
-use App\Domain\Exceptions\Interior\NotFoundEntityException;
-use App\Domain\Exceptions\Interior\RepositoryException;
-use App\Domain\Exceptions\Interior\TransitionStateNotAllowedException;
+use App\Domain\Exceptions\TransitionStateNotAllowedException;
 use Throwable;
 
 final readonly class Manager
@@ -74,9 +72,10 @@ final readonly class Manager
             );
 
             $this->unitOfWork->commit();
-        } catch (InvalidValueException $e) {
+        } catch (InvalidValueException | TransitionStateNotAllowedException $e) {
             $this->unitOfWork->rollback();
             $this->errorHandler($params->chatId, $e->getMessage());
+            throw $e;
         } catch (Throwable $e) {
             $this->unitOfWork->rollback();
             $this->notifyInternalError($params->chatId);
@@ -94,11 +93,6 @@ final readonly class Manager
         }
     }
 
-    /**
-     * @throws EntityAlreadyExistInPersistenceException
-     * @throws RepositoryException
-     * @throws NotFoundEntityException
-     */
     private function errorHandler(int $chatId, ?string $message = null): void
     {
         $session = $this->sessionRepository->findByChatId($chatId);

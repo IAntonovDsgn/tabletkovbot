@@ -5,21 +5,13 @@ declare(strict_types=1);
 namespace App\Application\Outbox;
 
 use App\Domain\Entities\Message\Message;
-use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
-use App\Domain\Exceptions\Interior\NotFoundEntityException;
-use App\Domain\Exceptions\Interior\RepositoryException;
 
 interface OutboxRepositoryInterface
 {
-    /**
-     * @throws EntityAlreadyExistInPersistenceException
-     * @throws RepositoryException
-     */
     public function insert(Message $message): void;
 
     /**
      * @return Message[]
-     * @throws RepositoryException
      */
     public function getPendingMessages(int $limit): array;
 
@@ -27,15 +19,8 @@ interface OutboxRepositoryInterface
      * Registers one failed delivery attempt for the message.
      *
      * @return int The updated attempts counter value.
-     *
-     * @throws NotFoundEntityException
-     * @throws RepositoryException
      */
     public function markAttempt(Message $message): int;
 
-    /**
-     * @throws NotFoundEntityException
-     * @throws RepositoryException
-     */
     public function delete(Message $message): void;
 }

@@ -6,13 +6,12 @@ namespace App\Infrastructure\Database\Dbal\Repositories;
 
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
-use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
-use App\Domain\Exceptions\Interior\NotFoundEntityException;
-use App\Domain\Exceptions\Interior\RepositoryException;
+use App\Domain\Exceptions\NotFoundEntityException;
+use App\Infrastructure\Exceptions\AlreadyExistInPersistenceException;
+use App\Infrastructure\Exceptions\RepositoryException;
 use DateTimeImmutable;
 use DateTimeZone;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception;
 
 final readonly class MedicamentRepository implements MedicamentRepositoryInterface
 {
@@ -33,7 +32,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
     public function insert(Medicament $medicament): int
     {
         if ($medicament->isExistInPersistence()) {
-            throw new EntityAlreadyExistInPersistenceException('isExistInPersistence = true');
+            throw new AlreadyExistInPersistenceException('isExistInPersistence = true');
         }
 
         $data = [

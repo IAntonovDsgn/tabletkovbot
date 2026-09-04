@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Application\BotManager\StateHandlers;
 
+use App\Application\BotManager\Exceptions\InvalidValueException;
 use App\Application\BotManager\KeyboardFactory;
 use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
-use App\Domain\Exceptions\External\InvalidValueException;
-use App\Domain\Exceptions\Interior\NotFoundEntityException;
-use App\Domain\Exceptions\Interior\RepositoryException;
+use App\Domain\Exceptions\NotFoundEntityException;
 
 final readonly class StateChangeNameMedicamentEnteredHandler implements StateHandlerInterface
 {
@@ -24,7 +23,6 @@ final readonly class StateChangeNameMedicamentEnteredHandler implements StateHan
     /**
      * @throws InvalidValueException
      * @throws NotFoundEntityException
-     * @throws RepositoryException
      */
     public function handle(
         int $chatId,

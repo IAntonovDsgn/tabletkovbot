@@ -8,9 +8,9 @@ use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
-use App\Domain\Exceptions\Interior\NotFoundEntityException;
-use App\Domain\Exceptions\Interior\RepositoryException;
+use App\Domain\Exceptions\NotFoundEntityException;
+use App\Infrastructure\Exceptions\AlreadyExistInPersistenceException;
+use App\Infrastructure\Exceptions\RepositoryException;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -35,7 +35,7 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
     public function insert(Message $message): void
     {
         if ($message->isExistInPersistence()) {
-            throw new EntityAlreadyExistInPersistenceException('isExistInPersistence = true');
+            throw new AlreadyExistInPersistenceException('isExistInPersistence = true');
         }
 
         try {

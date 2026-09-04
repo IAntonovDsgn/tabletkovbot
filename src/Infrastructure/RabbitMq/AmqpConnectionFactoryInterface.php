@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\RabbitMq;
 
-use App\Domain\Exceptions\Interior\AMQPException;
+use App\Infrastructure\Exceptions\AMQPException;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 interface AmqpConnectionFactoryInterface

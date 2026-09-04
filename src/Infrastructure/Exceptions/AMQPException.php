@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Exceptions\Interior;
+namespace App\Infrastructure\Exceptions;
 
 class AMQPException extends \Exception
 {}

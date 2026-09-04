@@ -2,14 +2,14 @@
 
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\StateHandlers\StateMedicamentNameEnteredHandler;
+use App\Application\BotManager\Exceptions\InvalidValueException;
 use App\Application\BotManager\StateHandlerResponseDTO;
+use App\Application\BotManager\StateHandlers\StateMedicamentNameEnteredHandler;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\External\InvalidValueException;
 use PHPUnit\Framework\TestCase;
 
 class StateMedicamentNameEnteredHandlerTest extends TestCase

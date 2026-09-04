@@ -17,6 +17,7 @@ use App\Domain\Entities\Session\State\EnumState;
 use App\Presentation\Api\WebhookController;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Telegram\Bot\Api as TelegramBotApi;
 use Telegram\Bot\Objects\CallbackQuery;
@@ -44,6 +45,7 @@ class WebhookControllerTest extends TestCase
         $this->outboxRepository = $this->createMock(OutboxRepositoryInterface::class);
         $this->keyboardFactory = $this->createMock(KeyboardFactory::class);
         $this->unitOfWork = $this->createMock(UnitOfWorkInterface::class);
+        $this->logger = $this->createMock(LoggerInterface::class);
 
         $manager = new Manager(
             $this->stateHandlerFactory,

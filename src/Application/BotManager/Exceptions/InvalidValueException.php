@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Exceptions\External;
+namespace App\Application\BotManager\Exceptions;
 
 class InvalidValueException extends \Exception
 {}

@@ -8,7 +8,7 @@ use App\Application\BotManager\StateHandlers\StateNotificationEnabledHandler;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
-use App\Domain\Exceptions\Interior\NotFoundEntityException;
+use App\Domain\Exceptions\NotFoundEntityException;
 use PHPUnit\Framework\TestCase;
 
 class StateNotificationEnabledHandlerTest extends TestCase

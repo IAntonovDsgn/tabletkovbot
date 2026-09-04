@@ -6,7 +6,7 @@ namespace App\Infrastructure\RabbitMq;
 
 use App\Application\Message\QueueConsumerInterface;
 use App\Domain\Entities\Message\Message;
-use App\Domain\Exceptions\Interior\AMQPException;
+use App\Infrastructure\Exceptions\AMQPException;
 use Closure;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
@@ -119,17 +119,11 @@ final class RabbitMqQueueConsumer implements QueueConsumerInterface
                 'error' => $e->getMessage(),
             ]);
             $amqpMessage->nack();
-
             return;
         }
 
         try {
             $onMessage($message);
-
-            $this->logger->info('Queue message delivered', [
-                'id' => $message->getId(),
-                'chat_id' => $message->getChatId(),
-            ]);
             $amqpMessage->ack();
         } catch (Throwable $e) {
             $this->logger->error('Dropping queue message after failed delivery', [

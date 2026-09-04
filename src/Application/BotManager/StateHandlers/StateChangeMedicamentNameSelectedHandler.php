@@ -19,10 +19,7 @@ class StateChangeMedicamentNameSelectedHandler implements StateHandlerInterface
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
         return new StateHandlerResponseDTO(
-            EnumMessageText::ENTER_NEW_NAME,
-            [
-                new MessageButton(MessageButton::MENU, EnumState::MENU)
-            ]
+            EnumMessageText::ENTER_NEW_NAME, []
         );
     }
 }

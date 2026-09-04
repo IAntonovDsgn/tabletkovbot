@@ -6,11 +6,10 @@ namespace App\Application\BotManager\StateHandlers;
 
 use App\Application\BotManager\StateHandlerInterface;
 use App\Application\BotManager\StateHandlerResponseDTO;
-use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\Interior\RepositoryException;
 
 final readonly class StateNotificationsSelectedHandler implements StateHandlerInterface
 {
@@ -20,9 +19,6 @@ final readonly class StateNotificationsSelectedHandler implements StateHandlerIn
     ) {
     }
 
-    /**
-     * @throws RepositoryException
-     */
     public function handle(
         int $chatId,
         ?string $messageText,

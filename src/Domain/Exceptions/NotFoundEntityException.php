@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Exceptions\Interior;
+namespace App\Domain\Exceptions;
 
 class NotFoundEntityException extends \Exception
 {}

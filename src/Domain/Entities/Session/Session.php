@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domain\Entities\Session;
 
+use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\State\EnumState;
 use App\Domain\Entities\Session\State\StateTransitionRules;
-use App\Domain\Exceptions\Interior\TransitionStateNotAllowedException;
+use App\Domain\Exceptions\TransitionStateNotAllowedException;
 
 final class Session
 {
@@ -73,7 +74,7 @@ final class Session
     public function transitionToState(EnumState $newState): void
     {
         if (!$this->stateMachineTransitionRules->isTransitionToStateAllowed($newState, $this->state)) {
-            throw new TransitionStateNotAllowedException('Transition state is not allowed');
+            throw new TransitionStateNotAllowedException(EnumMessageText::ERROR->value);
         }
         $this->state = $newState;
     }

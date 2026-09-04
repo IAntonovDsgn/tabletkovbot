@@ -7,9 +7,9 @@ namespace App\Infrastructure\Database\Dbal\Repositories;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Exceptions\Interior\EntityAlreadyExistInPersistenceException;
-use App\Domain\Exceptions\Interior\NotFoundEntityException;
-use App\Domain\Exceptions\Interior\RepositoryException;
+use App\Domain\Exceptions\NotFoundEntityException;
+use App\Infrastructure\Exceptions\AlreadyExistInPersistenceException;
+use App\Infrastructure\Exceptions\RepositoryException;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 
@@ -57,7 +57,7 @@ final readonly class SessionRepository implements SessionRepositoryInterface
     public function insert(Session $session): int
     {
         if ($session->isExistInPersistence()) {
-            throw new EntityAlreadyExistInPersistenceException('isExistInPersistence = true');
+            throw new AlreadyExistInPersistenceException('isExistInPersistence = true');
         }
 
         try {

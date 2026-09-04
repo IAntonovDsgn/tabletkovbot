@@ -6,16 +6,16 @@ use App\Application\BotManager\RequestDTO;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
-use App\Domain\Exceptions\Interior\SendMessageException;
+use App\Infrastructure\Exceptions\SendMessageException;
 use App\Infrastructure\TelegramMessageService\TelegramMessageService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Telegram\Bot\Api as TelegramBotApi;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 use Telegram\Bot\Keyboard\Keyboard;
-use Telegram\Bot\Objects\Update;
-use Telegram\Bot\Objects\Message as TelegramMessage;
 use Telegram\Bot\Objects\Chat;
+use Telegram\Bot\Objects\Message as TelegramMessage;
+use Telegram\Bot\Objects\Update;
 
 class TelegramMessageServiceTest extends TestCase
 {

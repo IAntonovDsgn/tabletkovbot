@@ -6,6 +6,7 @@ namespace App\Presentation\Api;
 
 use App\Application\BotManager\Manager;
 use App\Application\BotManager\RequestDTO;
+use Psr\Log\LoggerInterface;
 use OpenApi\Attributes as OA;
 use Telegram\Bot\Api;
 use Throwable;
@@ -19,7 +20,8 @@ final readonly class WebhookController
 {
     public function __construct(
         private Api $telegramApi,
-        private Manager $manager
+        private Manager $manager,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -81,6 +83,11 @@ final readonly class WebhookController
             return;
         }
 
-        $this->manager->process($requestDTO);
+        try {
+            $this->manager->process($requestDTO);
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+        }
+
     }
 }

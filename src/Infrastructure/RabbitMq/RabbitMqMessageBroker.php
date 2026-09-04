@@ -6,7 +6,7 @@ namespace App\Infrastructure\RabbitMq;
 
 use App\Application\Message\MessageBrokerInterface;
 use App\Domain\Entities\Message\Message;
-use App\Domain\Exceptions\Interior\AMQPException;
+use App\Infrastructure\Exceptions\AMQPException;
 use JsonException;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
