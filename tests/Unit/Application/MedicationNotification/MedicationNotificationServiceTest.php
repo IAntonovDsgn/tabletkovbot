@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Application\MedicationNotification;
 
-use App\Application\MedicationNotification\MedicationNotificationService;
+use App\Application\MedicationNotificationService\Service;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
 use App\Domain\Entities\Medicament\Medicament;
@@ -23,7 +23,7 @@ class MedicationNotificationServiceTest extends TestCase
     private MockObject $outboxRepository;
     private MockObject $unitOfWork;
     private FakeLogger $logger;
-    private MedicationNotificationService $service;
+    private Service $service;
 
     protected function setUp(): void
     {
@@ -32,7 +32,7 @@ class MedicationNotificationServiceTest extends TestCase
         $this->outboxRepository = $this->createMock(OutboxRepositoryInterface::class);
         $this->unitOfWork = $this->createMock(UnitOfWorkInterface::class);
         $this->logger = new FakeLogger();
-        $this->service = new MedicationNotificationService(
+        $this->service = new Service(
             $this->medicamentRepository,
             $this->outboxRepository,
             $this->unitOfWork,
@@ -71,7 +71,7 @@ class MedicationNotificationServiceTest extends TestCase
         $this->medicamentRepository->expects($this->once())
             ->method('update')
             ->with($this->callback(function (Medicament $m): bool {
-                $today = (new DateTimeImmutable('now', new DateTimeZone(Medicament::DATE_TIME_ZONE)))
+                $today = new DateTimeImmutable('now', new DateTimeZone(Medicament::DATE_TIME_ZONE))
                     ->format(Medicament::DATE_FORMAT);
 
                 return $m->getLastNotificationDate() !== null

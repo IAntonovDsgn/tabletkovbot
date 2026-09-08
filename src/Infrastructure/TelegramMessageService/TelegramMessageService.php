@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\TelegramMessageService;
 
 use App\Application\BotManager\RequestDTO;
-use App\Application\Message\MessageServiceInterface;
+use App\Application\Message\Services\MessageServiceInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;

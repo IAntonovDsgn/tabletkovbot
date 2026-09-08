@@ -3,7 +3,7 @@
 namespace Tests\Unit\Presentation\Console\Commands;
 
 use App\Application\BotManager\RequestDTO;
-use App\Application\Message\MessageServiceInterface;
+use App\Application\Message\Services\MessageServiceInterface;
 use App\Presentation\Console\Commands\GetTelegramUpdatesCommand;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

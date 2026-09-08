@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Presentation\Console\Commands;
 
-use App\Application\Message\MessageServiceInterface;
-use App\Application\Message\QueueConsumerInterface;
-use App\Application\Message\SendMessage\Handler;
+use App\Application\Message\Services\MessageServiceInterface;
+use App\Application\Message\UseCases\SendMessage\Handler;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\State\EnumState;
+use App\Infrastructure\RabbitMq\QueueConsumerInterface;
 use App\Presentation\Console\Commands\QueueConsumeCommand;
 use Closure;
 use PHPUnit\Framework\MockObject\MockObject;

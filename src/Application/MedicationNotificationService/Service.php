@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Application\MedicationNotification;
+namespace App\Application\MedicationNotificationService;
 
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
@@ -15,7 +15,7 @@ use App\Domain\Entities\Session\State\EnumState;
 use Exception;
 use Psr\Log\LoggerInterface;
 
-final class MedicationNotificationService
+final class Service
 {
     private bool $stopRequested = false;
 

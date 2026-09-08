@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Message;
+namespace App\Infrastructure\RabbitMq;
 
 use App\Domain\Entities\Message\Message;
 use Closure;

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Presentation\Console\Commands;
 
-use App\Application\Message\MessageServiceInterface;
-use App\Application\Message\SendMessage\Handler;
+use App\Application\Message\Services\MessageServiceInterface;
+use App\Application\Message\UseCases\SendMessage\Handler;
 use App\Domain\Entities\Message\Message;
 use App\Infrastructure\Exceptions\SendMessageException;
 use App\Presentation\Console\Commands\SendTelegramMessageCommand;

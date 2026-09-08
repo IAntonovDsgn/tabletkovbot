@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Presentation\Console\Commands;
 
-use App\Application\MedicationNotification\MedicationNotificationService;
+use App\Application\MedicationNotificationService\Service;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Throwable;
 
 use function extension_loaded;
 use function pcntl_async_signals;
@@ -20,7 +19,7 @@ use const SIGTERM;
 class MedicationNotifyCommand extends Command
 {
     public function __construct(
-        private readonly MedicationNotificationService $notificationService,
+        private readonly Service $notificationService,
     ) {
         parent::__construct();
     }

@@ -1,9 +1,8 @@
 <?php
 
-use App\Application\Message\MessageBrokerInterface;
-use App\Application\Message\MessageServiceInterface;
-use App\Application\Message\QueueConsumerInterface;
-use App\Application\MedicationNotification\MedicationNotificationService;
+use App\Application\MedicationNotificationService\Service;
+use App\Application\Message\Services\MessageBrokerInterface;
+use App\Application\Message\Services\MessageServiceInterface;
 use App\Application\Outbox\OutboxRelay;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
@@ -19,6 +18,7 @@ use App\Infrastructure\RabbitMq\AmqpConnectionFactory;
 use App\Infrastructure\RabbitMq\AmqpConnectionFactoryInterface;
 use App\Infrastructure\RabbitMq\MessagePayloadDeserializer;
 use App\Infrastructure\RabbitMq\MessagePayloadSerializer;
+use App\Infrastructure\RabbitMq\QueueConsumerInterface;
 use App\Infrastructure\RabbitMq\RabbitMqMessageBroker;
 use App\Infrastructure\RabbitMq\RabbitMqQueueConsumer;
 use App\Infrastructure\TelegramMessageService\TelegramMessageService;
@@ -124,8 +124,8 @@ return [
         );
     },
 
-    MedicationNotificationService::class => function (ContainerInterface $c) {
-        return new MedicationNotificationService(
+    Service::class => function (ContainerInterface $c) {
+        return new Service(
             $c->get(MedicamentRepositoryInterface::class),
             $c->get(OutboxRepositoryInterface::class),
             $c->get(UnitOfWorkInterface::class),

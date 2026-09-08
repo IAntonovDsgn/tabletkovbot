@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\RabbitMq;
 
-use App\Application\Message\QueueConsumerInterface;
 use App\Domain\Entities\Message\Message;
 use App\Infrastructure\Exceptions\AMQPException;
 use Closure;

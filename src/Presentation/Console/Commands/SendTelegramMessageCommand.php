@@ -13,7 +13,7 @@ use Throwable;
 final class SendTelegramMessageCommand extends Command
 {
     public function __construct(
-        private readonly \App\Application\Message\SendMessage\Handler $handler,
+        private readonly \App\Application\Message\UseCases\SendMessage\Handler $handler,
     ) {
         parent::__construct();
     }

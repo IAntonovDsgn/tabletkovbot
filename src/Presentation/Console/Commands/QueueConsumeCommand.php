@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Presentation\Console\Commands;
 
-use App\Application\Message\QueueConsumerInterface;
-use App\Application\Message\SendMessage\Handler;
+use App\Application\Message\UseCases\SendMessage\Handler;
 use App\Domain\Entities\Message\Message;
+use App\Infrastructure\RabbitMq\QueueConsumerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

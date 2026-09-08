@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Presentation\Console\Commands;
 
-use App\Application\Message\MessageBrokerInterface;
+use App\Application\Message\Services\MessageBrokerInterface;
 use App\Application\Outbox\OutboxRelay;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Domain\Entities\Message\Message;
