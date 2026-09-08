@@ -127,4 +127,43 @@ class StateNotifiedHandlerTest extends TestCase
 
         $this->handler->handle(Session::create(12345), null, null);
     }
+
+    /**
+     * @throws NotFoundEntityException
+     */
+    public function testHandleSuccessWhenMedicamentIdComesFromButtonPayload(): void
+    {
+        $chatId = 12345;
+        $medicamentId = 2;
+
+        $medicament = Medicament::restoreFromPersistence(
+            $medicamentId,
+            'Aspirin',
+            $chatId,
+            new DateTimeImmutable(),
+            true
+        );
+
+        $this->medicamentRepository->expects($this->once())
+            ->method('findById')
+            ->with($medicamentId)
+            ->willReturn($medicament);
+
+        $this->intakeMarkRepository->expects($this->once())
+            ->method('insert')
+            ->with(
+                $this->callback(function (IntakeMark $intakeMark) use ($chatId, $medicamentId) {
+                    return $intakeMark->getChatId() === $chatId && $intakeMark->getMedicamentId() === $medicamentId;
+                })
+            );
+
+        $response = $this->handler->handle(Session::create($chatId), null, (string) $medicamentId);
+
+        $expectedResponse = new StateHandlerResponseDTO(
+            EnumMessageText::INTAKE_MARK_SAVED,
+            $this->keyboardFactory->makeMenuKeyboard()
+        );
+
+        $this->assertEquals($expectedResponse, $response);
+    }
 }

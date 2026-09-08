@@ -3,6 +3,7 @@
 use App\Application\Message\MessageBrokerInterface;
 use App\Application\Message\MessageServiceInterface;
 use App\Application\Message\QueueConsumerInterface;
+use App\Application\MedicationNotification\MedicationNotificationService;
 use App\Application\Outbox\OutboxRelay;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
@@ -120,6 +121,16 @@ return [
             max(1, (int) ($_ENV['OUTBOX_BATCH_SIZE'] ?? 50)),
             max(1, (int) ($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
             max(1, (int) ($_ENV['OUTBOX_MAX_ATTEMPTS'] ?? 4)),
+        );
+    },
+
+    MedicationNotificationService::class => function (ContainerInterface $c) {
+        return new MedicationNotificationService(
+            $c->get(MedicamentRepositoryInterface::class),
+            $c->get(OutboxRepositoryInterface::class),
+            $c->get(UnitOfWorkInterface::class),
+            $c->get(LoggerInterface::class),
+            max(1, (int) ($_ENV['NOTIFY_POLL_INTERVAL_MS'] ?? 60000)),
         );
     },
 

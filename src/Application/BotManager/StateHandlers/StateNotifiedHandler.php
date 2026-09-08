@@ -32,10 +32,13 @@ final readonly class StateNotifiedHandler implements StateHandlerInterface
         ?string $messageText,
         ?string $buttonPayload
     ): StateHandlerResponseDTO {
-        if ($messageText === null) {
+        $medicamentId = $buttonPayload ?? $messageText;
+
+        if ($medicamentId === null) {
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
         }
-        $medicament = $this->medicamentRepository->findById((int) $messageText);
+
+        $medicament = $this->medicamentRepository->findById((int) $medicamentId);
 
         if (is_null($medicament) || $medicament->getChatId() !== $session->getChatId()) {
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);

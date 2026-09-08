@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Domain\Entities\Medicament;
 
+use DateMalformedStringException;
 use DateTimeImmutable;
+use DateTimeZone;
 
 class Medicament
 {
     public const string TIME_FORMAT = 'H:i';
+    public const string DATE_FORMAT = 'Y-m-d';
     public const string DATE_TIME_ZONE = 'Asia/Yekaterinburg';
 
     private function __construct(
@@ -18,6 +21,7 @@ class Medicament
         private readonly int $chatId,
         private ?DateTimeImmutable $notificationTime,
         private bool $isActive,
+        private ?DateTimeImmutable $lastNotificationDate,
     ) {}
 
     public static function create(
@@ -31,7 +35,8 @@ class Medicament
             false,
             $chatId,
             $notificationTime,
-            true
+            true,
+            null
         );
     }
 
@@ -41,6 +46,7 @@ class Medicament
         int $chatId,
         ?DateTimeImmutable $notificationTime,
         bool $isActive,
+        ?DateTimeImmutable $lastNotificationDate = null,
     ): Medicament {
         return new self(
             $id,
@@ -49,6 +55,7 @@ class Medicament
             $chatId,
             $notificationTime,
             $isActive,
+            $lastNotificationDate,
         );
     }
 
@@ -65,6 +72,22 @@ class Medicament
     public function setNotificationTime(DateTimeImmutable $time): void
     {
         $this->notificationTime = $time;
+    }
+
+    /**
+     * @throws DateMalformedStringException
+     */
+    public function markNotificationSent(): void
+    {
+        $this->lastNotificationDate = new DateTimeImmutable(
+            'now',
+            new DateTimeZone(Medicament::DATE_TIME_ZONE)
+        );
+    }
+
+    public function getLastNotificationDate(): ?DateTimeImmutable
+    {
+        return $this->lastNotificationDate;
     }
 
     public function getNotificationTime(): ?DateTimeImmutable

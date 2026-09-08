@@ -9,6 +9,7 @@ use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Exceptions\NotFoundEntityException;
 use App\Infrastructure\Exceptions\AlreadyExistInPersistenceException;
 use App\Infrastructure\Exceptions\RepositoryException;
+use DateMalformedStringException;
 use DateTimeImmutable;
 use DateTimeZone;
 use Doctrine\DBAL\Connection;
@@ -23,6 +24,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
     public const string CHAT_ID_COLUMN_NAME = 'chat_id';
     public const string NOTIFICATION_TIME_COLUMN_NAME = 'notification_time';
     public const string IS_ACTIVE_COLUMN_NAME = 'is_active';
+    public const string LAST_NOTIFICATION_DATE_COLUMN_NAME = 'last_notification_date';
     public const string ID_COLUMN_NAME = 'id';
 
     public function __construct(
@@ -45,6 +47,8 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             self::NOTIFICATION_TIME_COLUMN_NAME => $medicament->getNotificationTime()
                 ?->format(Medicament::TIME_FORMAT . ':s'),
             self::IS_ACTIVE_COLUMN_NAME => $medicament->isActive() ? 1 : 0,
+            self::LAST_NOTIFICATION_DATE_COLUMN_NAME => $medicament->getLastNotificationDate()
+                ?->format(Medicament::DATE_FORMAT),
         ];
 
         try {
@@ -71,6 +75,8 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             self::NOTIFICATION_TIME_COLUMN_NAME => $medicament->getNotificationTime()
                 ?->format(Medicament::TIME_FORMAT . ':s'),
             self::IS_ACTIVE_COLUMN_NAME => $medicament->isActive() ? 1 : 0,
+            self::LAST_NOTIFICATION_DATE_COLUMN_NAME => $medicament->getLastNotificationDate()
+                ?->format(Medicament::DATE_FORMAT),
         ];
 
         try {
@@ -168,6 +174,53 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
     }
 
     /**
+     * @return Medicament[]
+     *
+     * @throws RepositoryException
+     * @throws DateMalformedStringException
+     */
+    public function findForNotificationNow(): array
+    {
+        $result = [];
+        $now = new DateTimeImmutable('now', new DateTimeZone(Medicament::DATE_TIME_ZONE));
+        $queryBuilder = $this->connection->createQueryBuilder();
+
+        $queryBuilder->select('m.*')
+            ->from(self::MEDICAMENT_TABLE_NAME, 'm')
+            ->leftJoin(
+                'm',
+                SessionRepository::SESSION_TABLE_NAME,
+                's',
+                's.' . SessionRepository::CHAT_ID_COLUMN_NAME . ' = m.' . self::CHAT_ID_COLUMN_NAME
+            )
+            ->where('m.' . self::IS_ACTIVE_COLUMN_NAME . ' = 1')
+            ->andWhere('m.' . self::NOTIFICATION_TIME_COLUMN_NAME . ' IS NOT NULL')
+            ->andWhere('m.' . self::NOTIFICATION_TIME_COLUMN_NAME . ' <= :nowTime')
+            ->andWhere(
+                '(' . 'm.' . self::LAST_NOTIFICATION_DATE_COLUMN_NAME . ' IS NULL'
+                . ' OR ' . 'm.' . self::LAST_NOTIFICATION_DATE_COLUMN_NAME . ' <> :date)'
+            )
+            ->andWhere(
+                '(s.' . SessionRepository::ID_COLUMN_NAME . ' IS NULL'
+                . ' OR s.' . SessionRepository::IS_NOTIFICATION_ENABLED_COLUMN_NAME . ' = 1)'
+            )
+            ->setParameter('nowTime', $now->format(Medicament::TIME_FORMAT . ':s'))
+            ->setParameter('date', $now->format(Medicament::DATE_FORMAT));
+
+        try {
+            $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
+        } catch (Exception $e) {
+            throw new RepositoryException($e->getMessage(), 0, $e);
+        }
+
+        foreach ($rows as $row) {
+            $result[] = $this->mapOrmToDomain($row);
+        }
+
+        return $result;
+    }
+
+    /**
      * @param array<string, mixed> $row
      * @throws RepositoryException
      */
@@ -196,12 +249,36 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             }
         }
 
+        $lastNotificationDateString = $this->toStringOrNull($row[self::LAST_NOTIFICATION_DATE_COLUMN_NAME]);
+
+        if ($lastNotificationDateString === null) {
+            $lastNotificationDate = null;
+        } else {
+            $lastNotificationDate = DateTimeImmutable::createFromFormat(
+                '!' . Medicament::DATE_FORMAT,
+                $lastNotificationDateString,
+                new DateTimeZone(Medicament::DATE_TIME_ZONE)
+            );
+
+            if ($lastNotificationDate === false) {
+                throw new RepositoryException(
+                    sprintf(
+                        'Unexpected last_notification_date value "%s" in %s.%d',
+                        $lastNotificationDateString,
+                        self::MEDICAMENT_TABLE_NAME,
+                        $this->toInt($row[self::ID_COLUMN_NAME]),
+                    )
+                );
+            }
+        }
+
         return Medicament::restoreFromPersistence(
             $this->toInt($row[self::ID_COLUMN_NAME]),
             $this->toString($row[self::NAME_COLUMN_NAME]),
             $this->toInt($row[self::CHAT_ID_COLUMN_NAME]),
             $notificationTime,
             $this->toBool($row[self::IS_ACTIVE_COLUMN_NAME]),
+            $lastNotificationDate,
         );
     }
 }

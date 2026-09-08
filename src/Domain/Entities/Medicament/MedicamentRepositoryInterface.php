@@ -18,4 +18,9 @@ interface MedicamentRepositoryInterface
      * @return Medicament[]
      */
     public function findByChatId(int $chatId): array;
+
+    /**
+     * @return Medicament[]
+     */
+    public function findForNotificationNow(): array;
 }
