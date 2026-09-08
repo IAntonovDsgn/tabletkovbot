@@ -1,6 +1,6 @@
 <?php
 
-use App\Application\MedicationNotificationService\Service;
+use App\Application\Notification\CycleNotificationService;
 use App\Application\Message\Services\MessageBrokerInterface;
 use App\Application\Message\Services\MessageServiceInterface;
 use App\Application\Outbox\OutboxRelay;
@@ -124,8 +124,8 @@ return [
         );
     },
 
-    Service::class => function (ContainerInterface $c) {
-        return new Service(
+    CycleNotificationService::class => function (ContainerInterface $c) {
+        return new CycleNotificationService(
             $c->get(MedicamentRepositoryInterface::class),
             $c->get(OutboxRepositoryInterface::class),
             $c->get(UnitOfWorkInterface::class),

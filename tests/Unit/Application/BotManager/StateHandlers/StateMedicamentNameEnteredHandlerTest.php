@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\DTOs\StateHandlerResponseDTO;
-use App\Application\BotManager\Exceptions\InvalidValueException;
-use App\Application\BotManager\StateHandlers\StateMedicamentNameEnteredHandler;
+use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
+use App\Application\StateManager\Exceptions\InvalidValueException;
+use App\Application\StateManager\StateHandlers\StateMedicamentNameEnteredHandler;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;

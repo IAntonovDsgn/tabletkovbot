@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Presentation\Console\Commands;
 
-use App\Application\MedicationNotificationService\Service;
+use App\Application\Notification\CycleNotificationService;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
 use App\Domain\Entities\Medicament\Medicament;
@@ -22,7 +22,7 @@ class MedicationNotifyCommandTest extends TestCase
         $unitOfWork = $this->createMock(UnitOfWorkInterface::class);
         $logger = new FakeLogger();
 
-        $service = new Service(
+        $service = new CycleNotificationService(
             $medicamentRepository,
             $outboxRepository,
             $unitOfWork,

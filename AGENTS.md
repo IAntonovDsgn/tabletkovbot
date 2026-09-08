@@ -32,12 +32,12 @@ Env vars live in **`.env`** at the project root. `bootstrap/bootstrap.php` loads
 ## Architecture
 
 - `src/Domain` — entities + repository interfaces; no infra dependencies.
-- `src/Application` — use cases: `BotManager` state machine, `MedicationNotificationService` (daily reminder scheduler), `Message` (`Services` interfaces, `UseCases/SendMessage/Handler`), `Outbox` (relay + repo interface), `UnitOfWork` interface. `Manager::process()` orchestrates transaction + session + state transition.
+- `src/Application` — use cases: `StateManager` state machine, `Notification` (daily reminder scheduler), `Message` (`Services` interfaces, `UseCases/SendMessage/Handler`), `Outbox` (relay + repo interface), `UnitOfWork` interface. `Manager::process()` orchestrates transaction + session + state transition.
 - `src/Infrastructure` — DBAL repos (+ `UnitOfWork` impl), `Http/Router` (FastRoute), `TelegramMessageService`, `RabbitMq` (broker/consumer + `QueueConsumerInterface`), Doctrine migrations.
 - `src/Presentation` — `Api/WebhookController` (web entry `public/index.php`) and `Console/Console.php` (commands registered via `ContainerCommandLoader`; long-running ones also run as dedicated Docker containers).
 - DI is PHP-DI with autowiring; repository/service **interfaces** are bound explicitly in `bootstrap/appServiceProvider.php`. After changing a constructor, verify resolution: `docker exec tabletkovbot-app php -r '$c = require "/var/www/tabletkovbot/bootstrap/bootstrap.php"; $c->get(<class>::class); echo "OK";'`
 
-Adding a conversation state: create `State<X>Handler` implementing `StateHandlerInterface`, then register it in `src/Application/BotManager/StateHandlerFactory.php` (**both** the constructor param and the `match` arm — `match` over `EnumState` is exhaustive, PHPStan fails on a missing case).
+Adding a conversation state: create `State<X>Handler` implementing `StateHandlerInterface`, then register it in `src/Application/StateManager/StateHandlerFactory.php` (**both** the constructor param and the `match` arm — `match` over `EnumState` is exhaustive, PHPStan fails on a missing case).
 
 ## Persistence contract (do not regress)
 

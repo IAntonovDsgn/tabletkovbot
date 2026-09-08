@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\DTOs\StateHandlerResponseDTO;
-use App\Application\BotManager\Exceptions\InvalidValueException;
-use App\Application\BotManager\Factories\KeyboardFactory;
-use App\Application\BotManager\StateHandlers\StateDownloadReportStartDateEnteredHandler;
+use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
+use App\Application\StateManager\Exceptions\InvalidValueException;
+use App\Application\StateManager\Factories\KeyboardFactory;
+use App\Application\StateManager\StateHandlers\StateDownloadReportStartDateEnteredHandler;
 use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;

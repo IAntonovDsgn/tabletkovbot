@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Infrastructure\TelegramMessageService;
 
-use App\Application\BotManager\DTOs\RequestDTO;
+use App\Application\StateManager\DTOs\RequestDTO;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;

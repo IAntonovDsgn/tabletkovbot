@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\DTOs\StateHandlerResponseDTO;
-use App\Application\BotManager\StateHandlers\StateSelectedMedicamentForDeleteHandler;
+use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
+use App\Application\StateManager\StateHandlers\StateSelectedMedicamentForDeleteHandler;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\Session;

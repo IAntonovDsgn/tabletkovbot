@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Presentation\Api;
 
-use App\Application\BotManager\DTOs\RequestDTO;
-use App\Application\BotManager\Manager;
+use App\Application\StateManager\DTOs\RequestDTO;
+use App\Application\StateManager\Manager;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Telegram\Bot\Api;

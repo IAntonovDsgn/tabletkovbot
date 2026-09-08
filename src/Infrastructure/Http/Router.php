@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http;
 
-use App\Presentation\Api\SwaggerController;
+use App\Presentation\Api\Swagger\SwaggerController;
 use App\Presentation\Api\WebhookController;
 use DI\Container;
 use DI\DependencyException;

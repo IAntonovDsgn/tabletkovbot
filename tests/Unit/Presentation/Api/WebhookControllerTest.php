@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Presentation\Api;
 
-use App\Application\BotManager\DTOs\StateHandlerResponseDTO;
-use App\Application\BotManager\Factories\StateHandlerFactory;
-use App\Application\BotManager\Manager;
-use App\Application\BotManager\StateHandlers\StateHandlerInterface;
+use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
+use App\Application\StateManager\Factories\StateHandlerFactory;
+use App\Application\StateManager\Manager;
+use App\Application\StateManager\StateHandlers\StateHandlerInterface;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
 use App\Domain\Entities\Message\EnumMessageText;
