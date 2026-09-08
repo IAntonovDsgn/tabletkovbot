@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Application\BotManager;
 
-use App\Application\BotManager\KeyboardFactory;
-use App\Application\BotManager\StateHandlerFactory;
+use App\Application\BotManager\Factories\KeyboardFactory;
+use App\Application\BotManager\Factories\StateHandlerFactory;
 use App\Application\BotManager\StateHandlers\StateAddMedicamentSelectedHandler;
 use App\Application\BotManager\StateHandlers\StateChangeMedicamentNameSelectedHandler;
 use App\Application\BotManager\StateHandlers\StateChangeMedicamentSelectedHandler;
@@ -26,7 +26,6 @@ use App\Application\BotManager\StateHandlers\StateNotifiedHandler;
 use App\Application\BotManager\StateHandlers\StateSelectedMedicamentForDeleteHandler;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
-use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\State\EnumState;
 use PHPUnit\Framework\TestCase;
 

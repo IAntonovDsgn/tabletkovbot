@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Application\BotManager;
+namespace App\Application\BotManager\Factories;
 
 use App\Application\BotManager\StateHandlers\StateAddMedicamentSelectedHandler;
 use App\Application\BotManager\StateHandlers\StateChangeMedicamentNameSelectedHandler;
@@ -14,6 +14,7 @@ use App\Application\BotManager\StateHandlers\StateDeleteMedicamentConfirmedHandl
 use App\Application\BotManager\StateHandlers\StateDeleteMedicamentSelectedHandler;
 use App\Application\BotManager\StateHandlers\StateDownloadReportSelectedHandler;
 use App\Application\BotManager\StateHandlers\StateDownloadReportStartDateEnteredHandler;
+use App\Application\BotManager\StateHandlers\StateHandlerInterface;
 use App\Application\BotManager\StateHandlers\StateIntakeMarkHasMadeHandler;
 use App\Application\BotManager\StateHandlers\StateMakeIntakeMarkSelectedHandler;
 use App\Application\BotManager\StateHandlers\StateMedicamentNameEnteredHandler;

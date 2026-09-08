@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Application\BotManager\StateHandlers;
 
+use App\Application\BotManager\DTOs\StateHandlerResponseDTO;
 use App\Application\BotManager\Exceptions\InvalidValueException;
-use App\Application\BotManager\KeyboardFactory;
-use App\Application\BotManager\StateHandlerInterface;
-use App\Application\BotManager\StateHandlerResponseDTO;
+use App\Application\BotManager\Factories\KeyboardFactory;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Report\Report;

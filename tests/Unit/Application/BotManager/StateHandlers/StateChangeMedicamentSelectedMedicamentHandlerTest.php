@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\StateHandlerResponseDTO;
+use App\Application\BotManager\DTOs\StateHandlerResponseDTO;
 use App\Application\BotManager\StateHandlers\StateChangeMedicamentSelectedMedicamentHandler;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Application\BotManager;
+namespace App\Application\BotManager\DTOs;
 
-use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Report\Report;
 
 final readonly class StateHandlerResponseDTO

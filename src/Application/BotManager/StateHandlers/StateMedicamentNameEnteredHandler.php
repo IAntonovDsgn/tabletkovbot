@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\BotManager\StateHandlers;
 
+use App\Application\BotManager\DTOs\StateHandlerResponseDTO;
 use App\Application\BotManager\Exceptions\InvalidValueException;
-use App\Application\BotManager\StateHandlerInterface;
-use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;

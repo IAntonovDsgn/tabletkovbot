@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
+use App\Application\BotManager\DTOs\StateHandlerResponseDTO;
 use App\Application\BotManager\StateHandlers\StateChangeMedicamentNameSelectedHandler;
-use App\Application\BotManager\StateHandlerResponseDTO;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\Session;
 use PHPUnit\Framework\TestCase;

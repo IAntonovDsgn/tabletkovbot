@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Application\BotManager;
 
+use App\Application\BotManager\DTOs\RequestDTO;
+use App\Application\BotManager\DTOs\StateHandlerResponseDTO;
 use App\Application\BotManager\Exceptions\InvalidValueException;
+use App\Application\BotManager\Factories\StateHandlerFactory;
 use App\Application\BotManager\Manager;
-use App\Application\BotManager\RequestDTO;
-use App\Application\BotManager\StateHandlerFactory;
-use App\Application\BotManager\StateHandlerInterface;
-use App\Application\BotManager\StateHandlerResponseDTO;
+use App\Application\BotManager\StateHandlers\StateHandlerInterface;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
 use App\Domain\Entities\Message\EnumMessageText;

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
-use App\Application\BotManager\KeyboardFactory;
-use App\Application\BotManager\StateHandlerResponseDTO;
+use App\Application\BotManager\DTOs\StateHandlerResponseDTO;
+use App\Application\BotManager\Factories\KeyboardFactory;
 use App\Application\BotManager\StateHandlers\StateIntakeMarkHasMadeHandler;
 use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;

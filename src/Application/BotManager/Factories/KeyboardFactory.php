@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Application\BotManager;
+namespace App\Application\BotManager\Factories;
 
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\State\EnumState;
