@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Entities\Session\State;
+namespace App\Domain\Entities\Session\States;
 
 enum EnumState: string
 {

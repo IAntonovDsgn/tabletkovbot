@@ -14,7 +14,7 @@ use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
-use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Entities\Session\States\EnumState;
 use App\Domain\Exceptions\TransitionStateNotAllowedException;
 use Throwable;
 

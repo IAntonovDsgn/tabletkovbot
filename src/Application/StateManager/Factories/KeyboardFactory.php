@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Application\StateManager\Factories;
 
 use App\Domain\Entities\Message\MessageButton;
-use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Entities\Session\States\EnumState;
 
 final readonly class KeyboardFactory
 {

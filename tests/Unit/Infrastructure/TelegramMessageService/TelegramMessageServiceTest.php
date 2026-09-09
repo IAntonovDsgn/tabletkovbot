@@ -50,8 +50,8 @@ class TelegramMessageServiceTest extends TestCase
     {
         $chatId = 123;
         $text = EnumMessageText::CHOOSE_MEDICAMENT->value;
-        $button1 = new MessageButton('Button 1', \App\Domain\Entities\Session\State\EnumState::ADD_MEDICAMENT_SELECTED);
-        $button2 = new MessageButton('Button 2', \App\Domain\Entities\Session\State\EnumState::CHANGE_MEDICAMENT_SELECTED, 'payload');
+        $button1 = new MessageButton('Button 1', \App\Domain\Entities\Session\States\EnumState::ADD_MEDICAMENT_SELECTED);
+        $button2 = new MessageButton('Button 2', \App\Domain\Entities\Session\States\EnumState::CHANGE_MEDICAMENT_SELECTED, 'payload');
         $message = Message::create($chatId, $text, [$button1, $button2]);
 
         $keyboard = Keyboard::make()->inline();
@@ -89,7 +89,7 @@ class TelegramMessageServiceTest extends TestCase
     public function testEmptyTextWithButtonsIsSentWithoutAnyPrefix(): void
     {
         $chatId = 123;
-        $button = new MessageButton('Button 1', \App\Domain\Entities\Session\State\EnumState::ADD_MEDICAMENT_SELECTED);
+        $button = new MessageButton('Button 1', \App\Domain\Entities\Session\States\EnumState::ADD_MEDICAMENT_SELECTED);
         $message = Message::create($chatId, null, [$button]);
 
         $keyboard = Keyboard::make()->inline();

@@ -6,7 +6,7 @@ namespace App\Infrastructure\Database\Dbal\Repositories;
 
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
-use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Entities\Session\States\EnumState;
 use App\Domain\Exceptions\NotFoundEntityException;
 use App\Infrastructure\Exceptions\AlreadyExistInPersistenceException;
 use App\Infrastructure\Exceptions\RepositoryException;

@@ -26,7 +26,7 @@ use App\Application\StateManager\StateHandlers\StateNotifiedHandler;
 use App\Application\StateManager\StateHandlers\StateSelectedMedicamentForDeleteHandler;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
-use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Entities\Session\States\EnumState;
 use PHPUnit\Framework\TestCase;
 
 class StateHandlerFactoryTest extends TestCase

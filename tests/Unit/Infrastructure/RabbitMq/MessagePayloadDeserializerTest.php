@@ -5,7 +5,7 @@ namespace Tests\Unit\Infrastructure\RabbitMq;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
-use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Entities\Session\States\EnumState;
 use App\Infrastructure\RabbitMq\MessagePayloadDeserializer;
 use App\Infrastructure\RabbitMq\MessagePayloadSerializer;
 use JsonException;

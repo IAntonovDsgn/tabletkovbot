@@ -4,7 +4,7 @@ namespace Tests\Unit\Application\Services\Keyboard;
 
 use App\Application\StateManager\Factories\KeyboardFactory;
 use App\Domain\Entities\Message\MessageButton;
-use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Entities\Session\States\EnumState;
 use PHPUnit\Framework\TestCase;
 
 class KeyboardFactoryTest extends TestCase

@@ -11,7 +11,7 @@ use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
-use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Entities\Session\States\EnumState;
 use Exception;
 use Psr\Log\LoggerInterface;
 
@@ -82,6 +82,10 @@ final class NotificationService
                             MessageButton::MAKE_INTAKE_MARK_BUTTON_TITLE,
                             EnumState::NOTIFIED,
                             (string) $medicament->getId(),
+                        ),
+                        new MessageButton(
+                            MessageButton::MENU,
+                            EnumState::MENU
                         ),
                     ]
                 )

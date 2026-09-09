@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\Entities\Session;
 
 use App\Domain\Entities\Message\EnumMessageText;
-use App\Domain\Entities\Session\State\EnumState;
-use App\Domain\Entities\Session\State\StateTransitionRules;
+use App\Domain\Entities\Session\States\EnumState;
+use App\Domain\Entities\Session\States\StateTransitionRules;
 use App\Domain\Exceptions\TransitionStateNotAllowedException;
 
 final class Session

@@ -25,7 +25,7 @@ use App\Application\StateManager\StateHandlers\StateNotificationEnabledHandler;
 use App\Application\StateManager\StateHandlers\StateNotificationsSelectedHandler;
 use App\Application\StateManager\StateHandlers\StateNotifiedHandler;
 use App\Application\StateManager\StateHandlers\StateSelectedMedicamentForDeleteHandler;
-use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Entities\Session\States\EnumState;
 
 readonly class StateHandlerFactory
 {

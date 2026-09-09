@@ -10,7 +10,7 @@ use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\Session;
-use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Entities\Session\States\EnumState;
 use App\Domain\Exceptions\NotFoundEntityException;
 
 final readonly class StateChangeMedicamentSelectedHandler implements StateHandlerInterface

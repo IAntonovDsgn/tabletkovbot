@@ -9,7 +9,7 @@ use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
-use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Entities\Session\States\EnumState;
 use DateTimeImmutable;
 use DateTimeZone;
 use PHPUnit\Framework\MockObject\MockObject;

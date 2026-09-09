@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Entities\Message;
 
-use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Entities\Session\States\EnumState;
 use JsonSerializable;
 
 class MessageButton implements JsonSerializable

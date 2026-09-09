@@ -7,7 +7,7 @@ namespace App\Infrastructure\Database\Dbal\Repositories;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
-use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Entities\Session\States\EnumState;
 use App\Domain\Exceptions\NotFoundEntityException;
 use App\Infrastructure\Exceptions\AlreadyExistInPersistenceException;
 use App\Infrastructure\Exceptions\RepositoryException;

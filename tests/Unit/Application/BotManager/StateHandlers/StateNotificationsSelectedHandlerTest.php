@@ -7,7 +7,7 @@ use App\Application\StateManager\StateHandlers\StateNotificationsSelectedHandler
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\Session;
-use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Entities\Session\States\EnumState;
 use PHPUnit\Framework\TestCase;
 
 class StateNotificationsSelectedHandlerTest extends TestCase

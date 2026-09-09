@@ -64,4 +64,4 @@ Adding a conversation state: create `State<X>Handler` implementing `StateHandler
 
 ## Reference
 
-`src/Domain/Entities/Session/State/StateTransitionRules.php` defines allowed state transitions (checked by `Session::transitionToState()`).
+`src/Domain/Entities/Session/States/StateTransitionRules.php` defines allowed state transitions (checked by `Session::transitionToState()`).

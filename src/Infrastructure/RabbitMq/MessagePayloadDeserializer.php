@@ -6,7 +6,7 @@ namespace App\Infrastructure\RabbitMq;
 
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
-use App\Domain\Entities\Session\State\EnumState;
+use App\Domain\Entities\Session\States\EnumState;
 use JsonException;
 
 final readonly class MessagePayloadDeserializer
