@@ -44,6 +44,10 @@ final class Version20260806094910 extends AbstractMigration
             'notnull' => false,
         ]);
 
+        $table->addColumn(OutboxRepository::TYPE_COLUMN_NAME, 'text', [
+            'notnull' => false,
+        ]);
+
         $table->setPrimaryKey([OutboxRepository::ID_COLUMN_NAME]);
         $table->addOption('engine', 'InnoDB');
         $table->addOption('charset', 'utf8mb4');

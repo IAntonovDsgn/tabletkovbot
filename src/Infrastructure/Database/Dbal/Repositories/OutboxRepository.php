@@ -25,6 +25,7 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
     public const string BUTTONS_COLUMN_NAME = 'buttons';
     public const string STATUS_COLUMN_NAME = 'status';
     public const string ATTEMPTS_COLUMN_NAME = 'attempts';
+    public const string TYPE_COLUMN_NAME = 'type';
     public const string PENDING_STATUS = 'pending';
 
     public function __construct(
@@ -79,7 +80,6 @@ final readonly class OutboxRepository implements OutboxRepositoryInterface
         } catch (Exception $e) {
             throw new RepositoryException($e->getMessage(), 0, $e);
         }
-
 
         if (!empty($rows)) {
             foreach ($rows as $row) {

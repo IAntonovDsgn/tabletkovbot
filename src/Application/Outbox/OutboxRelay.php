@@ -6,8 +6,7 @@ namespace App\Application\Outbox;
 
 use App\Application\MessageService\MessageBrokerInterface;
 use App\Domain\Entities\Message\Message;
-use Closure;
-use Throwable;
+use Psr\Log\LoggerInterface;
 
 final class OutboxRelay
 {
@@ -16,23 +15,21 @@ final class OutboxRelay
     public function __construct(
         private readonly OutboxRepositoryInterface $outboxRepository,
         private readonly MessageBrokerInterface $broker,
+        private readonly LoggerInterface $logger,
         private readonly int $batchSize,
         private readonly int $pollIntervalMs,
         private readonly int $maxAttempts = 4,
     ) {}
 
-    /**
-     * @param null|Closure(Throwable, array<string, mixed>): void $onError
-     */
-    public function run(?Closure $onError = null): void
+    public function run(): void
     {
         while (!$this->stopRequested) {
             try {
-                if (!$this->processBatch($onError)) {
+                if (!$this->processBatch()) {
                     usleep($this->pollIntervalMs * 1000);
                 }
-            } catch (Throwable $e) {
-                $this->report($e, ['phase' => 'cycle'], $onError);
+            } catch (\Exception $e) {
+                $this->logger->error($e, ['phase' => 'cycle']);
                 usleep($this->pollIntervalMs * 1000);
             }
         }
@@ -40,7 +37,7 @@ final class OutboxRelay
         $this->broker->close();
     }
 
-    public function processBatch(?Closure $onError = null): bool
+    public function processBatch(): bool
     {
         $messages = $this->outboxRepository->getPendingMessages($this->batchSize);
 
@@ -54,29 +51,29 @@ final class OutboxRelay
                 $this->broker->publish($message);
                 $this->outboxRepository->delete($message);
                 $relayed = true;
-            } catch (Throwable $e) {
-                $this->report($e, [
+            } catch (\Exception $e) {
+                $this->logger->error($e, [
                     'message_id' => $message->getId(),
                     'chat_id' => $message->getChatId(),
                     'phase' => 'relay',
-                ], $onError);
-                $this->registerFailedAttempt($message, $e, $onError);
+                ]);
+                $this->registerFailedAttempt($message, $e);
             }
         }
 
         return $relayed;
     }
 
-    private function registerFailedAttempt(Message $message, Throwable $error, ?Closure $onError = null): void
+    private function registerFailedAttempt(Message $message, \Exception $error): void
     {
         try {
             $attempts = $this->outboxRepository->markAttempt($message);
-        } catch (Throwable $e) {
-            $this->report($e, [
+        } catch (\Exception $e) {
+            $this->logger->error($e, [
                 'message_id' => $message->getId(),
                 'chat_id' => $message->getChatId(),
                 'phase' => 'register_attempt',
-            ], $onError);
+            ]);
 
             return;
         }
@@ -85,36 +82,26 @@ final class OutboxRelay
             return;
         }
 
-        $this->report($error, [
+        $this->logger->error($error, [
             'message_id' => $message->getId(),
             'chat_id' => $message->getChatId(),
             'attempts' => $attempts,
             'phase' => 'drop_after_max_attempts',
-        ], $onError);
+        ]);
 
         try {
             $this->outboxRepository->delete($message);
-        } catch (Throwable $e) {
-            $this->report($e, [
+        } catch (\Exception $e) {
+            $this->logger->error($e, [
                 'message_id' => $message->getId(),
                 'chat_id' => $message->getChatId(),
                 'phase' => 'delete_dropped',
-            ], $onError);
+            ]);
         }
     }
 
     public function requestStop(): void
     {
         $this->stopRequested = true;
-    }
-
-    /**
-     * @param array<string, string|int|null> $context
-     */
-    private function report(Throwable $e, array $context, ?Closure $onError = null): void
-    {
-        if ($onError !== null) {
-            $onError($e, $context);
-        }
     }
 }
