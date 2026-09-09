@@ -63,9 +63,10 @@ class MedicationNotificationServiceTest extends TestCase
             ->with($this->callback(function (Message $message): bool {
                 return $message->getChatId() === 123
                     && $message->getText() === EnumMessageText::NOTIFICATION_REMINDER->value . ': "Aspirin"'
-                    && count($message->getButtons()) === 1
+                    && count($message->getButtons()) === 2
                     && $message->getButtons()[0]->getNewState() === EnumState::NOTIFIED->value
-                    && $message->getButtons()[0]->getAdditionalPayload() === '7';
+                    && $message->getButtons()[0]->getAdditionalPayload() === '7'
+                    && $message->getButtons()[1]->getNewState() === EnumState::MENU->value;
             }));
 
         $this->medicamentRepository->expects($this->once())
