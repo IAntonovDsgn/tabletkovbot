@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Application\MedicationNotification;
 
-use App\Application\Notification\CycleNotificationService;
+use App\Application\NotificationService\NotificationService;
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
 use App\Domain\Entities\Medicament\Medicament;
@@ -23,7 +23,7 @@ class MedicationNotificationServiceTest extends TestCase
     private MockObject $outboxRepository;
     private MockObject $unitOfWork;
     private FakeLogger $logger;
-    private CycleNotificationService $service;
+    private NotificationService $service;
 
     protected function setUp(): void
     {
@@ -32,7 +32,7 @@ class MedicationNotificationServiceTest extends TestCase
         $this->outboxRepository = $this->createMock(OutboxRepositoryInterface::class);
         $this->unitOfWork = $this->createMock(UnitOfWorkInterface::class);
         $this->logger = new FakeLogger();
-        $this->service = new CycleNotificationService(
+        $this->service = new NotificationService(
             $this->medicamentRepository,
             $this->outboxRepository,
             $this->unitOfWork,

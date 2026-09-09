@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Presentation\Console\Commands;
 
-use App\Application\Notification\CycleNotificationService;
+use App\Application\NotificationService\NotificationService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,7 +19,7 @@ use const SIGTERM;
 class MedicationNotifyCommand extends Command
 {
     public function __construct(
-        private readonly CycleNotificationService $notificationService,
+        private readonly NotificationService $notificationService,
     ) {
         parent::__construct();
     }

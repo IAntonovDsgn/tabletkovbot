@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Notification;
+namespace App\Application\NotificationService;
 
 use App\Application\Outbox\OutboxRepositoryInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
@@ -15,7 +15,7 @@ use App\Domain\Entities\Session\State\EnumState;
 use Exception;
 use Psr\Log\LoggerInterface;
 
-final class CycleNotificationService
+final class NotificationService
 {
     private bool $stopRequested = false;
 

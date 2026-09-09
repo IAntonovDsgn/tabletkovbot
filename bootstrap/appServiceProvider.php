@@ -1,10 +1,10 @@
 <?php
 
-use App\Application\Notification\CycleNotificationService;
-use App\Application\Message\Services\MessageBrokerInterface;
-use App\Application\Message\Services\MessageServiceInterface;
+use App\Application\NotificationService\NotificationService;
 use App\Application\Outbox\OutboxRelay;
 use App\Application\Outbox\OutboxRepositoryInterface;
+use App\Application\MessageService\MessageBrokerInterface;
+use App\Application\MessageService\MessageServiceInterface;
 use App\Application\UnitOfWork\UnitOfWorkInterface;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
@@ -124,8 +124,8 @@ return [
         );
     },
 
-    CycleNotificationService::class => function (ContainerInterface $c) {
-        return new CycleNotificationService(
+    NotificationService::class => function (ContainerInterface $c) {
+        return new NotificationService(
             $c->get(MedicamentRepositoryInterface::class),
             $c->get(OutboxRepositoryInterface::class),
             $c->get(UnitOfWorkInterface::class),

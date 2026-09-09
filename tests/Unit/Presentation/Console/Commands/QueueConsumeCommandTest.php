@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Presentation\Console\Commands;
 
-use App\Application\Message\Services\MessageServiceInterface;
-use App\Application\Message\UseCases\SendMessage\Handler;
+use App\Application\MessageService\MessageServiceInterface;
+use App\Application\MessageService\MessageService;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\State\EnumState;
@@ -31,7 +31,7 @@ class QueueConsumeCommandTest extends TestCase
         $this->consumer = $this->createMock(QueueConsumerInterface::class);
         $this->messageService = $this->createMock(MessageServiceInterface::class);
 
-        $command = new QueueConsumeCommand($this->consumer, new Handler($this->messageService));
+        $command = new QueueConsumeCommand($this->consumer, new MessageService($this->messageService));
         $this->tester = new CommandTester($command);
     }
 

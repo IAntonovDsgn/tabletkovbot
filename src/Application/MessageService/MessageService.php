@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Message\UseCases\SendMessage;
+namespace App\Application\MessageService;
 
-use App\Application\Message\Services\MessageServiceInterface;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
 
-final readonly class Handler
+final readonly class MessageService
 {
     public function __construct(
         private MessageServiceInterface $messageService,
@@ -17,7 +16,7 @@ final readonly class Handler
     /**
      * @param MessageButton[] $messageButtons
      */
-    public function handle(int $chat_id, string $messageText, array $messageButtons = []): void
+    public function sendMessage(int $chat_id, string $messageText, array $messageButtons = []): void
     {
         $message = Message::create($chat_id, $messageText, $messageButtons);
         $this->messageService->sendMessage($message);

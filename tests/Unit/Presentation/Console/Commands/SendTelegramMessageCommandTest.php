@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Presentation\Console\Commands;
 
-use App\Application\Message\Services\MessageServiceInterface;
-use App\Application\Message\UseCases\SendMessage\Handler;
+use App\Application\MessageService\MessageServiceInterface;
+use App\Application\MessageService\MessageService;
 use App\Domain\Entities\Message\Message;
 use App\Infrastructure\Exceptions\SendMessageException;
 use App\Presentation\Console\Commands\SendTelegramMessageCommand;
@@ -21,7 +21,7 @@ class SendTelegramMessageCommandTest extends TestCase
         parent::setUp();
 
         $this->messageService = $this->createMock(MessageServiceInterface::class);
-        $command = new SendTelegramMessageCommand(new Handler($this->messageService));
+        $command = new SendTelegramMessageCommand(new MessageService($this->messageService));
         $this->tester = new CommandTester($command);
     }
 

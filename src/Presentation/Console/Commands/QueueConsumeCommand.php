@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Presentation\Console\Commands;
 
-use App\Application\Message\UseCases\SendMessage\Handler;
+use App\Application\MessageService\MessageService;
 use App\Domain\Entities\Message\Message;
 use App\Infrastructure\RabbitMq\QueueConsumerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -22,7 +22,7 @@ class QueueConsumeCommand extends Command
 {
     public function __construct(
         private readonly QueueConsumerInterface $consumer,
-        private readonly Handler $handler,
+        private readonly MessageService $messageService,
     ) {
         parent::__construct();
     }
@@ -38,7 +38,7 @@ class QueueConsumeCommand extends Command
         $this->registerSignalHandlers();
 
         $this->consumer->run(function (Message $message): void {
-            $this->handler->handle(
+            $this->messageService->sendMessage(
                 $message->getChatId(),
                 $message->getText(),
                 $message->getButtons(),

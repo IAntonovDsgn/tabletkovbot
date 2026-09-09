@@ -8,12 +8,11 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Throwable;
 
 final class SendTelegramMessageCommand extends Command
 {
     public function __construct(
-        private readonly \App\Application\Message\UseCases\SendMessage\Handler $handler,
+        private readonly \App\Application\MessageService\MessageService $messageService,
     ) {
         parent::__construct();
     }
@@ -41,9 +40,9 @@ final class SendTelegramMessageCommand extends Command
         }
 
         try {
-            $this->handler->handle($chatId, $message);
+            $this->messageService->sendMessage($chatId, $message);
             return self::SUCCESS;
-        } catch (Throwable $e) {
+        } catch (\Exception $e) {
             $output->writeln("<error>Failed to send message: " . $e->getMessage() . "</error>");
             return self::FAILURE;
         }
