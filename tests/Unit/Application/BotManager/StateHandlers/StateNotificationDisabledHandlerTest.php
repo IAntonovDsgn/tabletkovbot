@@ -4,7 +4,7 @@ namespace Tests\Unit\Application\BotManager\StateHandlers;
 
 use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
 use App\Application\StateManager\Factories\KeyboardFactory;
-use App\Application\StateManager\StateHandlers\StateNotificationDisabledHandler;
+use App\Application\StateManager\UseCases\StateNotificationDisabledHandler;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Session\Session;
 use PHPUnit\Framework\TestCase;

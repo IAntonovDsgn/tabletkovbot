@@ -1,27 +1,28 @@
 <?php
 
-use App\Application\NotificationService\NotificationService;
-use App\Application\Outbox\OutboxRelay;
-use App\Application\Outbox\OutboxRepositoryInterface;
-use App\Application\MessageService\MessageBrokerInterface;
-use App\Application\MessageService\MessageServiceInterface;
-use App\Application\UnitOfWork\UnitOfWorkInterface;
+use App\Application\Services\SendDataService\MessageBrokerInterface;
+use App\Application\Services\SendDataService\DataTransportInterface;
+use App\Application\Services\NotificationService\NotificationService;
+use App\Application\Services\OutboxService\MessageOutboxRepositoryInterface;
+use App\Application\Services\OutboxService\OutboxRelay;
+use App\Application\Services\SendDataService\SendDataService;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
-use App\Infrastructure\Database\Dbal\Repositories\IntakeMarkRepository;
-use App\Infrastructure\Database\Dbal\Repositories\MedicamentRepository;
-use App\Infrastructure\Database\Dbal\Repositories\OutboxRepository;
-use App\Infrastructure\Database\Dbal\Repositories\SessionRepository;
-use App\Infrastructure\Database\Dbal\UnitOfWork\UnitOfWork;
+use App\Domain\UnitOfWorkInterface;
+use App\Infrastructure\Dbal\Repositories\IntakeMarkRepository;
+use App\Infrastructure\Dbal\Repositories\MedicamentRepository;
+use App\Infrastructure\Dbal\Repositories\MessageOutboxRepository;
+use App\Infrastructure\Dbal\Repositories\SessionRepository;
+use App\Infrastructure\Dbal\UnitOfWork\UnitOfWork;
 use App\Infrastructure\RabbitMq\AmqpConnectionFactory;
 use App\Infrastructure\RabbitMq\AmqpConnectionFactoryInterface;
-use App\Infrastructure\RabbitMq\MessagePayloadDeserializer;
-use App\Infrastructure\RabbitMq\MessagePayloadSerializer;
-use App\Infrastructure\RabbitMq\QueueConsumerInterface;
+use App\Infrastructure\RabbitMq\Deserializer;
+use App\Infrastructure\RabbitMq\MessageQueueConsumer;
 use App\Infrastructure\RabbitMq\RabbitMqMessageBroker;
-use App\Infrastructure\RabbitMq\RabbitMqQueueConsumer;
-use App\Infrastructure\TelegramMessageService\TelegramMessageService;
+use App\Infrastructure\RabbitMq\ReportQueueConsumer;
+use App\Infrastructure\RabbitMq\Serializer;
+use App\Infrastructure\TelegramMessageTransport\TelegramDataTransport;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Monolog\Formatter\LineFormatter;
@@ -72,20 +73,20 @@ return [
     /*==========================================
         Telegram
     ==========================================*/
-    MessageServiceInterface::class => get(TelegramMessageService::class),
-    TelegramMessageService::class => autowire(),
+    DataTransportInterface::class => get(TelegramDataTransport::class),
+    TelegramDataTransport::class => autowire(),
     Api::class => function () {
         $config = require __DIR__ . '/../config/telegram.php';
         return new Api($config['token']);
     },
 
     /*==========================================
-        Message broker (RabbitMQ)
+        Queue
     ==========================================*/
     MessageBrokerInterface::class => function (ContainerInterface $c) {
         $config = require __DIR__ . '/../config/rabbitmq.php';
         return new RabbitMqMessageBroker(
-            new MessagePayloadSerializer(),
+            new Serializer(),
             $c->get(LoggerInterface::class),
             (string) ($config['host'] ?? 'rabbitmq'),
             (int) ($config['port'] ?? 5672),
@@ -93,31 +94,17 @@ return [
             (string) ($config['user'] ?? 'guest'),
             (string) ($config['password'] ?? 'guest'),
             (string) ($config['exchange'] ?? 'outbox'),
-            (string) ($config['queue'] ?? 'telegram.send-message'),
+            (string) ($config['message_queue'] ?? 'messages'),
+            (string) ($config['message_report'] ?? 'reports'),
             (float) ($config['confirm_timeout_seconds'] ?? 5.0),
-        );
-    },
-
-    QueueConsumerInterface::class => function (ContainerInterface $c) {
-        $config = require __DIR__ . '/../config/rabbitmq.php';
-        return new RabbitMqQueueConsumer(
-            new MessagePayloadDeserializer(),
-            $c->get(LoggerInterface::class),
-            (string) ($config['host'] ?? 'rabbitmq'),
-            (int) ($config['port'] ?? 5672),
-            (string) ($config['vhost'] ?? '/'),
-            (string) ($config['user'] ?? 'guest'),
-            (string) ($config['password'] ?? 'guest'),
-            (string) ($config['exchange'] ?? 'outbox'),
-            (string) ($config['queue'] ?? 'telegram.send-message'),
-            max(1, (int) ($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
         );
     },
 
     OutboxRelay::class => function (ContainerInterface $c) {
         return new OutboxRelay(
-            $c->get(OutboxRepositoryInterface::class),
+            $c->get(MessageOutboxRepositoryInterface::class),
             $c->get(MessageBrokerInterface::class),
+            $c->get(LoggerInterface::class),
             max(1, (int) ($_ENV['OUTBOX_BATCH_SIZE'] ?? 50)),
             max(1, (int) ($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
             max(1, (int) ($_ENV['OUTBOX_MAX_ATTEMPTS'] ?? 4)),
@@ -127,10 +114,44 @@ return [
     NotificationService::class => function (ContainerInterface $c) {
         return new NotificationService(
             $c->get(MedicamentRepositoryInterface::class),
-            $c->get(OutboxRepositoryInterface::class),
+            $c->get(MessageOutboxRepositoryInterface::class),
             $c->get(UnitOfWorkInterface::class),
             $c->get(LoggerInterface::class),
             max(1, (int) ($_ENV['NOTIFY_POLL_INTERVAL_MS'] ?? 60000)),
+        );
+    },
+
+    MessageQueueConsumer::class => function (ContainerInterface $c) {
+        return new MessageQueueConsumer(
+            new Deserializer(),
+            $c->get(LoggerInterface::class),
+            (string) ($config['host'] ?? 'rabbitmq'),
+            (int) ($config['port'] ?? 5672),
+            (string) ($config['vhost'] ?? '/'),
+            (string) ($config['user'] ?? 'guest'),
+            (string) ($config['password'] ?? 'guest'),
+            (string) ($config['exchange'] ?? 'outbox'),
+            (string) ($config['message_queue'] ?? 'messages'),
+            max(1, (int) ($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
+            $c->get(SendDataService::class),
+            new AmqpConnectionFactory(),
+        );
+    },
+
+    ReportQueueConsumer::class => function (ContainerInterface $c) {
+        return new ReportQueueConsumer(
+            new Deserializer(),
+            $c->get(LoggerInterface::class),
+            (string) ($config['host'] ?? 'rabbitmq'),
+            (int) ($config['port'] ?? 5672),
+            (string) ($config['vhost'] ?? '/'),
+            (string) ($config['user'] ?? 'guest'),
+            (string) ($config['password'] ?? 'guest'),
+            (string) ($config['exchange'] ?? 'outbox'),
+            (string) ($config['report_queue'] ?? 'reports'),
+            max(1, (int) ($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
+            $c->get(SendDataService::class),
+            new AmqpConnectionFactory(),
         );
     },
 
@@ -139,13 +160,13 @@ return [
     /*==========================================
         Database
      ==========================================*/
-    Connection::class => function (ContainerInterface $c) {
+    Connection::class => function () {
         $config = require __DIR__ . '/../config/database.php';
         return DriverManager::getConnection($config);
     },
 
     UnitOfWorkInterface::class => autowire(UnitOfWork::class),
-    OutboxRepositoryInterface::class => autowire(OutboxRepository::class),
+    MessageOutboxRepositoryInterface::class => autowire(MessageOutboxRepository::class),
     SessionRepositoryInterface::class => autowire(SessionRepository::class),
     IntakeMarkRepositoryInterface::class => autowire(IntakeMarkRepository::class),
     MedicamentRepositoryInterface::class => autowire(MedicamentRepository::class),

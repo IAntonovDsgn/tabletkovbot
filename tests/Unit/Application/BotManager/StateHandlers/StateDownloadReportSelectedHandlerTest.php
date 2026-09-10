@@ -3,7 +3,7 @@
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
 use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
-use App\Application\StateManager\StateHandlers\StateDownloadReportSelectedHandler;
+use App\Application\StateManager\UseCases\StateDownloadReportSelectedHandler;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\Session;

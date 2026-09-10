@@ -3,7 +3,7 @@
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
 use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
-use App\Application\StateManager\StateHandlers\StateDeleteMedicamentSelectedHandler;
+use App\Application\StateManager\UseCases\StateDeleteMedicamentSelectedHandler;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;

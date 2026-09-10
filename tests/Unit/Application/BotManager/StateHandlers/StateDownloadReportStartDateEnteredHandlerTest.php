@@ -5,7 +5,7 @@ namespace Tests\Unit\Application\BotManager\StateHandlers;
 use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
 use App\Application\StateManager\Exceptions\InvalidValueException;
 use App\Application\StateManager\Factories\KeyboardFactory;
-use App\Application\StateManager\StateHandlers\StateDownloadReportStartDateEnteredHandler;
+use App\Application\StateManager\UseCases\StateDownloadReportStartDateEnteredHandler;
 use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
@@ -51,7 +51,7 @@ class StateDownloadReportStartDateEnteredHandlerTest extends TestCase
 
         $expectedReport = new Report($startDate, $intakeMarks);
         $expectedResponse = new StateHandlerResponseDTO(
-            EnumMessageText::REPORT_READY,
+            EnumMessageText::START_MAKING_REPORT,
             $this->keyboardFactory->makeMenuKeyboard(),
             report: $expectedReport
         );

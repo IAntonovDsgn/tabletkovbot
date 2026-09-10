@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Presentation\Console;
 
 use App\Presentation\Console\Commands\GetTelegramUpdatesCommand;
-use App\Presentation\Console\Commands\MedicationNotifyCommand;
+use App\Presentation\Console\Commands\NotifyCommand;
 use App\Presentation\Console\Commands\OutboxPublishCommand;
 use App\Presentation\Console\Commands\QueueConsumeCommand;
 use App\Presentation\Console\Commands\SendTelegramMessageCommand;
@@ -29,7 +29,7 @@ $commandLoader = new ContainerCommandLoader($container, [
     'app:send-telegram-message' => SendTelegramMessageCommand::class,
     'app:outbox-publish'        => OutboxPublishCommand::class,
     'app:queue-consume'         => QueueConsumeCommand::class,
-    'app:medication-notify'     => MedicationNotifyCommand::class,
+    'app:medication-notify'     => NotifyCommand::class,
 ]);
 
 $application = new Application('app');

@@ -2,17 +2,17 @@
 
 namespace Tests\Unit\Presentation\Api;
 
+use App\Application\Services\OutboxService\OutboxRepositoryInterface;
 use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
 use App\Application\StateManager\Factories\StateHandlerFactory;
 use App\Application\StateManager\Manager;
-use App\Application\StateManager\StateHandlers\StateHandlerInterface;
-use App\Application\Outbox\OutboxRepositoryInterface;
-use App\Application\UnitOfWork\UnitOfWorkInterface;
+use App\Application\StateManager\UseCases\StateHandlerInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\States\EnumState;
+use App\Domain\UnitOfWorkInterface;
 use App\Presentation\Api\WebhookController;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

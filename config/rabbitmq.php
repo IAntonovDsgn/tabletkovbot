@@ -7,7 +7,7 @@ return [
     'user' => $_ENV['RABBITMQ_USER'] ?? 'guest',
     'password' => $_ENV['RABBITMQ_PASSWORD'] ?? 'guest',
     'exchange' => 'outbox',
-    'queue' => $_ENV['RABBITMQ_MESSAGE_QUEUE'] ?? 'telegram.send-message',
-    'report_queue' => $_ENV['RABBITMQ_REPORT_QUEUE'] ?? 'report.generate',
+    'message_queue' => $_ENV['RABBITMQ_MESSAGE_QUEUE'] ?? 'messages',
+    'report_queue' => $_ENV['RABBITMQ_REPORT_QUEUE'] ?? 'reports',
     'confirm_timeout_seconds' => 5.0,
 ];

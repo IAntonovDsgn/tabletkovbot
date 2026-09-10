@@ -2,14 +2,14 @@
 
 namespace Tests\Unit\Application\MedicationNotification;
 
-use App\Application\NotificationService\NotificationService;
-use App\Application\Outbox\OutboxRepositoryInterface;
-use App\Application\UnitOfWork\UnitOfWorkInterface;
+use App\Application\Services\NotificationService\NotificationService;
+use App\Application\Services\OutboxService\OutboxRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\States\EnumState;
+use App\Domain\UnitOfWorkInterface;
 use DateTimeImmutable;
 use DateTimeZone;
 use PHPUnit\Framework\MockObject\MockObject;

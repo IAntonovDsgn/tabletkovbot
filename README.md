@@ -9,3 +9,11 @@
 <span style="font-size: 16px"><span style="color: green">Запуск консольных команд (<span style="color: orange">выполнять в контейнере app</span>):</span><br> composer console -- 'имя команды'</span>
 
 <span style="font-size: 16px"><span style="color: green">Запуск миграций (<span style="color: orange">выполнять в контейнере app</span>):</span><br> composer console -- migrations:migrate </span>
+
+
+------
+
+<h3>План работ:</h3>
+
+1) В SendDataService дописать реализацию метода sendReport
+2) Сделать отдельный воркер, который будет вызывать ReportQueueConsumer->run() параллельно с воркером, который вызывает MessageQueueConsumer-run()

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Presentation\Console\Commands;
 
-use App\Application\MessageService\MessageServiceInterface;
-use App\Application\StateManager\DTOs\RequestDTO;
+use App\Application\Services\SendDataService\DataTransportInterface;
+use App\Application\StateManager\RequestDTO;
 use App\Presentation\Console\Commands\GetTelegramUpdatesCommand;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -19,7 +19,7 @@ class GetTelegramUpdatesCommandTest extends TestCase
     {
         parent::setUp();
 
-        $this->messageService = $this->createMock(MessageServiceInterface::class);
+        $this->messageService = $this->createMock(DataTransportInterface::class);
         $this->tester = new CommandTester(new GetTelegramUpdatesCommand($this->messageService));
     }
 

@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Presentation\Console\Commands;
 
-use App\Application\Outbox\OutboxRelay;
-use Psr\Log\LoggerInterface;
+use App\Application\Services\OutboxService\OutboxRelay;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Throwable;
 
 use function extension_loaded;
 use function pcntl_async_signals;
@@ -21,8 +19,7 @@ use const SIGTERM;
 class OutboxPublishCommand extends Command
 {
     public function __construct(
-        private readonly OutboxRelay $relay,
-        private readonly LoggerInterface $logger,
+        private readonly OutboxRelay $outboxRelay,
     ) {
         parent::__construct();
     }
@@ -36,10 +33,7 @@ class OutboxPublishCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->registerSignalHandlers();
-
-        $this->relay->run(function (Throwable $e, array $context): void {
-            $this->logger->error($e, $context);
-        });
+        $this->outboxRelay->run();
 
         return self::SUCCESS;
     }
@@ -52,10 +46,10 @@ class OutboxPublishCommand extends Command
 
         pcntl_async_signals(true);
         pcntl_signal(SIGTERM, function () {
-            $this->relay->requestStop();
+            $this->outboxRelay->requestStop();
         });
         pcntl_signal(SIGINT, function () {
-            $this->relay->requestStop();
+            $this->outboxRelay->requestStop();
         });
     }
 }

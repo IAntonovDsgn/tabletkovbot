@@ -4,7 +4,7 @@ namespace Tests\Unit\Application\BotManager\StateHandlers;
 
 use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
 use App\Application\StateManager\Factories\KeyboardFactory;
-use App\Application\StateManager\StateHandlers\StateNotifiedHandler;
+use App\Application\StateManager\UseCases\StateNotifiedHandler;
 use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;

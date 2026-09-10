@@ -3,7 +3,7 @@
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
 use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
-use App\Application\StateManager\StateHandlers\StateChangeNotificationTimeSelectedHandler;
+use App\Application\StateManager\UseCases\StateChangeNotificationTimeSelectedHandler;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\Session;

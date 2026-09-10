@@ -21,8 +21,8 @@ enum EnumMessageText: string
     case MEDICAMENT_DELETED = 'Медикамент успешно удален. Чем еще я могу помочь?';
     case ENTER_DATE = 'Введите дату начала отчёта в формате dd.mm.yyyy';
     case FORMAT_DATE_ERROR = 'Введен неверный формат даты. Пожалуйста, введите дату в формате dd.mm.yyyy';
-    case INTAKE_MARKS_NOT_FOUND = 'За выбранный период не найдены отметки о приеме медикаментов';
-    case REPORT_READY = 'Отчет сформирован! Чем еще я могу помочь?';
+    case INTAKE_MARKS_NOT_FOUND = 'Не найдены отметки о приеме медикаментов';
+    case START_MAKING_REPORT = 'Формирование отчета может занять несколько минут. Отчет будет отправлен в чат по готовности.';
     case NOTIFICATIONS_ENABLE = 'Напоминания о приеме медикаментов включены. Хотите отключить?';
     case NOTIFICATIONS_DISABLE = 'Напоминания о приеме медикаментов отключены. Хотите включить?';
     case SETTINGS_SAVED = 'Настройки сохранены! Чем еще я могу помочь?';

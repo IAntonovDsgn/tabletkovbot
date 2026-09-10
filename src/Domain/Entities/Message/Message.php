@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace App\Domain\Entities\Message;
 
-final readonly class Message
+final class Message
 {
     /**
      * @param MessageButton[] $buttons
      */
     private function __construct(
-        private ?int $id,
-        private bool $isExistInPersistence,
-        private int $chatId,
-        private ?string $text,
-        private array $buttons,
+        private readonly ?int $id,
+        private readonly bool $isExistInPersistence,
+        private readonly int $chatId,
+        private readonly ?string $text,
+        private readonly array $buttons,
+        private int $attempts,
     ) {}
 
     /**
@@ -30,7 +31,8 @@ final readonly class Message
             false,
             $chatId,
             $text,
-            $buttons
+            $buttons,
+            0
         );
     }
 
@@ -40,6 +42,7 @@ final readonly class Message
     public static function restoreFromPersistence(
         int $id,
         int $chatId,
+        int $attempts,
         ?string $text = null,
         array $buttons = [],
     ): Message {
@@ -48,7 +51,8 @@ final readonly class Message
             true,
             $chatId,
             $text,
-            $buttons
+            $buttons,
+            $attempts
         );
     }
 
@@ -78,5 +82,15 @@ final readonly class Message
     public function isExistInPersistence(): bool
     {
         return $this->isExistInPersistence;
+    }
+
+    public function getAttempts(): int
+    {
+        return $this->attempts;
+    }
+
+    public function setAttempts(int $attempts): void
+    {
+        $this->attempts = $attempts;
     }
 }

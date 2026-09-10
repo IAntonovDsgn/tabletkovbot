@@ -4,7 +4,7 @@ namespace Tests\Unit\Application\BotManager\StateHandlers;
 
 use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
 use App\Application\StateManager\Factories\KeyboardFactory;
-use App\Application\StateManager\StateHandlers\StateChangeMedicamentSelectedHandler;
+use App\Application\StateManager\UseCases\StateChangeMedicamentSelectedHandler;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;

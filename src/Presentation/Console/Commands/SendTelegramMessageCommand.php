@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 final class SendTelegramMessageCommand extends Command
 {
     public function __construct(
-        private readonly \App\Application\MessageService\MessageService $messageService,
+        private readonly \App\Application\Services\SendDataService\SendDataService $messageService,
     ) {
         parent::__construct();
     }

@@ -4,9 +4,9 @@ namespace Tests\Unit\Infrastructure\RabbitMq;
 
 use App\Domain\Entities\Message\Message;
 use App\Infrastructure\RabbitMq\AmqpConnectionFactoryInterface;
-use App\Infrastructure\RabbitMq\MessagePayloadDeserializer;
+use App\Infrastructure\RabbitMq\Deserializer;
 use App\Infrastructure\RabbitMq\MessagePayloadSerializer;
-use App\Infrastructure\RabbitMq\RabbitMqQueueConsumer;
+use App\Infrastructure\RabbitMq\MessageQueueConsumer;
 use JsonException;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
@@ -57,10 +57,10 @@ class RabbitMqQueueConsumerTest extends TestCase
             });
     }
 
-    private function makeConsumer(): RabbitMqQueueConsumer
+    private function makeConsumer(): MessageQueueConsumer
     {
-        return new RabbitMqQueueConsumer(
-            new MessagePayloadDeserializer(),
+        return new MessageQueueConsumer(
+            new Deserializer(),
             $this->logger,
             'rabbitmq-host',
             5672,
@@ -78,7 +78,7 @@ class RabbitMqQueueConsumerTest extends TestCase
      * Emulates the library dispatching one delivery per wait() call. The last
      * invocation requests a graceful stop so the run() loop always terminates.
      */
-    private function channelWillDeliver(RabbitMqQueueConsumer $consumer, array $bodies): void
+    private function channelWillDeliver(MessageQueueConsumer $consumer, array $bodies): void
     {
         $invocation = 0;
         $this->channel->method('wait')

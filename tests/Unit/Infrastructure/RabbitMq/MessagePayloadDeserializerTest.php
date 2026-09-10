@@ -6,21 +6,21 @@ use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\States\EnumState;
-use App\Infrastructure\RabbitMq\MessagePayloadDeserializer;
+use App\Infrastructure\RabbitMq\Deserializer;
 use App\Infrastructure\RabbitMq\MessagePayloadSerializer;
 use JsonException;
 use PHPUnit\Framework\TestCase;
 
-class MessagePayloadDeserializerTest extends TestCase
+class DeserializerTest extends TestCase
 {
     private MessagePayloadSerializer $serializer;
-    private MessagePayloadDeserializer $deserializer;
+    private Deserializer $deserializer;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->serializer = new MessagePayloadSerializer();
-        $this->deserializer = new MessagePayloadDeserializer();
+        $this->deserializer = new Deserializer();
     }
 
     /**
@@ -38,7 +38,7 @@ class MessagePayloadDeserializerTest extends TestCase
             ],
         );
 
-        $restored = $this->deserializer->deserialize($this->serializer->serialize($original));
+        $restored = $this->deserializer->deserializeMessage($this->serializer->serialize($original));
 
         $this->assertSame($original->getId(), $restored->getId());
         $this->assertSame($original->getChatId(), $restored->getChatId());
@@ -60,7 +60,7 @@ class MessagePayloadDeserializerTest extends TestCase
      */
     public function testDeserializesPayloadWithoutTextAndButtons(): void
     {
-        $message = $this->deserializer->deserialize('{"id":1,"chat_id":2,"text":"","buttons":[]}');
+        $message = $this->deserializer->deserializeMessage('{"id":1,"chat_id":2,"text":"","buttons":[]}');
 
         $this->assertSame(1, $message->getId());
         $this->assertSame(2, $message->getChatId());
@@ -71,19 +71,19 @@ class MessagePayloadDeserializerTest extends TestCase
     public function testRejectsMalformedJson(): void
     {
         $this->expectException(JsonException::class);
-        $this->deserializer->deserialize('not-json');
+        $this->deserializer->deserializeMessage('not-json');
     }
 
     public function testRejectsNonObjectJson(): void
     {
         $this->expectException(JsonException::class);
-        $this->deserializer->deserialize('"string"');
+        $this->deserializer->deserializeMessage('"string"');
     }
 
     public function testRejectsMissingId(): void
     {
         $this->expectException(JsonException::class);
-        $this->deserializer->deserialize('{"chat_id":2,"text":"hi","buttons":[]}');
+        $this->deserializer->deserializeMessage('{"chat_id":2,"text":"hi","buttons":[]}');
     }
 
     public function testRejectsUnknownState(): void
@@ -91,25 +91,25 @@ class MessagePayloadDeserializerTest extends TestCase
         $payload = '{"id":1,"chat_id":2,"text":"hi","buttons":[{"title":"T","new_state":"NOPE"}]}';
 
         $this->expectException(JsonException::class);
-        $this->deserializer->deserialize($payload);
+        $this->deserializer->deserializeMessage($payload);
     }
 
     public function testRejectsNonIntId(): void
     {
         $this->expectException(JsonException::class);
-        $this->deserializer->deserialize('{"id":"7","chat_id":2,"text":"","buttons":[]}');
+        $this->deserializer->deserializeMessage('{"id":"7","chat_id":2,"text":"","buttons":[]}');
     }
 
     public function testRejectsNonStringText(): void
     {
         $this->expectException(JsonException::class);
-        $this->deserializer->deserialize('{"id":1,"chat_id":2,"text":42,"buttons":[]}');
+        $this->deserializer->deserializeMessage('{"id":1,"chat_id":2,"text":42,"buttons":[]}');
     }
 
     public function testRejectsNonArrayButtons(): void
     {
         $this->expectException(JsonException::class);
-        $this->deserializer->deserialize('{"id":1,"chat_id":2,"text":"","buttons":"nope"}');
+        $this->deserializer->deserializeMessage('{"id":1,"chat_id":2,"text":"","buttons":"nope"}');
     }
 
     public function testRejectsNumericAdditionalPayload(): void
@@ -117,6 +117,6 @@ class MessagePayloadDeserializerTest extends TestCase
         $payload = '{"id":1,"chat_id":2,"text":"","buttons":[{"title":"T","new_state":"menu","additional_payload":42}]}';
 
         $this->expectException(JsonException::class);
-        $this->deserializer->deserialize($payload);
+        $this->deserializer->deserializeMessage($payload);
     }
 }

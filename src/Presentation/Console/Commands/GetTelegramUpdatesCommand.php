@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Presentation\Console\Commands;
 
-use App\Application\MessageService\MessageServiceInterface;
+use App\Application\Services\SendDataService\DataTransportInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -13,7 +13,7 @@ use Throwable;
 class GetTelegramUpdatesCommand extends Command
 {
     public function __construct(
-        private readonly MessageServiceInterface $messageService,
+        private readonly DataTransportInterface $messageService,
     ) {
         parent::__construct();
     }

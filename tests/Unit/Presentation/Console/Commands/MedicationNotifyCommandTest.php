@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Presentation\Console\Commands;
 
-use App\Application\NotificationService\NotificationService;
-use App\Application\Outbox\OutboxRepositoryInterface;
-use App\Application\UnitOfWork\UnitOfWorkInterface;
+use App\Application\Services\NotificationService\NotificationService;
+use App\Application\Services\OutboxService\OutboxRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
-use App\Presentation\Console\Commands\MedicationNotifyCommand;
+use App\Domain\UnitOfWorkInterface;
+use App\Presentation\Console\Commands\NotifyCommand;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -40,7 +40,7 @@ class MedicationNotifyCommandTest extends TestCase
                 $service->requestStop();
             });
 
-        $command = new MedicationNotifyCommand($service);
+        $command = new NotifyCommand($service);
         $tester = new CommandTester($command);
         $statusCode = $tester->execute([]);
 

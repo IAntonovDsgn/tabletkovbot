@@ -2,20 +2,20 @@
 
 namespace Tests\Unit\Application\BotManager;
 
-use App\Application\StateManager\DTOs\RequestDTO;
+use App\Application\Services\OutboxService\OutboxRepositoryInterface;
 use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
 use App\Application\StateManager\Exceptions\InvalidValueException;
 use App\Application\StateManager\Factories\StateHandlerFactory;
 use App\Application\StateManager\Manager;
-use App\Application\StateManager\StateHandlers\StateHandlerInterface;
-use App\Application\Outbox\OutboxRepositoryInterface;
-use App\Application\UnitOfWork\UnitOfWorkInterface;
+use App\Application\StateManager\RequestDTO;
+use App\Application\StateManager\UseCases\StateHandlerInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\States\EnumState;
 use App\Domain\Exceptions\TransitionStateNotAllowedException;
+use App\Domain\UnitOfWorkInterface;
 use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -139,7 +139,7 @@ class ManagerTest extends TestCase
             ->with($this->callback(function (Session $session) use ($chatId, $payloadState, $handlerResponseDTO) {
                 return $session->getChatId() === $chatId
                        && $session->getState() === $payloadState
-                       && $session->getPayload() === $handlerResponseDTO->newSessionPayload;
+                       && $session->getPayload() === $handlerResponseDTO->payload;
             }));
 
         $this->outboxRepository->expects($this->once())

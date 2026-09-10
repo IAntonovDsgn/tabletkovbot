@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Presentation\Console\Commands;
 
-use App\Application\Outbox\OutboxRelay;
-use App\Application\Outbox\OutboxRepositoryInterface;
-use App\Application\MessageService\MessageBrokerInterface;
+use App\Application\Services\SendDataService\MessageBrokerInterface;
+use App\Application\Services\OutboxService\OutboxRelay;
+use App\Application\Services\OutboxService\OutboxRepositoryInterface;
 use App\Domain\Entities\Message\Message;
 use App\Presentation\Console\Commands\OutboxPublishCommand;
 use PHPUnit\Framework\MockObject\MockObject;

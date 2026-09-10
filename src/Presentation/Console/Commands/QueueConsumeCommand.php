@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Presentation\Console\Commands;
 
-use App\Application\MessageService\MessageService;
-use App\Domain\Entities\Message\Message;
-use App\Infrastructure\RabbitMq\QueueConsumerInterface;
+use App\Infrastructure\RabbitMq\AMQPException;
+use App\Infrastructure\RabbitMq\MessageQueueConsumer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -21,8 +20,7 @@ use const SIGTERM;
 class QueueConsumeCommand extends Command
 {
     public function __construct(
-        private readonly QueueConsumerInterface $consumer,
-        private readonly MessageService $messageService,
+        private readonly MessageQueueConsumer $messageQueueConsumer,
     ) {
         parent::__construct();
     }
@@ -33,17 +31,13 @@ class QueueConsumeCommand extends Command
         $this->setDescription('Consumes the telegram.send-message queue and delivers messages to Telegram.');
     }
 
+    /**
+     * @throws AMQPException
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->registerSignalHandlers();
-
-        $this->consumer->run(function (Message $message): void {
-            $this->messageService->sendMessage(
-                $message->getChatId(),
-                $message->getText(),
-                $message->getButtons(),
-            );
-        });
+        $this->messageQueueConsumer->run();
 
         return self::SUCCESS;
     }
@@ -56,10 +50,10 @@ class QueueConsumeCommand extends Command
 
         pcntl_async_signals(true);
         pcntl_signal(SIGTERM, function () {
-            $this->consumer->requestStop();
+            $this->messageQueueConsumer->requestStop();
         });
         pcntl_signal(SIGINT, function () {
-            $this->consumer->requestStop();
+            $this->messageQueueConsumer->requestStop();
         });
     }
 }

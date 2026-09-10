@@ -4,31 +4,75 @@ declare(strict_types=1);
 
 namespace App\Domain\Entities\Report;
 
-use App\Domain\Entities\IntakeMark\IntakeMark;
 use DateTimeImmutable;
 
-final readonly class Report
+final class Report
 {
     public const string DATE_FORMAT = 'd.m.Y';
 
-    /**
-     * @param IntakeMark[] $intakeMarks
-     */
-    public function __construct(
-        private DateTimeImmutable $startDate,
-        private array $intakeMarks,
+    private function __construct(
+        private readonly ?int $id,
+        private readonly int $chatId,
+        private readonly DateTimeImmutable $startDate,
+        private readonly bool $isExistInPersistence,
+        private int $attempts,
     ) {}
+
+    public static function create(
+        int $chatId,
+        DateTimeImmutable $startDate,
+    ): Report {
+        return new self(
+            null,
+            $chatId,
+            $startDate,
+            false,
+            0
+        );
+    }
+
+    public static function restoreFromPersistence(
+        int $id,
+        int $chatId,
+        DateTimeImmutable $startDate,
+        int $attempts,
+    ): Report {
+        return new self(
+            $id,
+            $chatId,
+            $startDate,
+            true,
+            $attempts
+        );
+    }
+
+    public function isExistInPersistence(): bool
+    {
+        return $this->isExistInPersistence;
+    }
+
+    public function getChatId(): int
+    {
+        return $this->chatId;
+    }
 
     public function getStartDate(): DateTimeImmutable
     {
         return $this->startDate;
     }
 
-    /**
-     * @return IntakeMark[]
-     */
-    public function getIntakeMarks(): array
+    public function getId(): ?int
     {
-        return $this->intakeMarks;
+        return $this->id;
+    }
+
+    public function getAttempts(): int
+    {
+        return $this->attempts;
+    }
+
+    public function setAttempts(int $attempts): void
+    {
+        $this->attempts = $attempts;
     }
 }

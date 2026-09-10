@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Infrastructure\TelegramMessageService;
 
-use App\Application\StateManager\DTOs\RequestDTO;
+use App\Application\StateManager\RequestDTO;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
-use App\Infrastructure\Exceptions\SendMessageException;
-use App\Infrastructure\TelegramMessageService\TelegramMessageService;
+use App\Infrastructure\TelegramMessageTransport\SendMessageException;
+use App\Infrastructure\TelegramMessageTransport\TelegramDataTransport;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Telegram\Bot\Api as TelegramBotApi;
@@ -20,13 +20,13 @@ use Telegram\Bot\Objects\Update;
 class TelegramMessageServiceTest extends TestCase
 {
     private MockObject $telegramApi;
-    private TelegramMessageService $service;
+    private TelegramDataTransport $service;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->telegramApi = $this->createMock(TelegramBotApi::class);
-        $this->service = new TelegramMessageService($this->telegramApi);
+        $this->service = new TelegramDataTransport($this->telegramApi);
     }
 
     public function testSendMessageWithNoButtons(): void

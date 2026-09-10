@@ -11,7 +11,7 @@ use DateTimeZone;
 class Medicament
 {
     public const string TIME_FORMAT = 'H:i';
-    public const string DATE_FORMAT = 'Y-m-d';
+    public const string DATE_FORMAT = 'd.m.Y';
     public const string DATE_TIME_ZONE = 'Asia/Yekaterinburg';
 
     private function __construct(
