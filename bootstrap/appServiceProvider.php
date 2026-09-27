@@ -17,6 +17,7 @@ use App\Infrastructure\Dbal\Repositories\MessageOutboxRepository;
 use App\Infrastructure\Dbal\Repositories\ReportOutboxRepository;
 use App\Infrastructure\Dbal\Repositories\SessionRepository;
 use App\Infrastructure\Dbal\UnitOfWork\UnitOfWork;
+use App\Infrastructure\Logging\SizeLimitedFileHandler;
 use App\Infrastructure\RabbitMq\AmqpConnectionFactory;
 use App\Infrastructure\RabbitMq\AmqpConnectionFactoryInterface;
 use App\Infrastructure\RabbitMq\Deserializer;
@@ -57,7 +58,12 @@ return [
 
         $monolog = new MonologLogger($channel);
 
-        $handler = new StreamHandler($path, Level::Debug);
+        $handler = new SizeLimitedFileHandler(
+            $path,
+            (int) ($config['max_bytes'] ?? 10 * 1024 * 1024),
+            (int) ($config['max_backups'] ?? 5),
+            Level::Debug,
+        );
         $handler->setFormatter($formatterFactory());
         $monolog->pushHandler($handler);
 

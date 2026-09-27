@@ -1,7 +1,7 @@
 /.env
 /vendor/
 run-phpstan-from-docker.sh
-/storage/logs/app.log
+/storage/logs/*.log*
 /.php-cs-fixer.cache
 /composer.lock
 /.idea
