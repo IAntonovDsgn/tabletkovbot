@@ -22,7 +22,6 @@ final readonly class ReportOutboxRepository implements ReportOutboxRepositoryInt
     const string ID_COLUMN_NAME = 'id';
     const string CHAT_ID_COLUMN_NAME = 'chat_id';
     const string START_DATE_COLUMN_NAME = 'start_date';
-    const string CREATED_AT_COLUMN_NAME = 'created_at';
     const string ATTEMPTS_COLUMN_NAME = 'attempts';
 
     public function __construct(

@@ -12,7 +12,7 @@ final class Version20260909110000 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Add type to message_outbox and create report_requests table';
+        return 'Create report_outbox table';
     }
 
     public function up(Schema $schema): void
@@ -30,11 +30,6 @@ final class Version20260909110000 extends AbstractMigration
         ]);
 
         $table->addColumn(ReportOutboxRepository::START_DATE_COLUMN_NAME, 'date', [
-            'unsigned' => true,
-            'notnull' => true,
-        ]);
-
-        $table->addColumn(ReportOutboxRepository::CREATED_AT_COLUMN_NAME, 'datetime',[
             'unsigned' => true,
             'notnull' => true,
         ]);

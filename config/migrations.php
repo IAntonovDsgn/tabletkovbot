@@ -5,7 +5,7 @@ return [
         'table_name' => 'migrations',
     ],
     'migrations_paths' => [
-        'App\Infrastructure\Database\Dbal\Migrations' => __DIR__ . '/../src/Infrastructure/Database/Dbal/Migrations',
+        'App\Infrastructure\Dbal\Migrations' => __DIR__ . '/../src/Infrastructure/Dbal/Migrations',
     ],
     'all_or_nothing' => true,
     'check_database_platform' => true,
