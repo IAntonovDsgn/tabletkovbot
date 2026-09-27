@@ -1,5 +1,6 @@
 <?php
 
+use App\Application\Services\OutboxService\ReportOutboxRepositoryInterface;
 use App\Application\Services\SendDataService\MessageBrokerInterface;
 use App\Application\Services\SendDataService\DataTransportInterface;
 use App\Application\Services\NotificationService\NotificationService;
@@ -13,6 +14,7 @@ use App\Domain\UnitOfWorkInterface;
 use App\Infrastructure\Dbal\Repositories\IntakeMarkRepository;
 use App\Infrastructure\Dbal\Repositories\MedicamentRepository;
 use App\Infrastructure\Dbal\Repositories\MessageOutboxRepository;
+use App\Infrastructure\Dbal\Repositories\ReportOutboxRepository;
 use App\Infrastructure\Dbal\Repositories\SessionRepository;
 use App\Infrastructure\Dbal\UnitOfWork\UnitOfWork;
 use App\Infrastructure\RabbitMq\AmqpConnectionFactory;
@@ -103,6 +105,7 @@ return [
     OutboxRelay::class => function (ContainerInterface $c) {
         return new OutboxRelay(
             $c->get(MessageOutboxRepositoryInterface::class),
+            $c->get(ReportOutboxRepositoryInterface::class),
             $c->get(MessageBrokerInterface::class),
             $c->get(LoggerInterface::class),
             max(1, (int) ($_ENV['OUTBOX_BATCH_SIZE'] ?? 50)),
@@ -122,6 +125,7 @@ return [
     },
 
     MessageQueueConsumer::class => function (ContainerInterface $c) {
+        $config = require __DIR__ . '/../config/rabbitmq.php';
         return new MessageQueueConsumer(
             new Deserializer(),
             $c->get(LoggerInterface::class),
@@ -139,6 +143,7 @@ return [
     },
 
     ReportQueueConsumer::class => function (ContainerInterface $c) {
+        $config = require __DIR__ . '/../config/rabbitmq.php';
         return new ReportQueueConsumer(
             new Deserializer(),
             $c->get(LoggerInterface::class),
@@ -170,4 +175,5 @@ return [
     SessionRepositoryInterface::class => autowire(SessionRepository::class),
     IntakeMarkRepositoryInterface::class => autowire(IntakeMarkRepository::class),
     MedicamentRepositoryInterface::class => autowire(MedicamentRepository::class),
+    ReportOutboxRepositoryInterface::class => autowire(ReportOutboxRepository::class)
 ];
