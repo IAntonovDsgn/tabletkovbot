@@ -41,7 +41,7 @@ final class OutboxRelay
     /**
      * @throws AttemptsExceededException
      */
-    private function processBatch(): void
+    public function processBatch(): void
     {
         $messages = $this->messageOutboxRepository->getMessages($this->batchSize);
         $reports = $this->reportOutboxRepository->getReports($this->batchSize);
