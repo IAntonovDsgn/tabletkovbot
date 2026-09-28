@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Application\Services;
 
-use App\Application\Services\Sender\MessageBrokerInterface;
+use App\Application\Services\MessageSender\MessageBrokerInterface;
 use App\Application\Services\Outbox\OutboxRelay;
 use App\Application\Services\Outbox\OutboxRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;

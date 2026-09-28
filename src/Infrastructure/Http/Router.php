@@ -68,7 +68,7 @@ final readonly class Router
                 $controller = $this->container->get($handler[0]);
                 if (!is_object($controller) || !method_exists($controller, $handler[1])) {
                     throw new RuntimeException(
-                        sprintf('Sender %s::%s() is not resolvable.', $handler[0], $handler[1])
+                        sprintf('MessageSender %s::%s() is not resolvable.', $handler[0], $handler[1])
                     );
                 }
                 $controller->{$handler[1]}();

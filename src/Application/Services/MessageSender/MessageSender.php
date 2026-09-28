@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Services\Sender;
+namespace App\Application\Services\MessageSender;
 
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Report\Report;
 
-final readonly class Sender
+final readonly class MessageSender
 {
     public function __construct(
         private DataTransportInterface $dataTransport,
