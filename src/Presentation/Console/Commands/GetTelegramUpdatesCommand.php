@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Presentation\Console\Commands;
 
-use App\Application\Services\SendDataService\DataTransportInterface;
+use App\Application\Services\Sender\DataTransportInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

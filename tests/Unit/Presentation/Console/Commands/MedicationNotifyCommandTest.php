@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Presentation\Console\Commands;
 
-use App\Application\Services\NotificationService\NotificationService;
-use App\Application\Services\OutboxService\OutboxRepositoryInterface;
+use App\Application\Services\Notifications\NotificationService;
+use App\Application\Services\Outbox\OutboxRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\UnitOfWorkInterface;

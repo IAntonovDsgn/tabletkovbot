@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\TelegramMessageTransport;
 
-use App\Application\Services\SendDataService\DataTransportInterface;
+use App\Application\Services\Sender\DataTransportInterface;
 use App\Application\StateManager\RequestDTO;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;

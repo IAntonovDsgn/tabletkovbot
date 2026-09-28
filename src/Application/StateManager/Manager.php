@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\StateManager;
 
-use App\Application\Services\OutboxService\MessageOutboxRepositoryInterface;
+use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Application\StateManager\Exceptions\InvalidValueException;
 use App\Application\StateManager\Factories\StateHandlerFactory;
 use App\Domain\Entities\Message\EnumMessageText;

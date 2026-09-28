@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Presentation\Console\Commands;
 
-use App\Application\Services\NotificationService\NotificationService;
+use App\Application\Services\Notifications\NotificationService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

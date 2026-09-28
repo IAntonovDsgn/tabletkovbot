@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Dbal\Repositories;
 
-use App\Application\Services\OutboxService\ReportOutboxRepositoryInterface;
+use App\Application\Services\Outbox\ReportOutboxRepositoryInterface;
 use App\Domain\Entities\Report\Report;
 use App\Domain\Exceptions\NotFoundEntityException;
 use App\Infrastructure\Dbal\Exceptions\AlreadyExistInPersistenceException;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\StateManager\UseCases;
 
-use App\Application\Services\OutboxService\MessageOutboxRepositoryInterface;
-use App\Application\Services\OutboxService\ReportOutboxRepositoryInterface;
+use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
+use App\Application\Services\Outbox\ReportOutboxRepositoryInterface;
 use App\Application\StateManager\Exceptions\InvalidValueException;
 use App\Application\StateManager\Factories\KeyboardFactory;
 use App\Application\StateManager\RequestDTO;

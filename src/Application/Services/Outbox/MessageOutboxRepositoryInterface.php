@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Services\OutboxService;
+namespace App\Application\Services\Outbox;
 
 use App\Domain\Entities\Message\Message;
 

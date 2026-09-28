@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Services\OutboxService;
+namespace App\Application\Services\Outbox;
 
-use App\Application\Services\SendDataService\MessageBrokerInterface;
+use App\Application\Services\Sender\MessageBrokerInterface;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Report\Report;
 use Psr\Log\LoggerInterface;

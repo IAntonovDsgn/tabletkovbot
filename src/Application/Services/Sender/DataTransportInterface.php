@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Services\SendDataService;
+namespace App\Application\Services\Sender;
 
 use App\Application\StateManager\RequestDTO;
 use App\Domain\Entities\Message\Message;

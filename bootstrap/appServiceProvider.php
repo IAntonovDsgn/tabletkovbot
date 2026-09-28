@@ -1,12 +1,12 @@
 <?php
 
-use App\Application\Services\OutboxService\ReportOutboxRepositoryInterface;
-use App\Application\Services\SendDataService\MessageBrokerInterface;
-use App\Application\Services\SendDataService\DataTransportInterface;
-use App\Application\Services\NotificationService\NotificationService;
-use App\Application\Services\OutboxService\MessageOutboxRepositoryInterface;
-use App\Application\Services\OutboxService\OutboxRelay;
-use App\Application\Services\SendDataService\SendDataService;
+use App\Application\Services\Outbox\ReportOutboxRepositoryInterface;
+use App\Application\Services\Sender\MessageBrokerInterface;
+use App\Application\Services\Sender\DataTransportInterface;
+use App\Application\Services\Notifications\NotificationService;
+use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
+use App\Application\Services\Outbox\OutboxRelay;
+use App\Application\Services\Sender\Sender;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
@@ -143,7 +143,7 @@ return [
             (string) ($config['exchange'] ?? 'outbox'),
             (string) ($config['message_queue'] ?? 'messages'),
             max(1, (int) ($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
-            $c->get(SendDataService::class),
+            $c->get(Sender::class),
             new AmqpConnectionFactory(),
         );
     },
@@ -161,7 +161,7 @@ return [
             (string) ($config['exchange'] ?? 'outbox'),
             (string) ($config['report_queue'] ?? 'reports'),
             max(1, (int) ($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
-            $c->get(SendDataService::class),
+            $c->get(Sender::class),
             new AmqpConnectionFactory(),
         );
     },

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Services\NotificationService;
+namespace App\Application\Services\Notifications;
 
-use App\Application\Services\OutboxService\MessageOutboxRepositoryInterface;
+use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;

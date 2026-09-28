@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\RabbitMq;
 
-use App\Application\Services\SendDataService\MessageBrokerInterface;
+use App\Application\Services\Sender\MessageBrokerInterface;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Report\Report;
 use JsonException;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\RabbitMq;
 
-use App\Application\Services\SendDataService\SendDataService;
+use App\Application\Services\Sender\Sender;
 use Exception;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Exception\AMQPTimeoutException;
@@ -26,7 +26,7 @@ final class ReportQueueConsumer
         private readonly string $exchange,
         private readonly string $queueName,
         private readonly int $pollInterval,
-        private readonly SendDataService $sendService,
+        private readonly Sender $sendService,
         private readonly AmqpConnectionFactoryInterface $connectionFactory,
     ) {}
 
@@ -50,7 +50,7 @@ final class ReportQueueConsumer
                 $domainReport = $this->deserializer->deserializeReport($message->getBody());
                 $this->sendService->sendReport($domainReport);
                 $message->ack();
-            } catch (\Throwable $e) {
+            } catch (Exception $e) {
                 $this->logger->error($e->getMessage());
                 $message->nack(true);
             }

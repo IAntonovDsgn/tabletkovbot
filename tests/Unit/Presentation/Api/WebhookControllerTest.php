@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Presentation\Api;
 
-use App\Application\Services\OutboxService\OutboxRepositoryInterface;
+use App\Application\Services\Outbox\OutboxRepositoryInterface;
 use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
 use App\Application\StateManager\Factories\StateHandlerFactory;
 use App\Application\StateManager\Manager;
