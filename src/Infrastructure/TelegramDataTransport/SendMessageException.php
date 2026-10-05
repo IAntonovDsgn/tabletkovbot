@@ -2,6 +2,6 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure\TelegramMessageTransport;
+namespace App\Infrastructure\TelegramDataTransport;
 
 class SendMessageException extends \Exception {}

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Services\Outbox;
 
-use App\Application\Services\MessageSender\MessageBrokerInterface;
+use App\Application\Services\DataSender\MessageBrokerInterface;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Report\Report;
 use Psr\Log\LoggerInterface;

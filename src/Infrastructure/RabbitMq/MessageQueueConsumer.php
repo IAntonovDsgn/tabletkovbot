@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\RabbitMq;
 
-use App\Application\Services\MessageSender\MessageSender;
+use App\Application\Services\DataSender\DataSender;
 use Exception;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Exception\AMQPTimeoutException;
@@ -26,7 +26,7 @@ final class MessageQueueConsumer
         private readonly string $exchange,
         private readonly string $queueName,
         private readonly int $pollInterval,
-        private readonly MessageSender $messageSenderService,
+        private readonly DataSender $messageSenderService,
         private readonly AmqpConnectionFactoryInterface $connectionFactory,
     ) {}
 

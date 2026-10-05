@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Presentation\Console\Commands;
 
-use App\Application\Services\MessageSender\DataTransportInterface;
+use App\Application\Services\DataSender\DataTransportInterface;
 use App\Application\StateManager\RequestDTO;
 use App\Presentation\Console\Commands\GetTelegramUpdatesCommand;
 use PHPUnit\Framework\MockObject\MockObject;

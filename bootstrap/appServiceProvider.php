@@ -1,12 +1,12 @@
 <?php
 
 use App\Application\Services\Outbox\ReportOutboxRepositoryInterface;
-use App\Application\Services\MessageSender\MessageBrokerInterface;
-use App\Application\Services\MessageSender\DataTransportInterface;
-use App\Application\Services\Notifications\NotificationService;
+use App\Application\Services\DataSender\MessageBrokerInterface;
+use App\Application\Services\DataSender\DataTransportInterface;
+use App\Application\Services\Notification\NotificationService;
 use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Application\Services\Outbox\OutboxRelay;
-use App\Application\Services\MessageSender\MessageSender;
+use App\Application\Services\DataSender\DataSender;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
@@ -25,7 +25,7 @@ use App\Infrastructure\RabbitMq\MessageQueueConsumer;
 use App\Infrastructure\RabbitMq\RabbitMqMessageBroker;
 use App\Infrastructure\RabbitMq\ReportQueueConsumer;
 use App\Infrastructure\RabbitMq\Serializer;
-use App\Infrastructure\TelegramMessageTransport\TelegramDataTransport;
+use App\Infrastructure\TelegramDataTransport\TelegramDataTransport;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Monolog\Formatter\LineFormatter;
@@ -143,7 +143,7 @@ return [
             (string) ($config['exchange'] ?? 'outbox'),
             (string) ($config['message_queue'] ?? 'messages'),
             max(1, (int) ($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
-            $c->get(MessageSender::class),
+            $c->get(DataSender::class),
             new AmqpConnectionFactory(),
         );
     },
@@ -161,7 +161,7 @@ return [
             (string) ($config['exchange'] ?? 'outbox'),
             (string) ($config['report_queue'] ?? 'reports'),
             max(1, (int) ($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
-            $c->get(MessageSender::class),
+            $c->get(DataSender::class),
             new AmqpConnectionFactory(),
         );
     },

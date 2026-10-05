@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Services\MessageSender;
+namespace App\Application\Services\DataSender;
 
 use App\Application\StateManager\RequestDTO;
 use App\Domain\Entities\Message\Message;

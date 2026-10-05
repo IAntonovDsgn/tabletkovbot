@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Services\Notifications;
+namespace App\Application\Services\Notification;
 
 use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;

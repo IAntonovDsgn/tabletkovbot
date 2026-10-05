@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Application\MedicationNotification;
 
-use App\Application\Services\Notifications\NotificationService;
+use App\Application\Services\Notification\NotificationService;
 use App\Application\Services\Outbox\OutboxRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
