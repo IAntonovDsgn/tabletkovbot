@@ -4,10 +4,12 @@ namespace Tests\Unit\Infrastructure\RabbitMq;
 
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
+use App\Domain\Entities\Report\Report;
 use App\Infrastructure\RabbitMq\AmqpConnectionFactoryInterface;
 use App\Infrastructure\RabbitMq\AMQPException;
-use App\Infrastructure\RabbitMq\MessagePayloadSerializer;
 use App\Infrastructure\RabbitMq\RabbitMqMessageBroker;
+use App\Infrastructure\RabbitMq\Serializer;
+use DateTimeImmutable;
 use JsonException;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
@@ -19,7 +21,7 @@ use Psr\Log\LoggerInterface;
 
 class RabbitMqMessageBrokerTest extends TestCase
 {
-    private MessagePayloadSerializer $serializer;
+    private Serializer $serializer;
     private MockObject $logger;
     private MockObject $connectionFactory;
     private MockObject $connection;
@@ -28,7 +30,7 @@ class RabbitMqMessageBrokerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->serializer = new MessagePayloadSerializer();
+        $this->serializer = new Serializer();
         $this->logger = $this->createMock(LoggerInterface::class);
         $this->connectionFactory = $this->createMock(AmqpConnectionFactoryInterface::class);
         $this->connection = $this->createMock(AMQPStreamConnection::class);
@@ -52,6 +54,7 @@ class RabbitMqMessageBrokerTest extends TestCase
             'pass',
             'outbox',
             'telegram.send-message',
+            'telegram.send-report',
             5.0,
             $this->connectionFactory,
         );
@@ -59,7 +62,12 @@ class RabbitMqMessageBrokerTest extends TestCase
 
     private function makeMessage(): Message
     {
-        return Message::restoreFromPersistence(7, 42, EnumMessageText::MENU->value);
+        return Message::restoreFromPersistence(7, 42, 0, EnumMessageText::MENU->value);
+    }
+
+    private function makeReport(): Report
+    {
+        return Report::restoreFromPersistence(9, 42, new DateTimeImmutable('2023-01-05 00:00:00'), 0);
     }
 
     /**
@@ -71,12 +79,18 @@ class RabbitMqMessageBrokerTest extends TestCase
         $this->channel->expects($this->once())
             ->method('exchange_declare')
             ->with('outbox', 'direct', false, true, false);
-        $this->channel->expects($this->once())
+        $this->channel->expects($this->exactly(2))
             ->method('queue_declare')
-            ->with('telegram.send-message', false, true, false, false);
-        $this->channel->expects($this->once())
+            ->with(
+                $this->anything(),
+                false,
+                true,
+                false,
+                false,
+            );
+        $this->channel->expects($this->exactly(2))
             ->method('queue_bind')
-            ->with('telegram.send-message', 'outbox', 'telegram.send-message');
+            ->with($this->anything(), 'outbox', $this->anything());
         $this->channel->expects($this->once())->method('confirm_select');
         $this->channel->expects($this->once())
             ->method('wait_for_pending_acks')
@@ -89,11 +103,11 @@ class RabbitMqMessageBrokerTest extends TestCase
                 $publishedMessage = $message;
             });
 
-        $this->makeBroker()->publish($this->makeMessage());
+        $this->makeBroker()->publishMessage($this->makeMessage());
 
         self::assertInstanceOf(AMQPMessage::class, $publishedMessage);
         self::assertSame(
-            $this->serializer->serialize($this->makeMessage()),
+            $this->serializer->serializeMessage($this->makeMessage()),
             $publishedMessage->getBody(),
         );
         self::assertSame('application/json', $publishedMessage->get('content_type'));
@@ -109,8 +123,8 @@ class RabbitMqMessageBrokerTest extends TestCase
         $this->channel->method('is_open')->willReturn(true);
 
         $this->channel->expects($this->once())->method('exchange_declare');
-        $this->channel->expects($this->once())->method('queue_declare');
-        $this->channel->expects($this->once())->method('queue_bind');
+        $this->channel->expects($this->exactly(2))->method('queue_declare');
+        $this->channel->expects($this->exactly(2))->method('queue_bind');
         $this->channel->expects($this->once())->method('confirm_select');
 
         $this->connectionFactory->expects($this->once())->method('create');
@@ -119,8 +133,33 @@ class RabbitMqMessageBrokerTest extends TestCase
         $this->channel->method('wait_for_pending_acks');
 
         $broker = $this->makeBroker();
-        $broker->publish($this->makeMessage());
-        $broker->publish($this->makeMessage());
+        $broker->publishMessage($this->makeMessage());
+        $broker->publishMessage($this->makeMessage());
+    }
+
+    /**
+     * Messages and reports share the exchange but must land on their own queue, otherwise the
+     * message consumer would try to render a report as a chat message.
+     *
+     * @throws AMQPException
+     * @throws JsonException
+     */
+    public function testMessageAndReportAreRoutedToTheirOwnQueues(): void
+    {
+        $this->channel->method('is_open')->willReturn(true);
+
+        $routingKeys = [];
+        $this->channel->method('basic_publish')
+            ->willReturnCallback(function (AMQPMessage $message, string $exchange, string $routingKey) use (&$routingKeys): void {
+                $routingKeys[] = $routingKey;
+            });
+        $this->channel->method('wait_for_pending_acks');
+
+        $broker = $this->makeBroker();
+        $broker->publishMessage($this->makeMessage());
+        $broker->publishReport($this->makeReport());
+
+        self::assertSame(['telegram.send-message', 'telegram.send-report'], $routingKeys);
     }
 
     /**
@@ -135,7 +174,7 @@ class RabbitMqMessageBrokerTest extends TestCase
 
         $this->expectException(AMQPTimeoutException::class);
 
-        $this->makeBroker()->publish($this->makeMessage());
+        $this->makeBroker()->publishMessage($this->makeMessage());
     }
 
     /**
@@ -153,10 +192,10 @@ class RabbitMqMessageBrokerTest extends TestCase
         $this->connectionFactory->expects($this->exactly(2))->method('create');
 
         $broker = $this->makeBroker();
-        $broker->publish($this->makeMessage());
+        $broker->publishMessage($this->makeMessage());
 
         $isOpen = false;
-        $broker->publish($this->makeMessage());
+        $broker->publishMessage($this->makeMessage());
     }
 
     /**
@@ -170,7 +209,7 @@ class RabbitMqMessageBrokerTest extends TestCase
         $this->expectException(AMQPException::class);
         $this->expectExceptionMessage('connection refused');
 
-        $this->makeBroker()->publish($this->makeMessage());
+        $this->makeBroker()->publishMessage($this->makeMessage());
     }
 
     /**
@@ -194,7 +233,7 @@ class RabbitMqMessageBrokerTest extends TestCase
             });
 
         $broker = $this->makeBroker();
-        $broker->publish($this->makeMessage());
+        $broker->publishMessage($this->makeMessage());
 
         $broker->close();
         $broker->close();

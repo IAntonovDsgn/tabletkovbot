@@ -21,8 +21,10 @@ enum EnumMessageText: string
     case MEDICAMENT_DELETED = 'Медикамент успешно удален. Чем еще я могу помочь?';
     case ENTER_DATE = 'Введите дату начала отчёта в формате dd.mm.yyyy';
     case FORMAT_DATE_ERROR = 'Введен неверный формат даты. Пожалуйста, введите дату в формате dd.mm.yyyy';
+    case DATE_IN_THE_FUTURE_ERROR = 'Дата начала отчёта не может быть в будущем';
     case INTAKE_MARKS_NOT_FOUND = 'Не найдены отметки о приеме медикаментов';
     case START_MAKING_REPORT = 'Формирование отчета может занять несколько минут. Отчет будет отправлен в чат по готовности.';
+    case REPORT_FAILED = 'Не удалось сформировать отчёт. Попробуйте позже.';
     case NOTIFICATIONS_ENABLE = 'Напоминания о приеме медикаментов включены. Хотите отключить?';
     case NOTIFICATIONS_DISABLE = 'Напоминания о приеме медикаментов отключены. Хотите включить?';
     case SETTINGS_SAVED = 'Настройки сохранены! Чем еще я могу помочь?';
@@ -36,10 +38,12 @@ enum EnumMessageText: string
         return match ($this) {
             self::ERROR,
             self::INTERNAL_ERROR,
+            self::REPORT_FAILED,
             self::MEDICAMENT_EMPTY_NAME_ERROR,
             self::MEDICAMENT_NOT_FOUND,
             self::FORMAT_TIME_ERROR,
-            self::FORMAT_DATE_ERROR => true,
+            self::FORMAT_DATE_ERROR,
+            self::DATE_IN_THE_FUTURE_ERROR => true,
             default => false,
         };
     }

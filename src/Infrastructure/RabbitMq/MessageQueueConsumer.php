@@ -5,13 +5,17 @@ declare(strict_types=1);
 namespace App\Infrastructure\RabbitMq;
 
 use App\Application\Services\DataSender\DataSender;
+use App\Application\Services\DataSender\MessageBrokerInterface;
+use App\Domain\Entities\Message\Message;
 use Exception;
 use PhpAmqpLib\Channel\AMQPChannel;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Exception\AMQPTimeoutException;
 use PhpAmqpLib\Message\AMQPMessage;
 use Psr\Log\LoggerInterface;
+use Throwable;
 
-final class MessageQueueConsumer
+final class MessageQueueConsumer implements QueueConsumerInterface
 {
     private bool $stopRequested = false;
 
@@ -26,7 +30,9 @@ final class MessageQueueConsumer
         private readonly string $exchange,
         private readonly string $queueName,
         private readonly int $pollInterval,
-        private readonly DataSender $messageSenderService,
+        private readonly DataSender $dataSender,
+        private readonly MessageBrokerInterface $broker,
+        private readonly int $maxAttempts,
         private readonly AmqpConnectionFactoryInterface $connectionFactory,
     ) {}
 
@@ -48,11 +54,24 @@ final class MessageQueueConsumer
         $messageProcessingCallback = function (AMQPMessage $message): void {
             try {
                 $domainMessage = $this->deserializer->deserializeMessage($message->getBody());
-                $this->messageSenderService->sendMessage($domainMessage);
+            } catch (Throwable $e) {
+                $this->logger->error($e, ['phase' => 'deserialize', 'queue' => $this->queueName]);
+                $message->nack();
+
+                return;
+            }
+
+            try {
+                $this->dataSender->sendMessage($domainMessage);
                 $message->ack();
-            } catch (\Throwable $e) {
-                $this->logger->error($e->getMessage());
-                $message->nack(true);
+            } catch (Throwable $e) {
+                $this->logger->error($e, [
+                    'phase' => 'delivery',
+                    'id' => $domainMessage->getId(),
+                    'chat_id' => $domainMessage->getChatId(),
+                    'attempts' => $domainMessage->getAttempts(),
+                ]);
+                $this->retryOrDrop($domainMessage, $message, $e);
             }
         };
 
@@ -72,16 +91,67 @@ final class MessageQueueConsumer
                 $channel->wait(null, false, $this->pollInterval);
             } catch (AMQPTimeoutException) {
                 continue;
+            } catch (Throwable $e) {
+                $this->logger->error($e, ['phase' => 'connection_lost', 'queue' => $this->queueName]);
+                break;
             }
         }
 
-        $channel->close();
-        $connection->close();
+        $this->closeConnection($channel, $connection);
+    }
+
+    /**
+     * Closing an already broken connection throws, and that must not mask the original
+     * connection_lost log entry.
+     */
+    private function closeConnection(AMQPChannel $channel, AMQPStreamConnection $connection): void
+    {
+        try {
+            $channel->close();
+            $connection->close();
+        } catch (Throwable $e) {
+            $this->logger->warning($e, ['phase' => 'close_connection', 'queue' => $this->queueName]);
+        }
     }
 
     public function requestStop(): void
     {
         $this->stopRequested = true;
+    }
+
+    private function retryOrDrop(Message $message, AMQPMessage $delivery, Throwable $cause): void
+    {
+        $attempts = $message->getAttempts() + 1;
+        $message->setAttempts($attempts);
+
+        if ($attempts < $this->maxAttempts) {
+            try {
+                $this->broker->publishMessage($message);
+                $delivery->ack();
+
+                return;
+            } catch (Throwable $e) {
+                $this->logger->error($e, [
+                    'phase' => 'republish',
+                    'id' => $message->getId(),
+                    'chat_id' => $message->getChatId(),
+                    'attempts' => $attempts,
+                    'cause' => $cause->getMessage(),
+                ]);
+                $delivery->nack();
+
+                return;
+            }
+        }
+
+        $this->logger->error($cause, [
+            'phase' => 'dropped',
+            'id' => $message->getId(),
+            'chat_id' => $message->getChatId(),
+            'attempts' => $attempts,
+        ]);
+
+        $delivery->nack();
     }
 
     private function declareTopology(AMQPChannel $channel): void

@@ -12,6 +12,7 @@ use App\Domain\Entities\Message\MessageButton;
 use Exception;
 use Telegram\Bot\Api as TelegramBotApi;
 use Telegram\Bot\Exceptions\TelegramSDKException;
+use Telegram\Bot\FileUpload\InputFile;
 use Telegram\Bot\Keyboard\Keyboard;
 
 final readonly class TelegramDataTransport implements DataTransportInterface
@@ -46,6 +47,25 @@ final readonly class TelegramDataTransport implements DataTransportInterface
                 'chat_id' => $message->getChatId(),
                 'text' => $this->decorateText($message->getText()),
                 'reply_markup' => $keyboard,
+            ]);
+        } catch (TelegramSDKException $e) {
+            throw new SendMessageException($e->getMessage());
+        }
+    }
+
+    /**
+     * @throws SendMessageException
+     */
+    public function sendFile(string $filePath, int $chatId): void
+    {
+        if (! is_file($filePath) || ! is_readable($filePath)) {
+            throw new SendMessageException('File is not readable: ' . $filePath);
+        }
+
+        try {
+            $this->telegramApi->sendDocument([
+                'chat_id' => $chatId,
+                'document' => InputFile::create($filePath, basename($filePath)),
             ]);
         } catch (TelegramSDKException $e) {
             throw new SendMessageException($e->getMessage());

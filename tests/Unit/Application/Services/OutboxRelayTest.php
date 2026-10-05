@@ -1,218 +1,249 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Application\Services;
 
 use App\Application\Services\DataSender\MessageBrokerInterface;
+use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Application\Services\Outbox\OutboxRelay;
-use App\Application\Services\Outbox\OutboxRepositoryInterface;
-use App\Domain\Entities\Message\EnumMessageText;
+use App\Application\Services\Outbox\ReportOutboxRepositoryInterface;
 use App\Domain\Entities\Message\Message;
+use App\Domain\Entities\Report\Report;
+use DateTimeImmutable;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
-use Throwable;
 
 class OutboxRelayTest extends TestCase
 {
-    private MockObject $outboxRepository;
+    private const int CHAT_ID = 12345;
+    private const int BATCH_SIZE = 10;
+    private const int MAX_ATTEMPTS = 3;
+
+    private MockObject $messageRepository;
+    private MockObject $reportRepository;
     private MockObject $broker;
+    private MockObject $logger;
     private OutboxRelay $relay;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->outboxRepository = $this->createMock(OutboxRepositoryInterface::class);
+
+        $this->messageRepository = $this->createMock(MessageOutboxRepositoryInterface::class);
+        $this->reportRepository = $this->createMock(ReportOutboxRepositoryInterface::class);
         $this->broker = $this->createMock(MessageBrokerInterface::class);
-        $this->relay = new OutboxRelay($this->outboxRepository, $this->broker, 10, 1000, 4);
+        $this->logger = $this->createMock(LoggerInterface::class);
+
+        $this->relay = new OutboxRelay(
+            $this->messageRepository,
+            $this->reportRepository,
+            $this->broker,
+            $this->logger,
+            self::BATCH_SIZE,
+            1000,
+            self::MAX_ATTEMPTS,
+        );
     }
 
-    private function makePendingMessage(int $id, int $chatId): Message
+    /**
+     * @param Message[] $messages
+     */
+    private function withMessages(array $messages): void
     {
-        return Message::restoreFromPersistence($id, $chatId, EnumMessageText::MENU->value);
+        $this->messageRepository->expects($this->once())
+            ->method('getMessages')
+            ->with(self::BATCH_SIZE)
+            ->willReturn($messages);
     }
 
-    public function testProcessBatchPublishesAndDeletesEveryPendingMessage(): void
+    /**
+     * @param Report[] $reports
+     */
+    private function withReports(array $reports): void
     {
-        $first = $this->makePendingMessage(1, 111);
-        $second = $this->makePendingMessage(2, 222);
+        $this->reportRepository->expects($this->once())
+            ->method('getReports')
+            ->with(self::BATCH_SIZE)
+            ->willReturn($reports);
+    }
 
-        $this->outboxRepository->expects($this->once())
-            ->method('getPendingMessages')
-            ->with(10)
-            ->willReturn([$first, $second]);
+    private function makeMessage(int $id): Message
+    {
+        return Message::restoreFromPersistence($id, self::CHAT_ID, 0, 'текст');
+    }
 
-        $this->outboxRepository->expects($this->never())->method('markAttempt');
+    private function makeReport(): Report
+    {
+        return Report::restoreFromPersistence(
+            7,
+            self::CHAT_ID,
+            new DateTimeImmutable('2023-01-01'),
+            0,
+        );
+    }
 
-        $publishedChatIds = [];
-        $deletedMessages = [];
+    public function testDeletesMessageOnlyAfterTheBrokerConfirms(): void
+    {
+        $message = $this->makeMessage(1);
+        $this->withMessages([$message]);
 
-        $this->broker->expects($this->exactly(2))
-            ->method('publish')
-            ->willReturnCallback(function (Message $message) use (&$publishedChatIds): void {
-                $publishedChatIds[] = $message->getChatId();
+        $calls = [];
+        $this->broker->method('publishMessage')
+            ->willReturnCallback(function () use (&$calls): void {
+                $calls[] = 'publish';
+            });
+        $this->messageRepository->method('delete')
+            ->willReturnCallback(function () use (&$calls): void {
+                $calls[] = 'delete';
             });
 
-        $this->outboxRepository->expects($this->exactly(2))
-            ->method('delete')
-            ->willReturnCallback(function (Message $message) use (&$deletedMessages): void {
-                $deletedMessages[] = $message->getId();
-            });
+        $this->relay->processBatch();
 
-        $this->assertTrue($this->relay->processBatch());
-        $this->assertSame([111, 222], $publishedChatIds);
-        $this->assertSame([1, 2], $deletedMessages);
+        self::assertSame(['publish', 'delete'], $calls);
     }
 
-    public function testProcessBatchKeepsRowWhenPublishFails(): void
+    public function testDeletesReportOnlyAfterTheBrokerConfirms(): void
     {
-        $message = $this->makePendingMessage(1, 111);
+        $report = $this->makeReport();
+        $this->withReports([$report]);
 
-        $this->outboxRepository->method('getPendingMessages')->willReturn([$message]);
+        $calls = [];
+        $this->broker->method('publishReport')
+            ->willReturnCallback(function () use (&$calls): void {
+                $calls[] = 'publish';
+            });
+        $this->reportRepository->method('delete')
+            ->willReturnCallback(function () use (&$calls): void {
+                $calls[] = 'delete';
+            });
 
-        $this->broker->expects($this->once())
-            ->method('publish')
-            ->willThrowException(new RuntimeException('broker is down'));
+        $this->relay->processBatch();
 
-        $this->outboxRepository->expects($this->once())
+        self::assertSame(['publish', 'delete'], $calls);
+    }
+
+    public function testKeepsRowAndCountsAttemptWhenPublishFails(): void
+    {
+        $message = $this->makeMessage(1);
+        $this->withMessages([$message]);
+
+        $this->broker->method('publishMessage')->willThrowException(new RuntimeException('broker down'));
+        $this->messageRepository->expects($this->once())
             ->method('markAttempt')
             ->with($message)
             ->willReturn(1);
+        $this->messageRepository->expects($this->never())->method('delete');
+        $this->logger->expects($this->never())->method('error');
 
-        $this->outboxRepository->expects($this->never())->method('delete');
-
-        /** @var list<array{Throwable, array<string, mixed>}> $errors */
-        $errors = [];
-        $onError = function (Throwable $e, array $context) use (&$errors): void {
-            $errors[] = [$e, $context];
-        };
-
-        $this->assertFalse($this->relay->processBatch($onError));
-        $this->assertNotEmpty($errors);
+        $this->relay->processBatch();
     }
 
-    public function testProcessBatchDropsMessageAfterMaxAttemptsReached(): void
+    public function testDropsMessageAfterMaxAttempts(): void
     {
-        $relay = new OutboxRelay($this->outboxRepository, $this->broker, 10, 1000, 2);
-        $message = $this->makePendingMessage(1, 111);
+        $message = $this->makeMessage(1);
+        $this->withMessages([$message]);
 
-        $this->outboxRepository->method('getPendingMessages')->willReturn([$message]);
+        $this->broker->method('publishMessage')->willThrowException(new RuntimeException('broker down'));
+        $this->messageRepository->method('markAttempt')->willReturn(self::MAX_ATTEMPTS);
+        $this->messageRepository->expects($this->once())->method('delete')->with($message);
+        $this->logger->expects($this->once())
+            ->method('error')
+            ->with(
+                $this->stringContains('attempts exhausted'),
+                $this->callback(
+                    static fn(array $context): bool
+                        => $context['phase'] === 'outbox_publish'
+                        && $context['kind'] === 'message'
+                        && $context['attempts'] === self::MAX_ATTEMPTS,
+                ),
+            );
 
-        $this->broker->method('publish')->willThrowException(new RuntimeException('broker is down'));
-
-        $this->outboxRepository->expects($this->once())
-            ->method('markAttempt')
-            ->with($message)
-            ->willReturn(2);
-
-        $this->outboxRepository->expects($this->once())->method('delete')->with($message);
-
-        /** @var list<array{Throwable, array<string, mixed>}> $errors */
-        $errors = [];
-        $onError = function (Throwable $e, array $context) use (&$errors): void {
-            $errors[] = [$e, $context];
-        };
-
-        $this->assertFalse($relay->processBatch($onError));
-
-        $drops = array_values(array_filter(
-            $errors,
-            static fn(array $record): bool => $record[1]['phase'] === 'drop_after_max_attempts'
-        ));
-        self::assertCount(1, $drops);
-        self::assertSame(2, $drops[0][1]['attempts']);
-        self::assertSame('broker is down', $drops[0][0]->getMessage());
+        $this->relay->processBatch();
     }
 
-    public function testProcessBatchKeepsRowWhenMarkAttemptFails(): void
+    public function testDropsReportAfterMaxAttempts(): void
     {
-        $message = $this->makePendingMessage(1, 111);
+        $report = $this->makeReport();
+        $this->withReports([$report]);
 
-        $this->outboxRepository->method('getPendingMessages')->willReturn([$message]);
+        $this->broker->method('publishReport')->willThrowException(new RuntimeException('broker down'));
+        $this->reportRepository->method('markAttempt')->willReturn(self::MAX_ATTEMPTS);
+        $this->reportRepository->expects($this->once())->method('delete')->with($report);
+        $this->logger->expects($this->once())
+            ->method('error')
+            ->with(
+                $this->stringContains('attempts exhausted'),
+                $this->callback(
+                    static fn(array $context): bool
+                        => $context['phase'] === 'outbox_publish'
+                        && $context['kind'] === 'report',
+                ),
+            );
 
-        $this->broker->method('publish')->willThrowException(new RuntimeException('broker is down'));
-
-        $this->outboxRepository->expects($this->once())
-            ->method('markAttempt')
-            ->willThrowException(new RuntimeException('db is down'));
-
-        $this->outboxRepository->expects($this->never())->method('delete');
-
-        /** @var list<array{Throwable, array<string, mixed>}> $warnings */
-        $warnings = [];
-        $onError = function (Throwable $e, array $context) use (&$warnings): void {
-            $warnings[] = [$e, $context];
-        };
-
-        $this->assertFalse($this->relay->processBatch($onError));
-
-        $failures = array_values(array_filter(
-            $warnings,
-            static fn(array $record): bool => $record[1]['phase'] === 'register_attempt'
-        ));
-        self::assertCount(1, $failures);
-        self::assertSame('db is down', $failures[0][0]->getMessage());
+        $this->relay->processBatch();
     }
 
-    public function testProcessBatchDoesNotFailWhenDeleteFailsAfterConfirmedPublish(): void
+    public function testOneFailedMessageDoesNotBlockTheRestOfTheBatch(): void
     {
-        $first = $this->makePendingMessage(1, 111);
-        $second = $this->makePendingMessage(2, 222);
+        $broken = $this->makeMessage(1);
+        $good = $this->makeMessage(2);
+        $this->withMessages([$broken, $good]);
 
-        $this->outboxRepository->method('getPendingMessages')->willReturn([$first, $second]);
-
-        $this->broker->expects($this->exactly(2))->method('publish');
-
-        $matcher = $this->exactly(2);
-        $this->outboxRepository->expects($matcher)
-            ->method('delete')
-            ->willReturnCallback(function (Message $message) use ($matcher): void {
-                if ($matcher->numberOfInvocations() === 1) {
-                    throw new RuntimeException('DB hiccup');
+        $this->broker->method('publishMessage')
+            ->willReturnCallback(static function (Message $message) use ($broken): void {
+                if ($message->getId() === $broken->getId()) {
+                    throw new RuntimeException('poison message');
                 }
             });
+        $this->messageRepository->method('markAttempt')->willReturn(1);
+        $this->messageRepository->expects($this->once())
+            ->method('delete')
+            ->with($good);
 
-        /** @var list<array{Throwable, array<string, mixed>}> $errors */
-        $errors = [];
-        $onError = function (Throwable $e, array $context) use (&$errors): void {
-            $errors[] = [$e, $context];
-        };
-
-        $this->assertTrue($this->relay->processBatch($onError));
-        $this->assertNotEmpty($errors);
+        $this->relay->processBatch();
     }
 
-    public function testProcessBatchReturnsFalseAndSkipsBrokerWhenOutboxIsEmpty(): void
+    public function testMessageFailureDoesNotStopReportPublishing(): void
     {
-        $this->outboxRepository->expects($this->once())
-            ->method('getPendingMessages')
+        $message = $this->makeMessage(1);
+        $report = $this->makeReport();
+        $this->withMessages([$message]);
+        $this->withReports([$report]);
+
+        $this->broker->method('publishMessage')->willThrowException(new RuntimeException('broker down'));
+        $this->messageRepository->method('markAttempt')->willReturn(1);
+        $this->reportRepository->expects($this->once())->method('delete')->with($report);
+
+        $this->relay->processBatch();
+    }
+
+    public function testRequestsTheBatchSizeFromBothRepositories(): void
+    {
+        $this->messageRepository->expects($this->once())
+            ->method('getMessages')
+            ->with(self::BATCH_SIZE)
+            ->willReturn([]);
+        $this->reportRepository->expects($this->once())
+            ->method('getReports')
+            ->with(self::BATCH_SIZE)
             ->willReturn([]);
 
-        $this->broker->expects($this->never())->method('publish');
-        $this->outboxRepository->expects($this->never())->method('delete');
-
-        $this->assertFalse($this->relay->processBatch());
+        $this->relay->processBatch();
     }
 
-    public function testProcessBatchStopsMidBatchWhenStopIsRequested(): void
+    public function testRunClosesTheBrokerAfterAStopRequest(): void
     {
-        $messages = [
-            $this->makePendingMessage(1, 111),
-            $this->makePendingMessage(2, 222),
-            $this->makePendingMessage(3, 333),
-        ];
+        // requestStop() before run() means the polling loop body never executes at all.
+        $this->messageRepository->expects($this->never())->method('getMessages');
+        $this->reportRepository->expects($this->never())->method('getReports');
 
-        $this->outboxRepository->method('getPendingMessages')->willReturn($messages);
+        $this->broker->expects($this->once())->method('close');
+        $this->broker->expects($this->never())->method('publishMessage');
 
-        $published = 0;
-        $this->broker->expects($this->once())->method('publish')
-            ->willReturnCallback(function () use (&$published) {
-                $published++;
-                $this->relay->requestStop();
-            });
-
-        $this->outboxRepository->expects($this->once())->method('delete');
-
-        $this->assertTrue($this->relay->processBatch());
-        $this->assertSame(1, $published);
+        $this->relay->requestStop();
+        $this->relay->run();
     }
 }

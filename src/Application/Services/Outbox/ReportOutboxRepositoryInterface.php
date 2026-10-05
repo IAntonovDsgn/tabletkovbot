@@ -8,7 +8,7 @@ use App\Domain\Entities\Report\Report;
 
 interface ReportOutboxRepositoryInterface
 {
-    public function insert(Report $report): void;
+    public function insert(Report $report): int;
 
     public function update(Report $report): void;
 

@@ -3,7 +3,7 @@
 namespace Tests\Unit\Presentation\Console\Commands;
 
 use App\Application\Services\Notification\NotificationService;
-use App\Application\Services\Outbox\OutboxRepositoryInterface;
+use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\UnitOfWorkInterface;
@@ -18,7 +18,7 @@ class MedicationNotifyCommandTest extends TestCase
     public function testRunDispatchesDueMedicamentsUntilStopped(): void
     {
         $medicamentRepository = $this->createMock(MedicamentRepositoryInterface::class);
-        $outboxRepository = $this->createMock(OutboxRepositoryInterface::class);
+        $outboxRepository = $this->createMock(MessageOutboxRepositoryInterface::class);
         $unitOfWork = $this->createMock(UnitOfWorkInterface::class);
         $logger = new FakeLogger();
 

@@ -4,6 +4,7 @@ namespace Tests\Unit\Presentation\Console\Commands;
 
 use App\Application\Services\DataSender\DataSender;
 use App\Application\Services\DataSender\DataTransportInterface;
+use App\Application\Services\PdfFactory\PdfFactoryInterface;
 use App\Domain\Entities\Message\Message;
 use App\Infrastructure\TelegramDataTransport\SendMessageException;
 use App\Presentation\Console\Commands\SendTelegramMessageCommand;
@@ -21,7 +22,8 @@ class SendTelegramMessageCommandTest extends TestCase
         parent::setUp();
 
         $this->messageService = $this->createMock(DataTransportInterface::class);
-        $command = new SendTelegramMessageCommand(new DataSender($this->messageService));
+        $pdfFactory = $this->createMock(PdfFactoryInterface::class);
+        $command = new SendTelegramMessageCommand(new DataSender($this->messageService, $pdfFactory));
         $this->tester = new CommandTester($command);
     }
 

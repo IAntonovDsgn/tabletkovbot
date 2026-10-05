@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Entities\IntakeMark;
 
+use Doctrine\DBAL\Exception;
+
 interface IntakeMarkRepositoryInterface
 {
     public function insert(IntakeMark $intakeMark): int;
@@ -16,4 +18,14 @@ interface IntakeMarkRepositoryInterface
      * @return IntakeMark[]
      */
     public function findByChatId(int $chatId): array;
+
+    /**
+     * @throws Exception
+     */
+    public function existsByChatId(int $chatId): bool;
+
+    /**
+     * @return IntakeMark[]
+     */
+    public function findForMonthByChatId(int $chatId, int $year, int $month): array;
 }

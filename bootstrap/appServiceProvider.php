@@ -7,6 +7,7 @@ use App\Application\Services\Notification\NotificationService;
 use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Application\Services\Outbox\OutboxRelay;
 use App\Application\Services\DataSender\DataSender;
+use App\Application\Services\PdfFactory\PdfFactoryInterface;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
@@ -18,12 +19,15 @@ use App\Infrastructure\Dbal\Repositories\ReportOutboxRepository;
 use App\Infrastructure\Dbal\Repositories\SessionRepository;
 use App\Infrastructure\Dbal\UnitOfWork\UnitOfWork;
 use App\Infrastructure\Logging\SizeLimitedFileHandler;
+use App\Infrastructure\PDF\PdfFactory;
 use App\Infrastructure\RabbitMq\AmqpConnectionFactory;
 use App\Infrastructure\RabbitMq\AmqpConnectionFactoryInterface;
 use App\Infrastructure\RabbitMq\Deserializer;
 use App\Infrastructure\RabbitMq\MessageQueueConsumer;
 use App\Infrastructure\RabbitMq\RabbitMqMessageBroker;
 use App\Infrastructure\RabbitMq\ReportQueueConsumer;
+use App\Presentation\Console\Commands\QueueConsumeCommand;
+use App\Presentation\Console\Commands\ReportConsumeCommand;
 use App\Infrastructure\RabbitMq\Serializer;
 use App\Infrastructure\TelegramDataTransport\TelegramDataTransport;
 use Doctrine\DBAL\Connection;
@@ -76,7 +80,7 @@ return [
         return $monolog;
     },
 
-    'log' => \DI\get(LoggerInterface::class),
+    'log' => get(LoggerInterface::class),
 
     /*==========================================
         Telegram
@@ -103,7 +107,7 @@ return [
             (string) ($config['password'] ?? 'guest'),
             (string) ($config['exchange'] ?? 'outbox'),
             (string) ($config['message_queue'] ?? 'messages'),
-            (string) ($config['message_report'] ?? 'reports'),
+            (string) ($config['report_queue'] ?? 'reports'),
             (float) ($config['confirm_timeout_seconds'] ?? 5.0),
         );
     },
@@ -132,6 +136,7 @@ return [
 
     MessageQueueConsumer::class => function (ContainerInterface $c) {
         $config = require __DIR__ . '/../config/rabbitmq.php';
+        $reportConfig = require __DIR__ . '/../config/report.php';
         return new MessageQueueConsumer(
             new Deserializer(),
             $c->get(LoggerInterface::class),
@@ -144,12 +149,15 @@ return [
             (string) ($config['message_queue'] ?? 'messages'),
             max(1, (int) ($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
             $c->get(DataSender::class),
+            $c->get(MessageBrokerInterface::class),
+            (int) ($reportConfig['max_send_attempts'] ?? 3),
             new AmqpConnectionFactory(),
         );
     },
 
     ReportQueueConsumer::class => function (ContainerInterface $c) {
         $config = require __DIR__ . '/../config/rabbitmq.php';
+        $reportConfig = require __DIR__ . '/../config/report.php';
         return new ReportQueueConsumer(
             new Deserializer(),
             $c->get(LoggerInterface::class),
@@ -160,13 +168,42 @@ return [
             (string) ($config['password'] ?? 'guest'),
             (string) ($config['exchange'] ?? 'outbox'),
             (string) ($config['report_queue'] ?? 'reports'),
-            max(1, (int) ($_ENV['OUTBOX_POLL_INTERVAL_MS'] ?? 1000)),
+            max(1, (int) ($_ENV['REPORT_POLL_INTERVAL_MS'] ?? 1000)),
             $c->get(DataSender::class),
+            $c->get(MessageBrokerInterface::class),
+            (int) ($reportConfig['max_send_attempts'] ?? 3),
             new AmqpConnectionFactory(),
         );
     },
 
+    /*==========================================
+        Queue consume commands
+
+        Both commands depend on QueueConsumerInterface but need different concrete consumers,
+        so autowiring cannot pick one for them — each command is wired explicitly.
+     ==========================================*/
+    QueueConsumeCommand::class => function (ContainerInterface $c) {
+        return new QueueConsumeCommand($c->get(MessageQueueConsumer::class));
+    },
+
+    ReportConsumeCommand::class => function (ContainerInterface $c) {
+        return new ReportConsumeCommand($c->get(ReportQueueConsumer::class));
+    },
+
     AmqpConnectionFactoryInterface::class => autowire(AmqpConnectionFactory::class),
+
+    /*==========================================
+        PDF factory
+     ==========================================*/
+    PdfFactoryInterface::class => function (ContainerInterface $c) {
+        $config = require __DIR__ . '/../config/report.php';
+        return new PdfFactory(
+            $c->get(IntakeMarkRepositoryInterface::class),
+            $c->get(MedicamentRepositoryInterface::class),
+            (int) ($config['max_days'] ?? 365),
+            (int) ($config['temp_file_ttl'] ?? 3600),
+        );
+    },
 
     /*==========================================
         Database

@@ -11,6 +11,8 @@ interface DataTransportInterface
 {
     public function sendMessage(Message $message): void;
 
+    public function sendFile(string $filePath, int $chatId): void;
+
     /**
      * @return RequestDTO[]
      */

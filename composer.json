@@ -18,7 +18,7 @@
     "doctrine/migrations": "^3.9",
     "php-amqplib/php-amqplib": "^3.7",
     "ext-pcntl": "*",
-    "openspout/openspout": "^5.11"
+    "mpdf/mpdf": "^8.3"
   },
   "require-dev": {
     "pestphp/pest": "^4.7",

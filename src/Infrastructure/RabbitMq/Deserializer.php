@@ -10,6 +10,7 @@ use App\Domain\Entities\Report\Report;
 use App\Domain\Entities\Session\States\EnumState;
 use App\Infrastructure\Dbal\Repositories\MessageOutboxRepository;
 use App\Infrastructure\Dbal\Repositories\ReportOutboxRepository;
+use DateTimeImmutable;
 use JsonException;
 
 final readonly class Deserializer
@@ -29,7 +30,7 @@ final readonly class Deserializer
             $this->requireInt($data, MessageOutboxRepository::ID_COLUMN_NAME),
             $this->requireInt($data, MessageOutboxRepository::CHAT_ID_COLUMN_NAME),
             $this->requireInt($data, MessageOutboxRepository::ATTEMPTS_COLUMN_NAME),
-            $this->optionalString($data, MessageOutboxRepository::TEXT_COLUMN_NAME),
+            $this->optionalString($data),
             $this->buttons($data),
         );
     }
@@ -48,7 +49,7 @@ final readonly class Deserializer
         return Report::restoreFromPersistence(
             $this->requireInt($data, ReportOutboxRepository::ID_COLUMN_NAME),
             $this->requireInt($data, ReportOutboxRepository::CHAT_ID_COLUMN_NAME),
-            $this->requireDate($data, ReportOutboxRepository::START_DATE_COLUMN_NAME, Report::DATE_FORMAT),
+            $this->requireDate($data),
             $this->requireInt($data, ReportOutboxRepository::ATTEMPTS_COLUMN_NAME),
         );
     }
@@ -67,24 +68,38 @@ final readonly class Deserializer
     }
 
     /**
+     * @param array<array-key, mixed> $data
      * @throws JsonException
      */
-    private function requireDate(array $data, string $key, string $dateFormat): \DateTimeImmutable
+    private function requireDate(array $data): DateTimeImmutable
     {
-        if (!isset($data[$key]) || !is_string($data[$key])) {
-            throw new JsonException(sprintf('Field "%s" must be an string.', $key));
+        $raw = $data[ReportOutboxRepository::START_DATE_COLUMN_NAME] ?? null;
+
+        if (!is_string($raw)) {
+            throw new JsonException(sprintf('Field "%s" must be a string.',
+                ReportOutboxRepository::START_DATE_COLUMN_NAME
+            ));
         }
 
-        return \DateTimeImmutable::createFromFormat($dateFormat, $data[$key]);
+        $date = DateTimeImmutable::createFromFormat('!' . Report::DB_DATE_FORMAT, $raw);
+
+        if ($date === false) {
+            throw new JsonException(sprintf('Field "%s" must match the "%s" format.',
+                ReportOutboxRepository::START_DATE_COLUMN_NAME,
+                Report::DB_DATE_FORMAT
+            ));
+        }
+
+        return $date;
     }
 
     /**
      * @param array<array-key, mixed> $data
      * @throws JsonException
      */
-    private function optionalString(array $data, string $key): ?string
+    private function optionalString(array $data): ?string
     {
-        $text = $data[$key] ?? null;
+        $text = $data[MessageOutboxRepository::TEXT_COLUMN_NAME] ?? null;
         if ($text !== null && !is_string($text)) {
             throw new JsonException('Field "text" must be a string or null.');
         }

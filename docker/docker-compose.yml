@@ -100,6 +100,34 @@ services:
     stop_grace_period: 30s
     command: ["php", "src/Presentation/Console/Console.php", "app:queue-consume"]
 
+  report:
+    build:
+      context: ./app
+    volumes:
+      - ../:/var/www/tabletkovbot:rw
+    container_name: "${COMPOSE_PROJECT_NAME}-report"
+    logging: *default-logging
+    environment:
+      - DB_HOST=${MYSQL_HOST}
+      - DB_PORT=3306
+      - DB_USER=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_NAME=${MYSQL_DATABASE}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - app-network
+    env_file:
+      - ../.env
+    restart: unless-stopped
+    stop_grace_period: 30s
+    command: ["php", "src/Presentation/Console/Console.php", "app:report-consume"]
+
   scheduler:
     build:
       context: ./app

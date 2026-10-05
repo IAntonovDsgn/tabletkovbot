@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Presentation\Api;
 
-use App\Application\Services\Outbox\OutboxRepositoryInterface;
+use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
 use App\Application\StateManager\Factories\StateHandlerFactory;
 use App\Application\StateManager\Manager;
@@ -42,7 +42,7 @@ class WebhookControllerTest extends TestCase
         $this->telegramApi = $this->createMock(TelegramBotApi::class);
         $this->stateHandlerFactory = $this->createMock(StateHandlerFactory::class);
         $this->sessionRepository = $this->createMock(SessionRepositoryInterface::class);
-        $this->outboxRepository = $this->createMock(OutboxRepositoryInterface::class);
+        $this->outboxRepository = $this->createMock(MessageOutboxRepositoryInterface::class);
         $this->unitOfWork = $this->createMock(UnitOfWorkInterface::class);
         $this->logger = $this->createMock(LoggerInterface::class);
 

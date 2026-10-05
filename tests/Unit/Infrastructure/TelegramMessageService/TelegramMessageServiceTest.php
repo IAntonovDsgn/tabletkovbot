@@ -6,12 +6,14 @@ use App\Application\StateManager\RequestDTO;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
+use App\Domain\Entities\Session\States\EnumState;
 use App\Infrastructure\TelegramDataTransport\SendMessageException;
 use App\Infrastructure\TelegramDataTransport\TelegramDataTransport;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Telegram\Bot\Api as TelegramBotApi;
 use Telegram\Bot\Exceptions\TelegramSDKException;
+use Telegram\Bot\FileUpload\InputFile;
 use Telegram\Bot\Keyboard\Keyboard;
 use Telegram\Bot\Objects\Chat;
 use Telegram\Bot\Objects\Message as TelegramMessage;
@@ -19,6 +21,9 @@ use Telegram\Bot\Objects\Update;
 
 class TelegramMessageServiceTest extends TestCase
 {
+    /** @var string[] */
+    private array $tempFiles = [];
+
     private MockObject $telegramApi;
     private TelegramDataTransport $service;
 
@@ -29,11 +34,26 @@ class TelegramMessageServiceTest extends TestCase
         $this->service = new TelegramDataTransport($this->telegramApi);
     }
 
+    protected function tearDown(): void
+    {
+        foreach ($this->tempFiles as $path) {
+            if (is_file($path)) {
+                unlink($path);
+            }
+        }
+
+        $this->tempFiles = [];
+        parent::tearDown();
+    }
+
+    /**
+     * @throws SendMessageException
+     */
     public function testSendMessageWithNoButtons(): void
     {
         $chatId = 123;
         $text = EnumMessageText::MENU->value;
-        $message = Message::create($chatId, $text, []);
+        $message = Message::create($chatId, $text);
 
         $this->telegramApi->expects($this->once())
             ->method('sendMessage')
@@ -46,12 +66,15 @@ class TelegramMessageServiceTest extends TestCase
         $this->service->sendMessage($message);
     }
 
+    /**
+     * @throws SendMessageException
+     */
     public function testSendMessageWithButtons(): void
     {
         $chatId = 123;
         $text = EnumMessageText::CHOOSE_MEDICAMENT->value;
-        $button1 = new MessageButton('Button 1', \App\Domain\Entities\Session\States\EnumState::ADD_MEDICAMENT_SELECTED);
-        $button2 = new MessageButton('Button 2', \App\Domain\Entities\Session\States\EnumState::CHANGE_MEDICAMENT_SELECTED, 'payload');
+        $button1 = new MessageButton('Button 1', EnumState::ADD_MEDICAMENT_SELECTED);
+        $button2 = new MessageButton('Button 2', EnumState::CHANGE_MEDICAMENT_SELECTED, 'payload');
         $message = Message::create($chatId, $text, [$button1, $button2]);
 
         $keyboard = Keyboard::make()->inline();
@@ -69,6 +92,9 @@ class TelegramMessageServiceTest extends TestCase
         $this->service->sendMessage($message);
     }
 
+    /**
+     * @throws SendMessageException
+     */
     public function testErrorMessageGetsCrossPrefix(): void
     {
         $chatId = 123;
@@ -86,10 +112,13 @@ class TelegramMessageServiceTest extends TestCase
         $this->service->sendMessage($message);
     }
 
+    /**
+     * @throws SendMessageException
+     */
     public function testEmptyTextWithButtonsIsSentWithoutAnyPrefix(): void
     {
         $chatId = 123;
-        $button = new MessageButton('Button 1', \App\Domain\Entities\Session\States\EnumState::ADD_MEDICAMENT_SELECTED);
+        $button = new MessageButton('Button 1', EnumState::ADD_MEDICAMENT_SELECTED);
         $message = Message::create($chatId, null, [$button]);
 
         $keyboard = Keyboard::make()->inline();
@@ -118,6 +147,60 @@ class TelegramMessageServiceTest extends TestCase
         $this->service->sendMessage($message);
     }
 
+    /**
+     * @throws SendMessageException
+     */
+    public function testSendFileUploadsDocumentWithInputFile(): void
+    {
+        $path = $this->makeTempFile();
+
+        $this->telegramApi->expects($this->once())
+            ->method('sendDocument')
+            ->with([
+                'chat_id' => 123,
+                'document' => InputFile::create($path, 'report.pdf'),
+            ]);
+
+        $this->service->sendFile($path, 123);
+    }
+
+    public function testSendFileThrowsExceptionOnTelegramSDKException(): void
+    {
+        $path = $this->makeTempFile();
+
+        $this->telegramApi->expects($this->once())
+            ->method('sendDocument')
+            ->willThrowException(new TelegramSDKException());
+
+        $this->expectException(SendMessageException::class);
+        $this->service->sendFile($path, 123);
+    }
+
+    public function testSendFileThrowsWithoutCallingTelegramWhenFileIsMissing(): void
+    {
+        $this->telegramApi->expects($this->never())->method('sendDocument');
+
+        $this->expectException(SendMessageException::class);
+        $this->service->sendFile(__DIR__ . '/definitely-missing.pdf', 123);
+    }
+
+    private function makeTempFile(): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'TableTools_test_');
+
+        self::assertIsString($path);
+        file_put_contents($path, '%PDF-1.4 test');
+
+        $target = dirname($path) . '/' . 'report.pdf';
+        rename($path, $target);
+        $this->tempFiles[] = $target;
+
+        return $target;
+    }
+
+    /**
+     * @throws SendMessageException
+     */
     public function testGetUpdatesReturnsRequestDTOs(): void
     {
         $chatId1 = 111;

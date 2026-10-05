@@ -1,12 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Infrastructure\RabbitMq;
 
+use App\Application\Services\DataSender\DataSender;
+use App\Application\Services\DataSender\DataTransportInterface;
+use App\Application\Services\DataSender\MessageBrokerInterface;
+use App\Application\Services\PdfFactory\PdfFactoryInterface;
 use App\Domain\Entities\Message\Message;
+use App\Domain\Entities\Message\MessageButton;
+use App\Domain\Entities\Session\States\EnumState;
 use App\Infrastructure\RabbitMq\AmqpConnectionFactoryInterface;
 use App\Infrastructure\RabbitMq\Deserializer;
-use App\Infrastructure\RabbitMq\MessagePayloadSerializer;
 use App\Infrastructure\RabbitMq\MessageQueueConsumer;
+use App\Infrastructure\RabbitMq\Serializer;
+use App\Infrastructure\TelegramDataTransport\SendMessageException;
+use DateTimeImmutable;
 use JsonException;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
@@ -18,29 +28,42 @@ use Tests\Support\FakeLogger;
 
 class RabbitMqQueueConsumerTest extends TestCase
 {
+    private const int MAX_ATTEMPTS = 3;
+
     private FakeLogger $logger;
+    private Serializer $serializer;
     private MockObject $connectionFactory;
     private MockObject $channel;
+    private MockObject $transport;
+    private MockObject $broker;
 
-    /** @var callable(AMQPMessage): void|null */
+    /** @var (callable(AMQPMessage): void)|null */
     private $capturedCallback = null;
 
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->logger = new FakeLogger();
+        $this->serializer = new Serializer();
         $this->connectionFactory = $this->createMock(AmqpConnectionFactoryInterface::class);
+        $this->transport = $this->createMock(DataTransportInterface::class);
+        $this->broker = $this->createMock(MessageBrokerInterface::class);
+
         $connection = $this->createMock(AMQPStreamConnection::class);
         $this->channel = $this->createMock(AMQPChannel::class);
 
-        $this->connectionFactory->method('create')
-            ->willReturn($connection);
-        $connection->method('channel')
-            ->willReturn($this->channel);
+        $this->connectionFactory->method('create')->willReturn($connection);
+        $connection->method('channel')->willReturn($this->channel);
         $this->channel->method('is_open')->willReturn(true);
         $this->channel->method('basic_qos');
+        $this->channel->method('exchange_declare');
+        $this->channel->method('queue_declare');
+        $this->channel->method('queue_bind');
 
         $consumeCalls = 0;
+        // By reference: an arrow function would capture the counter by value and keep
+        // reporting "not consuming" forever, so the polling loop would never run.
         $this->channel->method('is_consuming')
             ->willReturnCallback(function () use (&$consumeCalls): bool {
                 return $consumeCalls > 0;
@@ -70,6 +93,12 @@ class RabbitMqQueueConsumerTest extends TestCase
             'outbox',
             'telegram.send-message',
             1,
+            new DataSender(
+                $this->transport,
+                $this->createMock(PdfFactoryInterface::class),
+            ),
+            $this->broker,
+            self::MAX_ATTEMPTS,
             $this->connectionFactory,
         );
     }
@@ -77,6 +106,8 @@ class RabbitMqQueueConsumerTest extends TestCase
     /**
      * Emulates the library dispatching one delivery per wait() call. The last
      * invocation requests a graceful stop so the run() loop always terminates.
+     *
+     * @param array<int, string|RuntimeException> $bodies
      */
     private function channelWillDeliver(MessageQueueConsumer $consumer, array $bodies): void
     {
@@ -110,86 +141,151 @@ class RabbitMqQueueConsumerTest extends TestCase
     /**
      * @throws JsonException
      */
-    private function validPayload(int $id): string
+    private function validPayload(int $id, int $attempts = 0, ?MessageButton $button = null): string
     {
-        return new MessagePayloadSerializer()
-            ->serialize(Message::restoreFromPersistence($id, 42, 'hello'));
+        return $this->serializer->serializeMessage(
+            Message::restoreFromPersistence(
+                $id,
+                42,
+                $attempts,
+                'hello',
+                $button === null ? [] : [$button],
+            )
+        );
     }
 
-    public function testRunWithStopRequestedNeverConnects(): void
+/**
+     * A stop requested before run() still subscribes once, but the polling loop never
+     * dispatches anything.
+     */
+public function testRunWithStopRequestedConsumesNothing(): void
     {
-        $this->connectionFactory->expects($this->never())->method('create');
+        $this->channel->expects($this->once())->method('basic_consume');
+        $this->channel->expects($this->never())->method('wait');
+        $this->transport->expects($this->never())->method('sendMessage');
 
         $consumer = $this->makeConsumer();
         $consumer->requestStop();
-        $consumer->run(function (): void {
-            self::fail('Callback must not be invoked.');
-        });
-
-        self::assertTrue($this->logger->hasMessage('Queue consumer started'));
-        self::assertTrue($this->logger->hasMessage('Queue consumer stopped gracefully'));
+        $consumer->run();
     }
 
     /**
      * @throws JsonException
      */
-    public function testSuccessfulDeliveryPassesMessageToCallbackAndAcks(): void
+    public function testSuccessfulDeliveryReachesTheTransportAndAcks(): void
     {
         $consumer = $this->makeConsumer();
         $this->channelWillDeliver($consumer, [$this->validPayload(7)]);
 
         $this->channel->expects($this->once())->method('basic_ack')->with(11);
 
-        $received = null;
-        $consumer->run(function (Message $message) use (&$received, $consumer): void {
-            $received = $message;
-            $consumer->requestStop();
-        });
+        $sent = null;
+        $this->transport->expects($this->once())
+            ->method('sendMessage')
+            ->willReturnCallback(function (Message $message) use (&$sent, $consumer): void {
+                $sent = $message;
+                $consumer->requestStop();
+            });
 
-        self::assertInstanceOf(Message::class, $received);
-        self::assertSame(7, $received->getId());
-        self::assertSame(42, $received->getChatId());
-        self::assertSame('hello', $received->getText());
-    }
+        $consumer->run();
 
-    public function testMalformedPayloadIsNackedWithoutCallingCallback(): void
-    {
-        $consumer = $this->makeConsumer();
-        $this->channelWillDeliver($consumer, ['definitely-not-json']);
-
-        $this->channel->expects($this->once())->method('basic_nack')->with(11, false, false);
-
-        $consumer->run(function (): void {
-            self::fail('Callback must not be invoked for malformed payloads.');
-        });
-
-        self::assertTrue($this->logger->hasRecordWithContext('phase', 'deserialize'));
+        self::assertInstanceOf(Message::class, $sent);
+        self::assertSame(7, $sent->getId());
+        self::assertSame(42, $sent->getChatId());
+        self::assertSame('hello', $sent->getText());
     }
 
     /**
      * @throws JsonException
      */
-    public function testFailingCallbackIsLoggedAndMessageIsDropped(): void
+    public function testButtonsSurviveTheRoundTripToTheTransport(): void
+    {
+        $button = new MessageButton('Menu', EnumState::MENU, 'extra');
+        $consumer = $this->makeConsumer();
+        $this->channelWillDeliver($consumer, [$this->validPayload(7, 0, $button)]);
+
+        $this->channel->method('basic_ack');
+
+        $buttons = null;
+        $this->transport->method('sendMessage')
+            ->willReturnCallback(function (Message $message) use (&$buttons, $consumer): void {
+                $buttons = $message->getButtons();
+                $consumer->requestStop();
+            });
+
+        $consumer->run();
+
+        self::assertCount(1, $buttons);
+        self::assertSame('Menu', $buttons[0]->getTitle());
+        self::assertSame($button->getNewState(), $buttons[0]->getNewState());
+        self::assertSame(EnumState::MENU->value, $buttons[0]->getNewState());
+        self::assertSame('extra', $buttons[0]->getAdditionalPayload());
+    }
+
+    public function testMalformedPayloadIsNackedWithoutDelivery(): void
+    {
+        $consumer = $this->makeConsumer();
+        $this->channelWillDeliver($consumer, ['definitely-not-json']);
+
+        $this->channel->expects($this->once())->method('basic_nack')->with(11, false, false);
+        $this->transport->expects($this->never())->method('sendMessage');
+
+        $consumer->run();
+
+        self::assertTrue($this->logger->hasRecordWithContext('phase', 'deserialize'));
+    }
+
+    /**
+     * A failed delivery is republished with a bumped attempt counter and the delivery acked —
+     * dropping it straight away would lose the reminder.
+     *
+     * @throws JsonException
+     */
+    public function testFailedDeliveryIsRepublishedWithBumpedAttempts(): void
     {
         $consumer = $this->makeConsumer();
         $this->channelWillDeliver($consumer, [$this->validPayload(7)]);
 
+        $this->transport->method('sendMessage')
+            ->willThrowException(new SendMessageException('chat not found'));
+
+        $republished = null;
+        $this->broker->expects($this->once())
+            ->method('publishMessage')
+            ->willReturnCallback(function (Message $message) use (&$republished, $consumer): void {
+                $republished = $message;
+                $consumer->requestStop();
+            });
+
+        $this->channel->expects($this->once())->method('basic_ack')->with(11);
+        $this->channel->expects($this->never())->method('basic_nack');
+
+        $consumer->run();
+
+        self::assertInstanceOf(Message::class, $republished);
+        self::assertSame(1, $republished->getAttempts());
+        self::assertTrue($this->logger->hasRecordWithContext('phase', 'delivery'));
+    }
+
+    /**
+     * Once the attempts run out the message is dropped instead of looping forever.
+     *
+     * @throws JsonException
+     */
+    public function testMessageIsDroppedAfterMaxAttempts(): void
+    {
+        $consumer = $this->makeConsumer();
+        $this->channelWillDeliver($consumer, [$this->validPayload(7, self::MAX_ATTEMPTS - 1)]);
+
+        $this->transport->method('sendMessage')
+            ->willThrowException(new SendMessageException('chat not found'));
+
+        $this->broker->expects($this->never())->method('publishMessage');
         $this->channel->expects($this->once())->method('basic_nack')->with(11, false, false);
 
-        $consumer->run(function (): void {
-            throw new RuntimeException('Bad Request: chat not found');
-        });
+        $consumer->run();
 
-        $dropRecords = [];
-        foreach ($this->logger->records as $record) {
-            if (isset($record['context']['phase']) && $record['context']['phase'] === 'delivery') {
-                $dropRecords[] = $record;
-            }
-        }
-
-        self::assertCount(1, $dropRecords);
-        self::assertSame(7, $dropRecords[0]['context']['id']);
-        self::assertSame(42, $dropRecords[0]['context']['chat_id']);
+        self::assertTrue($this->logger->hasRecordWithContext('phase', 'dropped'));
     }
 
     /**
@@ -208,28 +304,32 @@ class RabbitMqQueueConsumerTest extends TestCase
         $this->channel->expects($this->exactly(3))->method('basic_ack');
 
         $processedIds = [];
-        $consumer->run(function (Message $message) use (&$processedIds, $consumer): void {
-            $processedIds[] = $message->getId();
-            if (count($processedIds) === 3) {
-                $consumer->requestStop();
-            }
-        });
+        $this->transport->method('sendMessage')
+            ->willReturnCallback(function (Message $message) use (&$processedIds, $consumer): void {
+                $processedIds[] = $message->getId();
+                if (count($processedIds) === 3) {
+                    $consumer->requestStop();
+                }
+            });
+
+        $consumer->run();
 
         self::assertSame([1, 2, 3], $processedIds);
     }
 
-    public function testConnectionLossLogsWarningAndReconnects(): void
+    /**
+     * A broken connection must not escape run(): that used to kill the worker and silently
+     * stop message delivery.
+     */
+    public function testConnectionLossIsLoggedAndEndsTheLoop(): void
     {
-        $this->connectionFactory->expects($this->exactly(2))->method('create');
-
         $consumer = $this->makeConsumer();
         $this->channelWillDeliver($consumer, [new RuntimeException('broken pipe')]);
 
-        $consumer->run(function (): void {
-            self::fail('Callback must not be invoked when the connection dies.');
-        });
+        $this->transport->expects($this->never())->method('sendMessage');
+
+        $consumer->run();
 
         self::assertTrue($this->logger->hasRecordWithContext('phase', 'connection_lost'));
-        self::assertTrue($this->logger->hasMessage('Queue consumer stopped gracefully'));
     }
 }

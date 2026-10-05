@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Services\DataSender;
 
+use App\Application\Services\PdfFactory\PdfFactoryInterface;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Report\Report;
 
@@ -11,6 +12,7 @@ final readonly class DataSender
 {
     public function __construct(
         private DataTransportInterface $dataTransport,
+        private PdfFactoryInterface $pdfFactory,
     ) {}
 
     public function sendMessage(Message $message): void
@@ -20,6 +22,15 @@ final readonly class DataSender
 
     public function sendReport(Report $report): void
     {
+        $reportPdfPath = $this->pdfFactory->createFromReport($report);
+        $this->dataTransport->sendFile($reportPdfPath, $report->getChatId());
+        $this->deleteReportPdf($reportPdfPath);
+    }
 
+    private function deleteReportPdf(string $filePath): void
+    {
+        if (is_file($filePath)) {
+            unlink($filePath);
+        }
     }
 }

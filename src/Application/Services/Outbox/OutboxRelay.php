@@ -7,6 +7,7 @@ namespace App\Application\Services\Outbox;
 use App\Application\Services\DataSender\MessageBrokerInterface;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Report\Report;
+use Exception;
 use Psr\Log\LoggerInterface;
 
 final class OutboxRelay
@@ -29,7 +30,7 @@ final class OutboxRelay
             try {
                 $this->processBatch();
                 usleep($this->pollIntervalMs * 1000);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->logger->error($e);
                 usleep($this->pollIntervalMs * 1000);
             }
@@ -38,9 +39,6 @@ final class OutboxRelay
         $this->broker->close();
     }
 
-    /**
-     * @throws AttemptsExceededException
-     */
     public function processBatch(): void
     {
         $messages = $this->messageOutboxRepository->getMessages($this->batchSize);
@@ -51,62 +49,68 @@ final class OutboxRelay
 
     /**
      * @param Message[] $messages
-     *
-     * @throws AttemptsExceededException
      */
     private function publishMessages(array $messages): void
     {
         foreach ($messages as $message) {
             try {
                 $this->broker->publishMessage($message);
-            } catch (\Exception) {
+            } catch (Exception) {
                 $this->registerFailedPublishMessageAttempt($message);
+
+                continue;
             }
+
             $this->messageOutboxRepository->delete($message);
         }
     }
 
     /**
      * @param Report[] $reports
-     *
-     * @throws AttemptsExceededException
      */
     private function publishReports(array $reports): void
     {
         foreach ($reports as $report) {
             try {
                 $this->broker->publishReport($report);
-            } catch (\Exception) {
+            } catch (Exception) {
                 $this->registerFailedPublishReportAttempt($report);
+
+                continue;
             }
+
             $this->reportOutboxRepository->delete($report);
         }
     }
 
-    /**
-     * @throws AttemptsExceededException
-     */
     private function registerFailedPublishMessageAttempt(Message $message): void
     {
         $attempts = $this->messageOutboxRepository->markAttempt($message);
 
-        if ($attempts >= $this->maxAttempts) {
-            $this->messageOutboxRepository->delete($message);
-            throw new AttemptsExceededException('message id = '.$message->getId());
+        if ($attempts < $this->maxAttempts) {
+            return;
         }
+
+        $this->messageOutboxRepository->delete($message);
+        $this->logger->error(
+            sprintf('Publish attempts exhausted, message dropped: id = %s', $message->getId()),
+            ['phase' => 'outbox_publish', 'kind' => 'message', 'attempts' => $attempts],
+        );
     }
 
-    /**
-     * @throws AttemptsExceededException
-     */
     private function registerFailedPublishReportAttempt(Report $report): void
     {
         $attempts = $this->reportOutboxRepository->markAttempt($report);
 
-        if ($attempts >= $this->maxAttempts) {
-            $this->reportOutboxRepository->delete($report);
-            throw new AttemptsExceededException('report id = '.$report->getId());
+        if ($attempts < $this->maxAttempts) {
+            return;
         }
+
+        $this->reportOutboxRepository->delete($report);
+        $this->logger->error(
+            sprintf('Publish attempts exhausted, report dropped: id = %s', $report->getId()),
+            ['phase' => 'outbox_publish', 'kind' => 'report', 'attempts' => $attempts],
+        );
     }
 
     public function requestStop(): void

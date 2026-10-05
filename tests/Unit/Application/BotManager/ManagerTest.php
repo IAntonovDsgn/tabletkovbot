@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Application\BotManager;
 
-use App\Application\Services\Outbox\OutboxRepositoryInterface;
+use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
 use App\Application\StateManager\Exceptions\InvalidValueException;
 use App\Application\StateManager\Factories\StateHandlerFactory;
@@ -35,7 +35,7 @@ class ManagerTest extends TestCase
         parent::setUp();
         $this->factoryStateHandler = $this->createMock(StateHandlerFactory::class);
         $this->sessionRepository = $this->createMock(SessionRepositoryInterface::class);
-        $this->outboxRepository = $this->createMock(OutboxRepositoryInterface::class);
+        $this->outboxRepository = $this->createMock(MessageOutboxRepositoryInterface::class);
         $this->unitOfWork = $this->createMock(UnitOfWorkInterface::class);
 
         $this->manager = new Manager(

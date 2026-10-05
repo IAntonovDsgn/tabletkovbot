@@ -157,6 +157,9 @@ final readonly class MessageOutboxRepository implements MessageOutboxRepositoryI
         }
     }
 
+    /**
+     * @param array<string, mixed> $row
+     */
     private function mapOrmToDomain(array $row): Message
     {
         $buttons = [];

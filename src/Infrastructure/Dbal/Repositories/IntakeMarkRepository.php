@@ -9,6 +9,7 @@ use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Exceptions\NotFoundEntityException;
 use App\Infrastructure\Dbal\Exceptions\AlreadyExistInPersistenceException;
 use App\Infrastructure\Dbal\Exceptions\RepositoryException;
+use DateMalformedStringException;
 use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
@@ -105,8 +106,6 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
     }
 
     /**
-     * @return IntakeMark[]
-     *
      * @throws Exception
      */
     public function findByChatId(int $chatId): array
@@ -118,6 +117,51 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
             ->from(self::INTAKE_MARKS_TABLE_NAME)
             ->where(self::CHAT_ID_COLUMN_NAME . ' = :chat_id')
             ->setParameter('chat_id', $chatId);
+
+        $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
+
+        foreach ($rows as $row) {
+            $result[] = $this->mapOrmToDomain($row);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function existsByChatId(int $chatId): bool
+    {
+        $queryBuilder = $this->connection->createQueryBuilder();
+
+        $queryBuilder->select(self::ID_COLUMN_NAME)
+            ->from(self::INTAKE_MARKS_TABLE_NAME)
+            ->where(self::CHAT_ID_COLUMN_NAME . ' = :chat_id')
+            ->setParameter('chat_id', $chatId)
+            ->setMaxResults(1);
+
+        return $queryBuilder->executeQuery()->fetchOne() !== false;
+    }
+
+    /**
+     * @throws DateMalformedStringException
+     * @throws Exception
+     */
+    public function findForMonthByChatId(int $chatId, int $year, int $month): array
+    {
+        $start = new DateTimeImmutable(sprintf('%04d-%02d-01 00:00:00', $year, $month));
+        $end = $start->modify('first day of next month');
+        $queryBuilder = $this->connection->createQueryBuilder();
+        $result = [];
+
+        $queryBuilder->select('*')
+            ->from(self::INTAKE_MARKS_TABLE_NAME)
+            ->where(self::CHAT_ID_COLUMN_NAME . ' = :chat_id')
+            ->andWhere(self::CREATED_AT_COLUMN_NAME . ' >= :start')
+            ->andWhere(self::CREATED_AT_COLUMN_NAME . ' < :end')
+            ->setParameter('chat_id', $chatId)
+            ->setParameter('start', $start->format(IntakeMark::DATE_TIME_FORMAT))
+            ->setParameter('end', $end->format(IntakeMark::DATE_TIME_FORMAT));
 
         $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
 

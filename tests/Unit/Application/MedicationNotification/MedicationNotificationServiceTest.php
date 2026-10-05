@@ -3,7 +3,7 @@
 namespace Tests\Unit\Application\MedicationNotification;
 
 use App\Application\Services\Notification\NotificationService;
-use App\Application\Services\Outbox\OutboxRepositoryInterface;
+use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
@@ -29,7 +29,7 @@ class MedicationNotificationServiceTest extends TestCase
     {
         parent::setUp();
         $this->medicamentRepository = $this->createMock(MedicamentRepositoryInterface::class);
-        $this->outboxRepository = $this->createMock(OutboxRepositoryInterface::class);
+        $this->outboxRepository = $this->createMock(MessageOutboxRepositoryInterface::class);
         $this->unitOfWork = $this->createMock(UnitOfWorkInterface::class);
         $this->logger = new FakeLogger();
         $this->service = new NotificationService(
@@ -37,7 +37,7 @@ class MedicationNotificationServiceTest extends TestCase
             $this->outboxRepository,
             $this->unitOfWork,
             $this->logger,
-            1000,
+            0,
         );
     }
 
@@ -113,20 +113,40 @@ class MedicationNotificationServiceTest extends TestCase
         self::assertSame(111, $this->logger->records[0]['context']['chat_id']);
     }
 
-    public function testProcessCycleStopsMidwayWhenStopIsRequested(): void
+    public function testStopRequestedMidCycleFinishesTheCycleAndEndsTheLoop(): void
     {
         $first = $this->makeMedicament(1, 111);
         $second = $this->makeMedicament(2, 222);
 
         $this->medicamentRepository->method('findForNotificationNow')->willReturn([$first, $second]);
 
-        $this->outboxRepository->expects($this->once())->method('insert');
-        $this->medicamentRepository->expects($this->once())
+        $updates = 0;
+
+        $this->outboxRepository->expects($this->exactly(2))->method('insert');
+        $this->medicamentRepository->expects($this->exactly(2))
             ->method('update')
-            ->willReturnCallback(function (): void {
-                $this->service->requestStop();
+            ->willReturnCallback(function () use (&$updates): void {
+                $updates++;
+                if ($updates === 1) {
+                    $this->service->requestStop();
+                }
             });
 
-        $this->service->processCycle();
+        $this->service->run();
+
+        self::assertSame(2, $updates, 'the in-flight cycle must run to completion');
+    }
+
+    public function testRunDoesNotStartAnotherCycleAfterAStop(): void
+    {
+        $this->medicamentRepository->expects($this->once())
+            ->method('findForNotificationNow')
+            ->willReturnCallback(function (): array {
+                $this->service->requestStop();
+
+                return [];
+            });
+
+        $this->service->run();
     }
 }

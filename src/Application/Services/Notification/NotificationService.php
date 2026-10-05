@@ -12,6 +12,7 @@ use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\States\EnumState;
 use App\Domain\UnitOfWorkInterface;
+use Exception;
 use Psr\Log\LoggerInterface;
 
 final class NotificationService
@@ -29,13 +30,18 @@ final class NotificationService
     public function run(): void
     {
         while ($this->stopRequested === false) {
-            $medicamentsForNotification = $this->medicamentRepository->findForNotificationNow();
-
-            foreach ($medicamentsForNotification as $medicament) {
-                $this->sendNotification($medicament);
-            }
+            $this->processCycle();
 
             usleep($this->pollIntervalMs * 1000);
+        }
+    }
+
+    public function processCycle(): void
+    {
+        $medicamentsForNotification = $this->medicamentRepository->findForNotificationNow();
+
+        foreach ($medicamentsForNotification as $medicament) {
+            $this->sendNotification($medicament);
         }
     }
 
@@ -69,7 +75,7 @@ final class NotificationService
             $medicament->markNotificationSent();
             $this->medicamentRepository->update($medicament);
             $this->unitOfWork->commit();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->unitOfWork->rollback();
             $this->logger->error($e, [
                 'medicament_id' => $medicament->getId(),

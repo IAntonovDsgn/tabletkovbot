@@ -1,38 +1,54 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Presentation\Console\Commands;
 
 use App\Application\Services\DataSender\MessageBrokerInterface;
+use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Application\Services\Outbox\OutboxRelay;
-use App\Application\Services\Outbox\OutboxRepositoryInterface;
+use App\Application\Services\Outbox\ReportOutboxRepositoryInterface;
 use App\Domain\Entities\Message\Message;
 use App\Presentation\Console\Commands\OutboxPublishCommand;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
-use Tests\Support\FakeLogger;
 
 class OutboxPublishCommandTest extends TestCase
 {
-    private MockObject $outboxRepository;
+    private MockObject $messageOutboxRepository;
+    private MockObject $reportOutboxRepository;
     private MockObject $broker;
-    private FakeLogger $logger;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->messageOutboxRepository = $this->createMock(MessageOutboxRepositoryInterface::class);
+        $this->reportOutboxRepository = $this->createMock(ReportOutboxRepositoryInterface::class);
+        $this->broker = $this->createMock(MessageBrokerInterface::class);
+    }
 
     public function testRunRelaysPendingMessagesUntilStopped(): void
     {
-        $this->outboxRepository = $this->createMock(OutboxRepositoryInterface::class);
-        $this->broker = $this->createMock(MessageBrokerInterface::class);
-        $this->logger = new FakeLogger();
+        $relay = new OutboxRelay(
+            $this->messageOutboxRepository,
+            $this->reportOutboxRepository,
+            $this->broker,
+            $this->createMock(\Psr\Log\LoggerInterface::class),
+            10,
+            0,
+            4,
+        );
+        $command = new OutboxPublishCommand($relay);
 
-        $relay = new OutboxRelay($this->outboxRepository, $this->broker, 10, 0);
-        $command = new OutboxPublishCommand($relay, $this->logger);
-
-        $pending = Message::restoreFromPersistence(9, 77, 'hello');
-        $this->outboxRepository->method('getPendingMessages')
+        $pending = Message::restoreFromPersistence(9, 77, 0, 'hello');
+        $this->messageOutboxRepository->method('getMessages')
             ->willReturnOnConsecutiveCalls([$pending], []);
+        $this->reportOutboxRepository->method('getReports')->willReturn([]);
 
         $this->broker->expects($this->once())
-            ->method('publish')
+            ->method('publishMessage')
             ->with($this->callback(function (Message $message): bool {
                 return $message->getId() === 9 && $message->getChatId() === 77;
             }))
@@ -40,16 +56,30 @@ class OutboxPublishCommandTest extends TestCase
                 $relay->requestStop();
             });
 
-        $this->outboxRepository->expects($this->once())
+        // The row only leaves the outbox after the broker confirmed.
+        $this->messageOutboxRepository->expects($this->once())
             ->method('delete')
             ->with($pending);
 
         $this->broker->expects($this->once())->method('close');
 
         $tester = new CommandTester($command);
-        $statusCode = $tester->execute([]);
 
-        self::assertSame(0, $statusCode);
-        self::assertSame(0, $this->logger->countMessages('Failed to relay outbox message'));
+        self::assertSame(0, $tester->execute([]));
+    }
+
+    public function testCommandNameIsStable(): void
+    {
+        $relay = new OutboxRelay(
+            $this->messageOutboxRepository,
+            $this->reportOutboxRepository,
+            $this->broker,
+            $this->createMock(\Psr\Log\LoggerInterface::class),
+            10,
+            0,
+            4,
+        );
+
+        self::assertSame('app:outbox-publish', (new OutboxPublishCommand($relay))->getName());
     }
 }

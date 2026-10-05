@@ -32,7 +32,7 @@ final readonly class ReportOutboxRepository implements ReportOutboxRepositoryInt
      * @throws AlreadyExistInPersistenceException
      * @throws RepositoryException
      */
-    public function insert(Report $report): void
+    public function insert(Report $report): int
     {
         if ($report->isExistInPersistence()) {
             throw new AlreadyExistInPersistenceException('isExistInPersistence = true');
@@ -40,7 +40,7 @@ final readonly class ReportOutboxRepository implements ReportOutboxRepositoryInt
 
         $data = [
             self::CHAT_ID_COLUMN_NAME => $report->getChatId(),
-            self::START_DATE_COLUMN_NAME => $report->getStartDate()->format(Report::DATE_FORMAT),
+            self::START_DATE_COLUMN_NAME => $report->getStartDate()->format(Report::DB_DATE_FORMAT),
             self::ATTEMPTS_COLUMN_NAME => $report->getAttempts(),
         ];
 
@@ -49,6 +49,7 @@ final readonly class ReportOutboxRepository implements ReportOutboxRepositoryInt
                 self::REPORT_OUTBOX_TABLE_NAME,
                 $data)
             ;
+            return (int) $this->connection->lastInsertId();
         } catch (\Exception $e) {
             throw new RepositoryException($e->getMessage(), 0, $e);
         }
@@ -66,7 +67,7 @@ final readonly class ReportOutboxRepository implements ReportOutboxRepositoryInt
 
         $data = [
             self::CHAT_ID_COLUMN_NAME => $report->getChatId(),
-            self::START_DATE_COLUMN_NAME => $report->getStartDate()->format(Report::DATE_FORMAT),
+            self::START_DATE_COLUMN_NAME => $report->getStartDate()->format(Report::DB_DATE_FORMAT),
             self::ATTEMPTS_COLUMN_NAME => $report->getAttempts(),
         ];
 
@@ -147,15 +148,25 @@ final readonly class ReportOutboxRepository implements ReportOutboxRepositoryInt
         }
     }
 
+    /**
+     * @param array<string, mixed> $row
+     * @throws RepositoryException
+     */
     private function mapOrmToDomain(array $row): Report
     {
+        $startDate = DateTimeImmutable::createFromFormat(
+            '!' . Report::DB_DATE_FORMAT,
+            $this->toString($row[self::START_DATE_COLUMN_NAME])
+        );
+
+        if ($startDate === false) {
+            throw new RepositoryException('Report start date is malformed.');
+        }
+
         return Report::restoreFromPersistence(
             $this->toInt($row[self::ID_COLUMN_NAME]),
             $this->toInt($row[self::CHAT_ID_COLUMN_NAME]),
-            DateTimeImmutable::createFromFormat(
-                Report::DATE_FORMAT,
-                $this->toString($row[self::START_DATE_COLUMN_NAME])
-            ),
+            $startDate,
             $this->toInt($row[self::ATTEMPTS_COLUMN_NAME]),
         );
     }
