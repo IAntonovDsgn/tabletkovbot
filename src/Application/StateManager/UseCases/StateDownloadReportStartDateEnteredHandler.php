@@ -12,8 +12,8 @@ use App\Application\StateManager\RequestDTO;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
-use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Report\Report;
+use App\Domain\Support\DateFormats;
 use DateMalformedStringException;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -68,13 +68,13 @@ final readonly class StateDownloadReportStartDateEnteredHandler implements State
             throw new InvalidValueException(EnumMessageText::FORMAT_DATE_ERROR->value);
         }
 
-        $startDate = DateTimeImmutable::createFromFormat('!' . Report::DATE_FORMAT, $raw);
+        $startDate = DateTimeImmutable::createFromFormat('!' . DateFormats::DATE, $raw);
 
-        if ($startDate === false || $startDate->format(Report::DATE_FORMAT) !== $raw) {
+        if ($startDate === false || $startDate->format(DateFormats::DATE) !== $raw) {
             throw new InvalidValueException(EnumMessageText::FORMAT_DATE_ERROR->value);
         }
 
-        $now = new DateTimeImmutable('now', new DateTimeZone(Medicament::DATE_TIME_ZONE));
+        $now = new DateTimeImmutable('now', new DateTimeZone(DateFormats::TIME_ZONE));
 
         if ($startDate > $now) {
             throw new InvalidValueException(EnumMessageText::DATE_IN_THE_FUTURE_ERROR->value);

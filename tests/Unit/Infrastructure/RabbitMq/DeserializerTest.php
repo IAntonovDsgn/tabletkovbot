@@ -9,6 +9,7 @@ use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Report\Report;
 use App\Domain\Entities\Session\States\EnumState;
+use App\Domain\Support\DateFormats;
 use App\Infrastructure\RabbitMq\Deserializer;
 use App\Infrastructure\RabbitMq\Serializer;
 use DateTimeImmutable;
@@ -94,7 +95,7 @@ class DeserializerTest extends TestCase
         $this->assertSame($original->getId(), $restored->getId());
         $this->assertSame($original->getChatId(), $restored->getChatId());
         $this->assertSame($original->getAttempts(), $restored->getAttempts());
-        $this->assertSame('2023-01-05', $restored->getStartDate()->format(Report::DB_DATE_FORMAT));
+        $this->assertSame('2023-01-05', $restored->getStartDate()->format(DateFormats::DATE));
         $this->assertTrue($restored->isExistInPersistence());
     }
 
@@ -107,7 +108,7 @@ class DeserializerTest extends TestCase
             '{"id":1,"chat_id":2,"attempts":0,"start_date":"2024-02-29"}'
         );
 
-        $this->assertSame('2024-02-29', $report->getStartDate()->format(Report::DB_DATE_FORMAT));
+        $this->assertSame('2024-02-29', $report->getStartDate()->format(DateFormats::DATE));
     }
 
     public function testRejectsReportWithUserFacingDateFormat(): void

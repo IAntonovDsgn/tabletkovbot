@@ -5,8 +5,7 @@ namespace Tests\Unit\Application\MedicationNotification;
 use App\Application\Services\Notification\NotificationService;
 use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;
-use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
-use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Support\DateFormats;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\States\EnumState;
 use App\Domain\UnitOfWorkInterface;
@@ -72,11 +71,11 @@ class MedicationNotificationServiceTest extends TestCase
         $this->medicamentRepository->expects($this->once())
             ->method('update')
             ->with($this->callback(function (Medicament $m): bool {
-                $today = new DateTimeImmutable('now', new DateTimeZone(Medicament::DATE_TIME_ZONE))
-                    ->format(Medicament::DATE_FORMAT);
+                $today = new DateTimeImmutable('now', new DateTimeZone(DateFormats::TIME_ZONE))
+                    ->format(DateFormats::DATE);
 
                 return $m->getLastNotificationDate() !== null
-                    && $m->getLastNotificationDate()->format(Medicament::DATE_FORMAT) === $today;
+                    && $m->getLastNotificationDate()->format(DateFormats::DATE) === $today;
             }));
 
         $this->service->processCycle();

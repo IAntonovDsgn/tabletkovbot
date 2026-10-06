@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domain\Entities\Medicament;
 
+use App\Domain\Support\DateFormats;
 use DateMalformedStringException;
 use DateTimeImmutable;
 use DateTimeZone;
 
 class Medicament
 {
-    public const string TIME_FORMAT = 'H:i';
-    public const string DATE_FORMAT = 'd.m.Y';
-    public const string DATE_TIME_ZONE = 'Asia/Yekaterinburg';
-
     private function __construct(
         private readonly ?int $id,
         private string $name,
@@ -81,7 +78,7 @@ class Medicament
     {
         $this->lastNotificationDate = new DateTimeImmutable(
             'now',
-            new DateTimeZone(Medicament::DATE_TIME_ZONE)
+            new DateTimeZone(DateFormats::TIME_ZONE)
         );
     }
 

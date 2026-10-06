@@ -6,6 +6,7 @@ namespace App\Infrastructure\RabbitMq;
 
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Report\Report;
+use App\Domain\Support\DateFormats;
 use App\Infrastructure\Dbal\Repositories\MessageOutboxRepository;
 use App\Infrastructure\Dbal\Repositories\ReportOutboxRepository;
 use JsonException;
@@ -38,7 +39,7 @@ final readonly class Serializer
             [
                 ReportOutboxRepository::ID_COLUMN_NAME => $report->getId(),
                 ReportOutboxRepository::CHAT_ID_COLUMN_NAME => $report->getChatId(),
-                ReportOutboxRepository::START_DATE_COLUMN_NAME => $report->getStartDate()->format(Report::DB_DATE_FORMAT),
+                ReportOutboxRepository::START_DATE_COLUMN_NAME => $report->getStartDate()->format(DateFormats::DATE),
                 ReportOutboxRepository::ATTEMPTS_COLUMN_NAME => $report->getAttempts(),
             ],
             JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE,

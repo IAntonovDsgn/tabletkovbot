@@ -13,6 +13,7 @@ use App\Application\StateManager\UseCases\StateDownloadReportStartDateEnteredHan
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Report\Report;
+use App\Domain\Support\DateFormats;
 use DateMalformedStringException;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception;
@@ -61,7 +62,7 @@ class StateDownloadReportStartDateEnteredHandlerTest extends TestCase
             ->with($this->callback(
                 fn(Report $report): bool
                     => $report->getChatId() === self::CHAT_ID
-                    && $report->getStartDate()->format(Report::DATE_FORMAT) === '01.01.2023'
+                    && $report->getStartDate()->format(DateFormats::DATE) === '2023-01-01'
             ));
 
         $this->outboxRepository->expects($this->once())
@@ -70,7 +71,7 @@ class StateDownloadReportStartDateEnteredHandlerTest extends TestCase
                 fn($message): bool => $message->getText() === EnumMessageText::START_MAKING_REPORT->value
             ));
 
-        $this->handler->handle(new RequestDTO(self::CHAT_ID, '01.01.2023'));
+        $this->handler->handle(new RequestDTO(self::CHAT_ID, '2023-01-01'));
     }
 
     /**
@@ -93,7 +94,7 @@ class StateDownloadReportStartDateEnteredHandlerTest extends TestCase
                 fn($message): bool => $message->getText() === EnumMessageText::INTAKE_MARKS_NOT_FOUND->value
             ));
 
-        $this->handler->handle(new RequestDTO(self::CHAT_ID, '01.01.2023'));
+        $this->handler->handle(new RequestDTO(self::CHAT_ID, '2023-01-01'));
     }
 
     /**
@@ -133,7 +134,7 @@ class StateDownloadReportStartDateEnteredHandlerTest extends TestCase
         $this->expectException(InvalidValueException::class);
         $this->expectExceptionMessage(EnumMessageText::FORMAT_DATE_ERROR->value);
 
-        $this->handler->handle(new RequestDTO(self::CHAT_ID, '31.02.2026'));
+        $this->handler->handle(new RequestDTO(self::CHAT_ID, '2026-02-31'));
     }
 
     /**
@@ -147,7 +148,7 @@ class StateDownloadReportStartDateEnteredHandlerTest extends TestCase
         $this->expectException(InvalidValueException::class);
         $this->expectExceptionMessage(EnumMessageText::FORMAT_DATE_ERROR->value);
 
-        $this->handler->handle(new RequestDTO(self::CHAT_ID, '01.01.2023 10:00'));
+        $this->handler->handle(new RequestDTO(self::CHAT_ID, '2023-01-01 10:00'));
     }
 
     /**
@@ -160,7 +161,7 @@ class StateDownloadReportStartDateEnteredHandlerTest extends TestCase
 
         $tomorrow = new DateTimeImmutable('now')
             ->modify('+1 day')
-            ->format(Report::DATE_FORMAT);
+            ->format(DateFormats::DATE);
 
         $this->expectException(InvalidValueException::class);
         $this->expectExceptionMessage(EnumMessageText::DATE_IN_THE_FUTURE_ERROR->value);
@@ -175,7 +176,7 @@ class StateDownloadReportStartDateEnteredHandlerTest extends TestCase
      */
     public function testAcceptsTodayAsStartDate(): void
     {
-        $today = new DateTimeImmutable('now')->format(Report::DATE_FORMAT);
+        $today = new DateTimeImmutable('now')->format(DateFormats::DATE);
 
         $this->intakeMarkRepository->method('existsByChatId')->willReturn(true);
         $this->reportRepository->expects($this->once())->method('insert');
@@ -196,6 +197,6 @@ class StateDownloadReportStartDateEnteredHandlerTest extends TestCase
         $this->reportRepository->method('insert');
         $this->outboxRepository->method('insert');
 
-        $this->handler->handle(new RequestDTO(self::CHAT_ID, '01.01.2023'));
+        $this->handler->handle(new RequestDTO(self::CHAT_ID, '2023-01-01'));
     }
 }

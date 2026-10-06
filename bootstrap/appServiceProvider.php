@@ -26,7 +26,7 @@ use App\Infrastructure\RabbitMq\Deserializer;
 use App\Infrastructure\RabbitMq\MessageQueueConsumer;
 use App\Infrastructure\RabbitMq\RabbitMqMessageBroker;
 use App\Infrastructure\RabbitMq\ReportQueueConsumer;
-use App\Presentation\Console\Commands\QueueConsumeCommand;
+use App\Presentation\Console\Commands\MessageQueueConsumeCommand;
 use App\Presentation\Console\Commands\ReportConsumeCommand;
 use App\Infrastructure\RabbitMq\Serializer;
 use App\Infrastructure\TelegramDataTransport\TelegramDataTransport;
@@ -178,12 +178,9 @@ return [
 
     /*==========================================
         Queue consume commands
-
-        Both commands depend on QueueConsumerInterface but need different concrete consumers,
-        so autowiring cannot pick one for them — each command is wired explicitly.
      ==========================================*/
-    QueueConsumeCommand::class => function (ContainerInterface $c) {
-        return new QueueConsumeCommand($c->get(MessageQueueConsumer::class));
+    MessageQueueConsumeCommand::class => function (ContainerInterface $c) {
+        return new MessageQueueConsumeCommand($c->get(MessageQueueConsumer::class));
     },
 
     ReportConsumeCommand::class => function (ContainerInterface $c) {

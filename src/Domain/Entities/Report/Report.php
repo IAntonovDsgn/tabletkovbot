@@ -8,10 +8,6 @@ use DateTimeImmutable;
 
 final class Report
 {
-    public const string DATE_FORMAT = 'd.m.Y';
-
-    public const string DB_DATE_FORMAT = 'Y-m-d';
-
     private function __construct(
         private readonly ?int $id,
         private readonly int $chatId,

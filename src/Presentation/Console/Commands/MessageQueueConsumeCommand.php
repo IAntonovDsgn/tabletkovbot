@@ -16,7 +16,7 @@ use function pcntl_signal;
 use const SIGINT;
 use const SIGTERM;
 
-class QueueConsumeCommand extends Command
+class MessageQueueConsumeCommand extends Command
 {
     public function __construct(
         private readonly QueueConsumerInterface $messageQueueConsumer,
@@ -26,7 +26,7 @@ class QueueConsumeCommand extends Command
 
     protected function configure(): void
     {
-        $this->setName('app:queue-consume');
+        $this->setName('app:message-queue-consume');
         $this->setDescription('Consumes the telegram.send-message queue and delivers messages to Telegram.');
     }
 

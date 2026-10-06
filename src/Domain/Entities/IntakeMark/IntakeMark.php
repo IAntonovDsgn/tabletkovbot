@@ -8,8 +8,6 @@ use DateTimeImmutable;
 
 class IntakeMark
 {
-    public const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
-
     private function __construct(
         private readonly ?int $id,
         private readonly bool $isExistInPersistence,

@@ -6,9 +6,9 @@ namespace App\Infrastructure\PDF;
 
 use App\Application\Services\PdfFactory\PdfFactoryInterface;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
-use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Report\Report;
+use App\Domain\Support\DateFormats;
 use DateMalformedStringException;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -26,8 +26,7 @@ final readonly class PdfFactory implements PdfFactoryInterface
         private MedicamentRepositoryInterface $medicamentRepository,
         private int $maxDays,
         private int $tempFileTtl,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws MpdfException
@@ -49,9 +48,9 @@ final readonly class PdfFactory implements PdfFactoryInterface
 
         $css = '
             table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 10px; }
-            td { border: 1px solid #000; padding: 3px; text-align: center; }
+            td { border: 1px solid #000; padding: 4px; text-align: center; }
             td.name-col { text-align: left; width: 25%; font-weight: bold; }
-            h3 { margin-bottom: 5px; font-size: 14px; }
+            h3 { margin-bottom: 8px; font-size: 14px; }
         ';
 
         $mpdf->WriteHTML($css, HTMLParserMode::HEADER_CSS);
@@ -65,6 +64,12 @@ final readonly class PdfFactory implements PdfFactoryInterface
 
             $html = '<h3>Месяц: ' . $yearMonth . '</h3>';
             $html .= '<table>';
+            $html .= '<th>';
+            $html .= '<td style="background-color: lightgrey"><br></td>';
+            for ($day = $startDay; $day <= $endDay; $day++) {
+                $html .= '<td>' . $yearMonth . '-' . $day . '</td>';
+            }
+            $html .= '</th>';
 
             foreach ($medicaments as $medicamentId => $daysWithRecords) {
                 $medicamentName = $medicamentNames[$medicamentId] ?? null;
@@ -77,11 +82,9 @@ final readonly class PdfFactory implements PdfFactoryInterface
                 $html .= '<td class="name-col">' . htmlspecialchars($medicamentName) . '</td>';
 
                 for ($day = $startDay; $day <= $endDay; $day++) {
-                    $mark = isset($daysWithRecords[$day]) ?
-                        '<span style="color: green;">✅</span>' :
-                        '<span style="color: red;">❌</span>';
-
-                    $html .= '<td>' . $mark . '</td>';
+                    isset($daysWithRecords[$day]) ?
+                        $html .= '<td style="background-color: lightgreen">ДА</td>' :
+                        $html .= '<td style="background-color: indianred">НЕТ</td>';
                 }
 
                 $html .= '</tr>';
@@ -149,7 +152,7 @@ final readonly class PdfFactory implements PdfFactoryInterface
      */
     private function limitStartDate(DateTimeImmutable $startDate): DateTimeImmutable
     {
-        $now = new DateTimeImmutable('now', new DateTimeZone(Medicament::DATE_TIME_ZONE));
+        $now = new DateTimeImmutable('now', new DateTimeZone(DateFormats::TIME_ZONE));
         $minStartDate = $now->modify('-' . $this->maxDays . ' days');
 
         if ($startDate < $minStartDate) {
@@ -169,12 +172,12 @@ final readonly class PdfFactory implements PdfFactoryInterface
     private function getMonthlyDataGenerator(int $chatId, DateTimeImmutable $startDate): Generator
     {
         $currentDate = clone $startDate;
-        $endDate = new DateTimeImmutable('now', new DateTimeZone(Medicament::DATE_TIME_ZONE));
+        $endDate = new DateTimeImmutable('now', new DateTimeZone(DateFormats::TIME_ZONE));
 
-        while ($currentDate->format('Y-m') <= $endDate->format('Y-m')) {
+        while ($currentDate->format(DateFormats::YEAR_MONTH) <= $endDate->format(DateFormats::YEAR_MONTH)) {
             $year = (int)$currentDate->format('Y');
             $month = (int)$currentDate->format('m');
-            $yearMonth = $currentDate->format('Y-m');
+            $yearMonth = $currentDate->format(DateFormats::YEAR_MONTH);
 
             $intakeMarks = $this->intakeMarkRepository->findForMonthByChatId($chatId, $year, $month);
 
@@ -188,11 +191,11 @@ final readonly class PdfFactory implements PdfFactoryInterface
                 $startDay = 1;
                 $endDay = (int)$currentDate->format('t');
 
-                if ($yearMonth === $startDate->format('Y-m')) {
+                if ($yearMonth === $startDate->format(DateFormats::YEAR_MONTH)) {
                     $startDay = (int)$startDate->format('d');
                 }
 
-                if ($yearMonth === $endDate->format('Y-m')) {
+                if ($yearMonth === $endDate->format(DateFormats::YEAR_MONTH)) {
                     $endDay = (int)$endDate->format('d');
                 }
 

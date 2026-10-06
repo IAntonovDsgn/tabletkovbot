@@ -7,6 +7,7 @@ namespace App\Infrastructure\Dbal\Repositories;
 use App\Application\Services\Outbox\ReportOutboxRepositoryInterface;
 use App\Domain\Entities\Report\Report;
 use App\Domain\Exceptions\NotFoundEntityException;
+use App\Domain\Support\DateFormats;
 use App\Infrastructure\Dbal\Exceptions\AlreadyExistInPersistenceException;
 use App\Infrastructure\Dbal\Exceptions\NotExistInPersistenceException;
 use App\Infrastructure\Dbal\Exceptions\RepositoryException;
@@ -40,7 +41,7 @@ final readonly class ReportOutboxRepository implements ReportOutboxRepositoryInt
 
         $data = [
             self::CHAT_ID_COLUMN_NAME => $report->getChatId(),
-            self::START_DATE_COLUMN_NAME => $report->getStartDate()->format(Report::DB_DATE_FORMAT),
+            self::START_DATE_COLUMN_NAME => $report->getStartDate()->format(DateFormats::DATE),
             self::ATTEMPTS_COLUMN_NAME => $report->getAttempts(),
         ];
 
@@ -67,7 +68,7 @@ final readonly class ReportOutboxRepository implements ReportOutboxRepositoryInt
 
         $data = [
             self::CHAT_ID_COLUMN_NAME => $report->getChatId(),
-            self::START_DATE_COLUMN_NAME => $report->getStartDate()->format(Report::DB_DATE_FORMAT),
+            self::START_DATE_COLUMN_NAME => $report->getStartDate()->format(DateFormats::DATE),
             self::ATTEMPTS_COLUMN_NAME => $report->getAttempts(),
         ];
 
@@ -154,7 +155,7 @@ final readonly class ReportOutboxRepository implements ReportOutboxRepositoryInt
     private function mapOrmToDomain(array $row): Report
     {
         $startDate = DateTimeImmutable::createFromFormat(
-            '!' . Report::DB_DATE_FORMAT,
+            '!' . DateFormats::DATE,
             $this->toString($row[self::START_DATE_COLUMN_NAME])
         );
 

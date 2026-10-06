@@ -72,12 +72,12 @@ services:
     stop_grace_period: 30s
     command: ["php", "src/Presentation/Console/Console.php", "app:outbox-publish"]
 
-  queue:
+  message-queue-consumer:
     build:
       context: ./app
     volumes:
       - ../:/var/www/tabletkovbot:rw
-    container_name: "${COMPOSE_PROJECT_NAME}-queue"
+    container_name: "${COMPOSE_PROJECT_NAME}-message-queue-consumer"
     logging: *default-logging
     environment:
       - DB_HOST=${MYSQL_HOST}
@@ -98,14 +98,14 @@ services:
       - ../.env
     restart: unless-stopped
     stop_grace_period: 30s
-    command: ["php", "src/Presentation/Console/Console.php", "app:queue-consume"]
+    command: ["php", "src/Presentation/Console/Console.php", "app:message-queue-consume"]
 
-  report:
+  report-queue-consumer:
     build:
       context: ./app
     volumes:
       - ../:/var/www/tabletkovbot:rw
-    container_name: "${COMPOSE_PROJECT_NAME}-report"
+    container_name: "${COMPOSE_PROJECT_NAME}-report-queue-consumer"
     logging: *default-logging
     environment:
       - DB_HOST=${MYSQL_HOST}
@@ -126,7 +126,7 @@ services:
       - ../.env
     restart: unless-stopped
     stop_grace_period: 30s
-    command: ["php", "src/Presentation/Console/Console.php", "app:report-consume"]
+    command: ["php", "src/Presentation/Console/Console.php", "app:report-queue-consume"]
 
   scheduler:
     build:

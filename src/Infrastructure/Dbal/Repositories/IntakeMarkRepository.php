@@ -7,6 +7,7 @@ namespace App\Infrastructure\Dbal\Repositories;
 use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Exceptions\NotFoundEntityException;
+use App\Domain\Support\DateFormats;
 use App\Infrastructure\Dbal\Exceptions\AlreadyExistInPersistenceException;
 use App\Infrastructure\Dbal\Exceptions\RepositoryException;
 use DateMalformedStringException;
@@ -43,7 +44,7 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
             self::CHAT_ID_COLUMN_NAME => $intakeMark->getChatId(),
             self::MEDICAMENT_ID_COLUMN_NAME => $intakeMark->getMedicamentId(),
             self::IS_ACTIVE_COLUMN_NAME => $intakeMark->isActive() ? 1 : 0,
-            self::CREATED_AT_COLUMN_NAME => $intakeMark->getCreatedAt()->format(IntakeMark::DATE_TIME_FORMAT),
+            self::CREATED_AT_COLUMN_NAME => $intakeMark->getCreatedAt()->format(DateFormats::DATE_TIME),
         ];
 
         try {
@@ -68,7 +69,7 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
             self::CHAT_ID_COLUMN_NAME => $intakeMark->getChatId(),
             self::MEDICAMENT_ID_COLUMN_NAME => $intakeMark->getMedicamentId(),
             self::IS_ACTIVE_COLUMN_NAME => $intakeMark->isActive() ? 1 : 0,
-            self::CREATED_AT_COLUMN_NAME => $intakeMark->getCreatedAt()->format(IntakeMark::DATE_TIME_FORMAT),
+            self::CREATED_AT_COLUMN_NAME => $intakeMark->getCreatedAt()->format(DateFormats::DATE_TIME),
         ];
 
         try {
@@ -160,8 +161,8 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
             ->andWhere(self::CREATED_AT_COLUMN_NAME . ' >= :start')
             ->andWhere(self::CREATED_AT_COLUMN_NAME . ' < :end')
             ->setParameter('chat_id', $chatId)
-            ->setParameter('start', $start->format(IntakeMark::DATE_TIME_FORMAT))
-            ->setParameter('end', $end->format(IntakeMark::DATE_TIME_FORMAT));
+            ->setParameter('start', $start->format(DateFormats::DATE_TIME))
+            ->setParameter('end', $end->format(DateFormats::DATE_TIME));
 
         $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
 
@@ -182,7 +183,7 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
             $this->toInt($row[self::CHAT_ID_COLUMN_NAME]),
             $this->toInt($row[self::MEDICAMENT_ID_COLUMN_NAME]),
             DateTimeImmutable::createFromFormat(
-                IntakeMark::DATE_TIME_FORMAT,
+                DateFormats::DATE_TIME,
                 $this->toString($row[self::CREATED_AT_COLUMN_NAME])
             ) ?: new DateTimeImmutable(),
             $this->toBool($row[self::IS_ACTIVE_COLUMN_NAME])

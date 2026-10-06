@@ -7,7 +7,7 @@ namespace App\Presentation\Console;
 use App\Presentation\Console\Commands\GetTelegramUpdatesCommand;
 use App\Presentation\Console\Commands\NotifyCommand;
 use App\Presentation\Console\Commands\OutboxPublishCommand;
-use App\Presentation\Console\Commands\QueueConsumeCommand;
+use App\Presentation\Console\Commands\MessageQueueConsumeCommand;
 use App\Presentation\Console\Commands\ReportConsumeCommand;
 use App\Presentation\Console\Commands\SendTelegramMessageCommand;
 use DI\Container;
@@ -29,8 +29,8 @@ $commandLoader = new ContainerCommandLoader($container, [
     'app:tg-bot-get-updates'    => GetTelegramUpdatesCommand::class,
     'app:send-telegram-message' => SendTelegramMessageCommand::class,
     'app:outbox-publish'        => OutboxPublishCommand::class,
-    'app:queue-consume'         => QueueConsumeCommand::class,
-    'app:report-consume'        => ReportConsumeCommand::class,
+    'app:message-queue-consume'         => MessageQueueConsumeCommand::class,
+    'app:report-queue-consume'        => ReportConsumeCommand::class,
     'app:medication-notify'     => NotifyCommand::class,
 ]);
 

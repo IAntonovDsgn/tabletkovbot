@@ -28,7 +28,7 @@ class ReportConsumeCommand extends Command
 
     protected function configure(): void
     {
-        $this->setName('app:report-consume');
+        $this->setName('app:report-queue-consume');
         $this->setDescription('Consumes the report queue, renders PDFs and delivers them to Telegram.');
     }
 

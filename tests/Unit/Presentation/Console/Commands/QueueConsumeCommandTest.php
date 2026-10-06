@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Presentation\Console\Commands;
 
 use App\Infrastructure\RabbitMq\QueueConsumerInterface;
-use App\Presentation\Console\Commands\QueueConsumeCommand;
+use App\Presentation\Console\Commands\MessageQueueConsumeCommand;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -20,7 +20,7 @@ class QueueConsumeCommandTest extends TestCase
         parent::setUp();
 
         $this->consumer = $this->createMock(QueueConsumerInterface::class);
-        $this->tester = new CommandTester(new QueueConsumeCommand($this->consumer));
+        $this->tester = new CommandTester(new MessageQueueConsumeCommand($this->consumer));
     }
 
     public function testExecuteRunsTheConsumer(): void
@@ -32,6 +32,6 @@ class QueueConsumeCommandTest extends TestCase
 
     public function testCommandNameIsStable(): void
     {
-        self::assertSame('app:queue-consume', new QueueConsumeCommand($this->consumer)->getName());
+        self::assertSame('app:message-queue-consume', new MessageQueueConsumeCommand($this->consumer)->getName());
     }
 }

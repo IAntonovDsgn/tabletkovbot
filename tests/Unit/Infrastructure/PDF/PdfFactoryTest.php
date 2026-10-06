@@ -4,8 +4,7 @@ namespace Tests\Unit\Infrastructure\PDF;
 
 use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
-use App\Domain\Entities\Medicament\Medicament;
-use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
+use App\Domain\Support\DateFormats;
 use App\Domain\Entities\Report\Report;
 use App\Infrastructure\Dbal\Exceptions\RepositoryException;
 use App\Infrastructure\PDF\PdfFactory;
@@ -83,7 +82,7 @@ class PdfFactoryTest extends TestCase
      */
     private function currentMonthStart(): DateTimeImmutable
     {
-        $now = new DateTimeImmutable('now', new DateTimeZone(Medicament::DATE_TIME_ZONE));
+        $now = new DateTimeImmutable('now', new DateTimeZone(DateFormats::TIME_ZONE));
 
         return $now->modify('first day of this month')->setTime(0, 0);
     }
@@ -117,7 +116,7 @@ class PdfFactoryTest extends TestCase
      */
     private function stubCurrentMonthMarks(array $marks): void
     {
-        $now = new DateTimeImmutable('now', new DateTimeZone(Medicament::DATE_TIME_ZONE));
+        $now = new DateTimeImmutable('now', new DateTimeZone(DateFormats::TIME_ZONE));
         $year = (int) $now->format('Y');
         $month = (int) $now->format('m');
 

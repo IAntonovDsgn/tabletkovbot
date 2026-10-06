@@ -7,6 +7,7 @@ namespace App\Infrastructure\Dbal\Repositories;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Exceptions\NotFoundEntityException;
+use App\Domain\Support\DateFormats;
 use App\Infrastructure\Dbal\Exceptions\AlreadyExistInPersistenceException;
 use App\Infrastructure\Dbal\Exceptions\RepositoryException;
 use DateMalformedStringException;
@@ -45,10 +46,10 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             self::NAME_COLUMN_NAME => $medicament->getName(),
             self::CHAT_ID_COLUMN_NAME => $medicament->getChatId(),
             self::NOTIFICATION_TIME_COLUMN_NAME => $medicament->getNotificationTime()
-                ?->format(Medicament::TIME_FORMAT . ':s'),
+                ?->format(DateFormats::TIME),
             self::IS_ACTIVE_COLUMN_NAME => $medicament->isActive() ? 1 : 0,
             self::LAST_NOTIFICATION_DATE_COLUMN_NAME => $medicament->getLastNotificationDate()
-                ?->format(Medicament::DATE_FORMAT),
+                ?->format(DateFormats::DATE),
         ];
 
         try {
@@ -73,10 +74,10 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             self::NAME_COLUMN_NAME => $medicament->getName(),
             self::CHAT_ID_COLUMN_NAME => $medicament->getChatId(),
             self::NOTIFICATION_TIME_COLUMN_NAME => $medicament->getNotificationTime()
-                ?->format(Medicament::TIME_FORMAT . ':s'),
+                ?->format(DateFormats::TIME),
             self::IS_ACTIVE_COLUMN_NAME => $medicament->isActive() ? 1 : 0,
             self::LAST_NOTIFICATION_DATE_COLUMN_NAME => $medicament->getLastNotificationDate()
-                ?->format(Medicament::DATE_FORMAT),
+                ?->format(DateFormats::DATE),
         ];
 
         try {
@@ -182,7 +183,7 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
     public function findForNotificationNow(): array
     {
         $result = [];
-        $now = new DateTimeImmutable('now', new DateTimeZone(Medicament::DATE_TIME_ZONE));
+        $now = new DateTimeImmutable('now', new DateTimeZone(DateFormats::TIME_ZONE));
         $queryBuilder = $this->connection->createQueryBuilder();
 
         $queryBuilder->select('m.*')
@@ -204,8 +205,8 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
                 '(s.' . SessionRepository::ID_COLUMN_NAME . ' IS NULL'
                 . ' OR s.' . SessionRepository::IS_NOTIFICATION_ENABLED_COLUMN_NAME . ' = 1)'
             )
-            ->setParameter('nowTime', $now->format(Medicament::TIME_FORMAT . ':s'))
-            ->setParameter('date', $now->format(Medicament::DATE_FORMAT));
+            ->setParameter('nowTime', $now->format(DateFormats::TIME))
+            ->setParameter('date', $now->format(DateFormats::DATE));
 
         try {
             $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
@@ -232,9 +233,9 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             $notificationTime = null;
         } else {
             $notificationTime = DateTimeImmutable::createFromFormat(
-                '!' . Medicament::TIME_FORMAT . ':s',
+                '!' . DateFormats::TIME,
                 $notificationTimeString,
-                new DateTimeZone(Medicament::DATE_TIME_ZONE)
+                new DateTimeZone(DateFormats::TIME_ZONE)
             );
 
             if ($notificationTime === false) {
@@ -255,9 +256,9 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             $lastNotificationDate = null;
         } else {
             $lastNotificationDate = DateTimeImmutable::createFromFormat(
-                '!' . Medicament::DATE_FORMAT,
+                '!' . DateFormats::DATE,
                 $lastNotificationDateString,
-                new DateTimeZone(Medicament::DATE_TIME_ZONE)
+                new DateTimeZone(DateFormats::TIME_ZONE)
             );
 
             if ($lastNotificationDate === false) {

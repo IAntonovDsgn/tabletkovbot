@@ -8,6 +8,7 @@ use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Report\Report;
 use App\Domain\Entities\Session\States\EnumState;
+use App\Domain\Support\DateFormats;
 use App\Infrastructure\Dbal\Repositories\MessageOutboxRepository;
 use App\Infrastructure\Dbal\Repositories\ReportOutboxRepository;
 use DateTimeImmutable;
@@ -80,12 +81,12 @@ final readonly class Deserializer
             ));
         }
 
-        $date = DateTimeImmutable::createFromFormat('!' . Report::DB_DATE_FORMAT, $raw);
+        $date = DateTimeImmutable::createFromFormat('!' . DateFormats::DATE, $raw);
 
         if ($date === false) {
             throw new JsonException(sprintf('Field "%s" must match the "%s" format.',
                 ReportOutboxRepository::START_DATE_COLUMN_NAME,
-                Report::DB_DATE_FORMAT
+                DateFormats::DATE
             ));
         }
 

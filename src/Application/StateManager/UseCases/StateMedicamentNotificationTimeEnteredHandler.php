@@ -8,12 +8,12 @@ use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Application\StateManager\Exceptions\InvalidValueException;
 use App\Application\StateManager\Factories\KeyboardFactory;
 use App\Application\StateManager\RequestDTO;
-use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Exceptions\NotFoundEntityException;
+use App\Domain\Support\DateFormats;
 use DateTimeImmutable;
 use DateTimeZone;
 
@@ -32,11 +32,11 @@ final readonly class StateMedicamentNotificationTimeEnteredHandler implements St
      */
     public function handle(RequestDTO $params): void {
         $notificationTime = DateTimeImmutable::createFromFormat(
-            '!' . Medicament::TIME_FORMAT,
+            '!' . DateFormats::TIME_UI,
             $params->messageText ?? '',
-            new DateTimeZone(Medicament::DATE_TIME_ZONE)
+            new DateTimeZone(DateFormats::TIME_ZONE)
         );
-        if ($notificationTime === false) {
+        if ($notificationTime === false || $notificationTime->format(DateFormats::TIME_UI) !== $params->messageText) {
             throw new InvalidValueException(EnumMessageText::FORMAT_TIME_ERROR->value);
         }
 
