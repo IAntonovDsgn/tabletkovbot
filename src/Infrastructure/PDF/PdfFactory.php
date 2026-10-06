@@ -125,7 +125,7 @@ final readonly class PdfFactory implements PdfFactoryInterface
     }
 
     /**
-     * @return array<int, string>
+     * @return string[]
      */
     private function buildMedicamentNamesMap(int $chatId): array
     {
@@ -164,11 +164,6 @@ final readonly class PdfFactory implements PdfFactoryInterface
     }
 
     /**
-     * Yields one entry per month that actually has intake marks, keyed by "Y-m".
-     *
-     * `data` maps a medicament id to the set of days it was marked on.
-     *
-     * @return Generator<string, array{start_day: int, end_day: int, data: array<int, array<int, true>>}>
      * @throws DateMalformedStringException
      */
     private function getMonthlyDataGenerator(int $chatId, DateTimeImmutable $startDate): Generator

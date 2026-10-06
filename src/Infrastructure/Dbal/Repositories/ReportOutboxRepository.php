@@ -149,7 +149,6 @@ final readonly class ReportOutboxRepository implements ReportOutboxRepositoryInt
     }
 
     /**
-     * @param array<string, mixed> $row
      * @throws RepositoryException
      */
     private function mapOrmToDomain(array $row): Report

@@ -68,7 +68,6 @@ final readonly class Deserializer
     }
 
     /**
-     * @param array<array-key, mixed> $data
      * @throws JsonException
      */
     private function requireDate(array $data): DateTimeImmutable
@@ -94,7 +93,6 @@ final readonly class Deserializer
     }
 
     /**
-     * @param array<array-key, mixed> $data
      * @throws JsonException
      */
     private function optionalString(array $data): ?string
@@ -108,7 +106,6 @@ final readonly class Deserializer
     }
 
     /**
-     * @param array<array-key, mixed> $data
      * @return MessageButton[]
      * @throws JsonException
      */

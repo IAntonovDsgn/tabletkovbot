@@ -24,13 +24,6 @@ final readonly class DataSender
     {
         $reportPdfPath = $this->pdfFactory->createFromReport($report);
         $this->dataTransport->sendFile($reportPdfPath, $report->getChatId());
-        $this->deleteReportPdf($reportPdfPath);
-    }
-
-    private function deleteReportPdf(string $filePath): void
-    {
-        if (is_file($filePath)) {
-            unlink($filePath);
-        }
+        unlink($reportPdfPath);
     }
 }

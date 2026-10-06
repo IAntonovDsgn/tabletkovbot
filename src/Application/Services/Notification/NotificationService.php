@@ -30,18 +30,13 @@ final class NotificationService
     public function run(): void
     {
         while ($this->stopRequested === false) {
-            $this->processCycle();
+            $medicamentsForNotification = $this->medicamentRepository->findForNotificationNow();
+
+            foreach ($medicamentsForNotification as $medicament) {
+                $this->sendNotification($medicament);
+            }
 
             usleep($this->pollIntervalMs * 1000);
-        }
-    }
-
-    public function processCycle(): void
-    {
-        $medicamentsForNotification = $this->medicamentRepository->findForNotificationNow();
-
-        foreach ($medicamentsForNotification as $medicament) {
-            $this->sendNotification($medicament);
         }
     }
 

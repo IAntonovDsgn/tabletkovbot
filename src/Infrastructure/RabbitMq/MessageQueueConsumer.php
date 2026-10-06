@@ -100,10 +100,6 @@ final class MessageQueueConsumer implements QueueConsumerInterface
         $this->closeConnection($channel, $connection);
     }
 
-    /**
-     * Closing an already broken connection throws, and that must not mask the original
-     * connection_lost log entry.
-     */
     private function closeConnection(AMQPChannel $channel, AMQPStreamConnection $connection): void
     {
         try {
