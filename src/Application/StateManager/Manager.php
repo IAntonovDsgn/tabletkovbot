@@ -13,6 +13,7 @@ use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\States\EnumState;
+use App\Domain\Exceptions\NotFoundEntityException;
 use App\Domain\Exceptions\TransitionStateNotAllowedException;
 use App\Domain\UnitOfWorkInterface;
 
@@ -28,6 +29,7 @@ final readonly class Manager
     /**
      * @throws TransitionStateNotAllowedException
      * @throws InvalidValueException
+     * @throws NotFoundEntityException
      */
     public function process(RequestDTO $params): void
     {
@@ -37,7 +39,7 @@ final readonly class Manager
             $stateHandler = $this->factoryStateHandler->makeByState($newState);
             $stateHandler->handle($params);
             $this->unitOfWork->commit();
-        } catch (InvalidValueException|TransitionStateNotAllowedException $e) {
+        } catch (InvalidValueException|TransitionStateNotAllowedException|NotFoundEntityException $e) {
             $this->unitOfWork->rollback();
             $this->notifyClientError($params->chatId, $e->getMessage());
             throw $e;

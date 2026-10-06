@@ -11,6 +11,7 @@ enum EnumMessageText: string
     case ENTER_TIME = 'Медикамент создан! Введите время уведомления в формате hh:mm:';
     case MEDICAMENT_EMPTY_NAME_ERROR = 'Имя медикамента не может быть пустым, попробуйте снова';
     case MEDICAMENT_NOT_FOUND = 'Медикамент не найден, попробуйте снова';
+    case MEDICAMENTS_NOT_FOUND = 'У вас нет активных медикаментов';
     case MEDICAMENT_RENAMED_SUCCESS = 'Имя медикамента успешно изменено. Чем еще я могу помочь?';
     case MENU = 'Добрый день! Чем я могу помочь?';
     case ERROR = "Сообщение устарело. Давайте начнем сначала:";

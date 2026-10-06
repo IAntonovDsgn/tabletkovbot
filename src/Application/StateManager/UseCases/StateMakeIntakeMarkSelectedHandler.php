@@ -30,7 +30,7 @@ final readonly class StateMakeIntakeMarkSelectedHandler implements StateHandlerI
         $buttons = [];
 
         if (empty($medicaments)) {
-            throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
+            throw new NotFoundEntityException(EnumMessageText::MEDICAMENTS_NOT_FOUND->value);
         }
 
         foreach ($medicaments as $medicament) {
