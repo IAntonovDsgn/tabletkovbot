@@ -35,7 +35,7 @@ class StateDownloadReportSelectedHandlerTest extends TestCase
             ->method('insert')
             ->with($this->expectedMessage());
 
-        $handler->handle(new RequestDTO(self::CHAT_ID, 'Скачать отчет'));
+        $handler->handle(new RequestDTO(self::CHAT_ID, MessageButton::DOWNLOAD_REPORT_BUTTON_TITLE));
     }
 
     private function expectedMessage(): Message

@@ -49,7 +49,7 @@ final readonly class PdfFactory implements PdfFactoryInterface
         $css = '
             table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 10px; }
             td { border: 1px solid #000; padding: 4px; text-align: center; }
-            td.name-col { text-align: left; width: 25%; font-weight: bold; }
+            td.name-col { text-align: left; font-weight: bold; }
             h3 { margin-bottom: 8px; font-size: 14px; }
         ';
 
@@ -64,12 +64,12 @@ final readonly class PdfFactory implements PdfFactoryInterface
 
             $html = '<h3>Месяц: ' . $yearMonth . '</h3>';
             $html .= '<table>';
-            $html .= '<th>';
+            $html .= '<tr>';
             $html .= '<td style="background-color: lightgrey"><br></td>';
             for ($day = $startDay; $day <= $endDay; $day++) {
-                $html .= '<td>' . $yearMonth . '-' . $day . '</td>';
+                $html .= '<td><b>' . $yearMonth . '-' . $day . '</b></td>';
             }
-            $html .= '</th>';
+            $html .= '</tr>';
 
             foreach ($medicaments as $medicamentId => $daysWithRecords) {
                 $medicamentName = $medicamentNames[$medicamentId] ?? null;
