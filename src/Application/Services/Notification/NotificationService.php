@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Services\Notification;
 
 use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
+use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
@@ -21,19 +22,25 @@ final class NotificationService
 
     public function __construct(
         private readonly MedicamentRepositoryInterface $medicamentRepository,
+        private readonly IntakeMarkRepositoryInterface $intakeMarkRepository,
         private readonly MessageOutboxRepositoryInterface $outboxRepository,
         private readonly UnitOfWorkInterface $unitOfWork,
         private readonly LoggerInterface $logger,
         private readonly int $pollIntervalMs,
     ) {}
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function run(): void
     {
         while ($this->stopRequested === false) {
             $medicamentsForNotification = $this->medicamentRepository->findForNotificationNow();
 
             foreach ($medicamentsForNotification as $medicament) {
-                $this->sendNotification($medicament);
+                if ($this->intakeMarkRepository->existsForTodayByMedicamentId($medicament->getId()) === false) {
+                    $this->sendNotification($medicament);
+                };
             }
 
             usleep($this->pollIntervalMs * 1000);

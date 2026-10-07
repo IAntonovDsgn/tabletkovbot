@@ -173,6 +173,26 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
         return $result;
     }
 
+    public function existsForTodayByMedicamentId(int $medicamentId): bool
+    {
+        $startDate = new DateTimeImmutable('00:00:00');
+        $endDate = new DateTimeImmutable()->setTime(23, 59, 59);
+        $queryBuilder = $this->connection->createQueryBuilder();
+
+        $queryBuilder->select('*')
+            ->from(self::INTAKE_MARKS_TABLE_NAME)
+            ->where(self::MEDICAMENT_ID_COLUMN_NAME . ' = :medicament_id')
+            ->andWhere(self::CREATED_AT_COLUMN_NAME . ' >= :start')
+            ->andWhere(self::CREATED_AT_COLUMN_NAME . ' < :end')
+            ->setParameter('medicament_id', $medicamentId)
+            ->setParameter('start', $startDate->format(DateFormats::DATE_TIME))
+            ->setParameter('end', $endDate->format(DateFormats::DATE_TIME));
+
+        $rowCount = $queryBuilder->executeQuery()->rowCount();
+
+        return !(($rowCount === 0));
+    }
+
     /**
      * @param array<string, mixed> $row
      */

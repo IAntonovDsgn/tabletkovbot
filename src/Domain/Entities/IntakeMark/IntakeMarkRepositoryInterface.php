@@ -28,4 +28,9 @@ interface IntakeMarkRepositoryInterface
      * @return IntakeMark[]
      */
     public function findForMonthByChatId(int $chatId, int $year, int $month): array;
+
+    /**
+     * @throws Exception
+     */
+    public function existsForTodayByMedicamentId(int $medicamentId): bool;
 }

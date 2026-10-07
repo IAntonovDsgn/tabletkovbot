@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Presentation\Console\Commands;
 
 use App\Application\Services\Notification\NotificationService;
+use Doctrine\DBAL\Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -33,9 +34,14 @@ class NotifyCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->registerSignalHandlers();
-        $this->notificationService->run();
+        try {
+            $this->notificationService->run();
+            $result = self::SUCCESS;
+        } catch (Exception) {
+            $result = self::FAILURE;
+        }
 
-        return self::SUCCESS;
+        return $result;
     }
 
     private function registerSignalHandlers(): void
