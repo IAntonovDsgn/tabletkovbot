@@ -24,14 +24,9 @@ final readonly class StateChangeNameMedicamentEnteredHandler implements StateHan
     ) {}
 
     /**
-     * @throws InvalidValueException
      * @throws NotFoundEntityException
      */
     public function handle(RequestDTO $params): void {
-        if (is_null($params->messageText)) {
-            throw new InvalidValueException(EnumMessageText::MEDICAMENT_EMPTY_NAME_ERROR->value);
-        }
-
         $session = $this->sessionRepository->findByChatId($params->chatId);
 
         if (is_null($session)) {

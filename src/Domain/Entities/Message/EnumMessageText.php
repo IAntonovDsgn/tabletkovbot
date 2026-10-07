@@ -9,7 +9,6 @@ enum EnumMessageText: string
     case CHOOSE_MEDICAMENT = 'Выберите медикамент';
     case ENTER_NEW_NAME = 'Введите новое имя медикамента:';
     case ENTER_TIME = 'Медикамент создан! Введите время напоминания в формате hh:mm:';
-    case MEDICAMENT_EMPTY_NAME_ERROR = 'Имя медикамента не может быть пустым, попробуйте снова';
     case MEDICAMENT_NOT_FOUND = 'Медикамент не найден, попробуйте снова';
     case MEDICAMENTS_NOT_FOUND = 'У вас нет активных медикаментов';
     case MEDICAMENT_RENAMED_SUCCESS = 'Имя медикамента успешно изменено.';
@@ -33,6 +32,7 @@ enum EnumMessageText: string
     case NOTIFICATION_REMINDER = 'Напоминание: пора принять медикамент';
     case NOT_FOUND_ACTIVE_MEDICAMENTS = 'Упс, кажется у Вас нет активных медикаментов. Добавьте новый медикамент:';
     case INTERNAL_ERROR = 'Oops! Something broke. Please contact the administrator';
+    case MEDICAMENT_ALREADY_EXIST = 'Такой медикамент уже существует, попробуйте ввести другое имя медикамента';
 
     public function isError(): bool
     {
@@ -40,10 +40,11 @@ enum EnumMessageText: string
             self::ERROR,
             self::INTERNAL_ERROR,
             self::REPORT_FAILED,
-            self::MEDICAMENT_EMPTY_NAME_ERROR,
             self::MEDICAMENT_NOT_FOUND,
+            self::MEDICAMENTS_NOT_FOUND,
             self::FORMAT_TIME_ERROR,
             self::FORMAT_DATE_ERROR,
+            self::MEDICAMENT_ALREADY_EXIST,
             self::DATE_IN_THE_FUTURE_ERROR => true,
             default => false,
         };

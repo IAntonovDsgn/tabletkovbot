@@ -17,6 +17,7 @@ use App\Domain\Entities\Session\States\EnumState;
 use App\Domain\Exceptions\NotFoundEntityException;
 use App\Domain\Exceptions\TransitionStateNotAllowedException;
 use App\Domain\UnitOfWorkInterface;
+use App\Infrastructure\Dbal\Exceptions\AlreadyExistInPersistenceException;
 
 final readonly class Manager
 {
@@ -32,6 +33,7 @@ final readonly class Manager
      * @throws TransitionStateNotAllowedException
      * @throws InvalidValueException
      * @throws NotFoundEntityException
+     * @throws AlreadyExistInPersistenceException
      */
     public function process(RequestDTO $params): void
     {
@@ -41,7 +43,7 @@ final readonly class Manager
             $stateHandler = $this->factoryStateHandler->makeByState($newState);
             $stateHandler->handle($params);
             $this->unitOfWork->commit();
-        } catch (InvalidValueException|TransitionStateNotAllowedException|NotFoundEntityException $e) {
+        } catch (InvalidValueException|TransitionStateNotAllowedException|NotFoundEntityException|AlreadyExistInPersistenceException $e) {
             $this->unitOfWork->rollback();
             $this->notifyClientError($params->chatId, $e->getMessage());
             throw $e;

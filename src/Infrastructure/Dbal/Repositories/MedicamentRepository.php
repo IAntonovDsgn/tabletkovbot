@@ -6,6 +6,7 @@ namespace App\Infrastructure\Dbal\Repositories;
 
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
+use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Exceptions\NotFoundEntityException;
 use App\Domain\Support\DateFormats;
 use App\Infrastructure\Dbal\Exceptions\AlreadyExistInPersistenceException;
@@ -32,14 +33,14 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
         private Connection $connection,
     ) {}
 
-    /**
-     * @throws RepositoryException
-     * @throws AlreadyExistInPersistenceException
-     */
     public function insert(Medicament $medicament): int
     {
         if ($medicament->isExistInPersistence()) {
-            throw new AlreadyExistInPersistenceException('isExistInPersistence = true');
+            throw new AlreadyExistInPersistenceException(EnumMessageText::MEDICAMENT_ALREADY_EXIST->value);
+        }
+
+        if ($this->findByChatIdAndMedicamentName($medicament->getName(), $medicament->getChatId()) !== null) {
+            throw new AlreadyExistInPersistenceException(EnumMessageText::MEDICAMENT_ALREADY_EXIST->value);
         }
 
         $data = [
@@ -60,14 +61,14 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
         }
     }
 
-    /**
-     * @throws RepositoryException
-     * @throws NotFoundEntityException
-     */
     public function update(Medicament $medicament): void
     {
         if (!$medicament->isExistInPersistence()) {
             throw new NotFoundEntityException('isExistInPersistence = false');
+        }
+
+        if ($this->findByChatIdAndMedicamentName($medicament->getName(), $medicament->getChatId()) !== null) {
+            throw new AlreadyExistInPersistenceException(EnumMessageText::MEDICAMENT_ALREADY_EXIST->value);
         }
 
         $data = [
@@ -91,9 +92,6 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
         }
     }
 
-    /**
-     * @throws RepositoryException
-     */
     public function findByChatIdAndMedicamentName(string $medicamentName, int $chatId): ?Medicament
     {
         $queryBuilder = $this->connection->createQueryBuilder();
@@ -120,9 +118,6 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
         return $result;
     }
 
-    /**
-     * @throws RepositoryException
-     */
     public function findById(int $id): ?Medicament
     {
         $queryBuilder = $this->connection->createQueryBuilder();
@@ -147,10 +142,6 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
         return $result;
     }
 
-    /**
-     * @return Medicament[]
-     * @throws RepositoryException
-     */
     public function findByChatId(int $chatId): array
     {
         $result = [];
@@ -174,12 +165,6 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
         return $result;
     }
 
-    /**
-     * @return Medicament[]
-     *
-     * @throws RepositoryException
-     * @throws DateMalformedStringException
-     */
     public function findForNotificationNow(): array
     {
         $result = [];
