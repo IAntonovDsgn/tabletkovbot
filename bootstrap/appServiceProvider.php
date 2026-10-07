@@ -127,6 +127,7 @@ return [
     NotificationService::class => function (ContainerInterface $c) {
         return new NotificationService(
             $c->get(MedicamentRepositoryInterface::class),
+            $c->get(IntakeMarkRepositoryInterface::class),
             $c->get(MessageOutboxRepositoryInterface::class),
             $c->get(UnitOfWorkInterface::class),
             $c->get(LoggerInterface::class),

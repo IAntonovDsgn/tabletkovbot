@@ -6,6 +6,7 @@ namespace App\Application\StateManager;
 
 use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Application\StateManager\Exceptions\InvalidValueException;
+use App\Application\StateManager\Factories\KeyboardFactory;
 use App\Application\StateManager\Factories\StateHandlerFactory;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
@@ -24,6 +25,7 @@ final readonly class Manager
         private SessionRepositoryInterface $sessionRepository,
         private MessageOutboxRepositoryInterface $outboxRepository,
         private UnitOfWorkInterface $unitOfWork,
+        private KeyboardFactory $keyboardFactory,
     ) {}
 
     /**
@@ -86,7 +88,11 @@ final readonly class Manager
     private function notifyClientError(int $chatId, ?string $message = null): void
     {
         $this->outboxRepository->insert(
-            Message::create($chatId, $message ?? EnumMessageText::ERROR->value)
+            Message::create(
+                $chatId,
+                    $message ?? EnumMessageText::ERROR->value,
+                $this->keyboardFactory->makeMenuKeyboard()
+            )
         );
     }
 
