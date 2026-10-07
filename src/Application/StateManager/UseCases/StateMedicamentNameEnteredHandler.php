@@ -30,8 +30,13 @@ final readonly class StateMedicamentNameEnteredHandler implements StateHandlerIn
      * @throws NotFoundEntityException
      * @throws RepositoryException
      * @throws AlreadyExistInPersistenceException
+     * @throws InvalidValueException
      */
     public function handle(RequestDTO $params): void {
+        if ($params->messageText === null) {
+            throw new InvalidValueException(EnumMessageText::INTERNAL_ERROR->value);
+        }
+
         $medicament = Medicament::create($params->messageText, $params->chatId);
         $medicamentId = $this->medicamentRepository->insert($medicament);
         $session = $this->sessionRepository->findByChatId($params->chatId);

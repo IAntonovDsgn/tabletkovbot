@@ -13,6 +13,8 @@ use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
 use App\Domain\Entities\Session\States\EnumState;
 use App\Domain\UnitOfWorkInterface;
+use App\Infrastructure\Dbal\Exceptions\RepositoryException;
+use DateMalformedStringException;
 use Exception;
 use Psr\Log\LoggerInterface;
 
@@ -31,6 +33,8 @@ final class NotificationService
 
     /**
      * @throws \Doctrine\DBAL\Exception
+     * @throws RepositoryException
+     * @throws DateMalformedStringException
      */
     public function run(): void
     {
@@ -38,7 +42,7 @@ final class NotificationService
             $medicamentsForNotification = $this->medicamentRepository->findForNotificationNow();
 
             foreach ($medicamentsForNotification as $medicament) {
-                if ($this->intakeMarkRepository->existsForTodayByMedicamentId($medicament->getId()) === false) {
+                if ($this->isMedicamentAlreadyBeenTaken($medicament->getId()) === false) {
                     $this->sendNotification($medicament);
                 };
             }
@@ -50,6 +54,22 @@ final class NotificationService
     public function requestStop(): void
     {
         $this->stopRequested = true;
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    private function isMedicamentAlreadyBeenTaken(?int $medicamentId): bool
+    {
+        $result = true;
+
+        if ($medicamentId === null) {
+            $result = false;
+        } elseif ($this->intakeMarkRepository->existsForTodayByMedicamentId($medicamentId) === false) {
+            $result = false;
+        }
+
+        return $result;
     }
 
     private function sendNotification(Medicament $medicament): void

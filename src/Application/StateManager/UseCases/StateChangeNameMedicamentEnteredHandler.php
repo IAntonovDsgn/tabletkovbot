@@ -13,6 +13,8 @@ use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Exceptions\NotFoundEntityException;
+use App\Infrastructure\Dbal\Exceptions\AlreadyExistInPersistenceException;
+use App\Infrastructure\Dbal\Exceptions\RepositoryException;
 
 final readonly class StateChangeNameMedicamentEnteredHandler implements StateHandlerInterface
 {
@@ -24,7 +26,10 @@ final readonly class StateChangeNameMedicamentEnteredHandler implements StateHan
     ) {}
 
     /**
+     * @throws RepositoryException
      * @throws NotFoundEntityException
+     * @throws AlreadyExistInPersistenceException
+     * @throws InvalidValueException
      */
     public function handle(RequestDTO $params): void {
         $session = $this->sessionRepository->findByChatId($params->chatId);
@@ -36,9 +41,12 @@ final readonly class StateChangeNameMedicamentEnteredHandler implements StateHan
         $medicamentId = intval($session->getPayload());
         $medicament = $this->medicamentRepository->findById($medicamentId);
 
-        if (is_null($medicament) || ($medicament->getChatId() !== $session->getChatId())
-        ) {
+        if (is_null($medicament) || ($medicament->getChatId() !== $session->getChatId())) {
             throw new NotFoundEntityException(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
+        }
+
+        if ($params->messageText === null) {
+            throw new InvalidValueException(EnumMessageText::INTERNAL_ERROR->value);
         }
 
         $medicament->setName($params->messageText);
