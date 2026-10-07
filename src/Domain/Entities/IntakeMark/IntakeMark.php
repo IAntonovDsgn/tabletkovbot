@@ -6,15 +6,14 @@ namespace App\Domain\Entities\IntakeMark;
 
 use DateTimeImmutable;
 
-class IntakeMark
+final readonly class IntakeMark
 {
     private function __construct(
-        private readonly ?int $id,
-        private readonly bool $isExistInPersistence,
-        private readonly int $chatId,
-        private readonly int $medicamentId,
-        private readonly DateTimeImmutable $createdAt,
-        private bool $isActive,
+        private ?int $id,
+        private bool $isExistInPersistence,
+        private int $chatId,
+        private int $medicamentId,
+        private DateTimeImmutable $createdAt,
     ) {}
 
     public static function create(
@@ -27,7 +26,6 @@ class IntakeMark
             $chatId,
             $medicamentId,
             new DateTimeImmutable(),
-            true
         );
     }
 
@@ -36,7 +34,6 @@ class IntakeMark
         int $chatId,
         int $medicamentId,
         DateTimeImmutable $createdAt,
-        bool $isActive
     ): self {
         return new self(
             $id,
@@ -44,25 +41,12 @@ class IntakeMark
             $chatId,
             $medicamentId,
             $createdAt,
-            $isActive
         );
     }
 
     public function isExistInPersistence(): bool
     {
         return $this->isExistInPersistence;
-    }
-
-    public function isActive(): bool
-    {
-        return $this->isActive;
-    }
-
-    public function deactivate(): void
-    {
-        if ($this->isActive()) {
-            $this->isActive = false;
-        }
     }
 
     public function getChatId(): int

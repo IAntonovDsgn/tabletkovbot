@@ -22,7 +22,6 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
     public const string INTAKE_MARKS_TABLE_NAME = 'intake_marks';
     public const string CHAT_ID_COLUMN_NAME = 'chat_id';
     public const string MEDICAMENT_ID_COLUMN_NAME = 'medicament_id';
-    public const string IS_ACTIVE_COLUMN_NAME = 'is_active';
     public const string CREATED_AT_COLUMN_NAME = 'created_at';
     public const string ID_COLUMN_NAME = 'id';
 
@@ -43,7 +42,6 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
         $data = [
             self::CHAT_ID_COLUMN_NAME => $intakeMark->getChatId(),
             self::MEDICAMENT_ID_COLUMN_NAME => $intakeMark->getMedicamentId(),
-            self::IS_ACTIVE_COLUMN_NAME => $intakeMark->isActive() ? 1 : 0,
             self::CREATED_AT_COLUMN_NAME => $intakeMark->getCreatedAt()->format(DateFormats::DATE_TIME),
         ];
 
@@ -68,7 +66,6 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
         $data = [
             self::CHAT_ID_COLUMN_NAME => $intakeMark->getChatId(),
             self::MEDICAMENT_ID_COLUMN_NAME => $intakeMark->getMedicamentId(),
-            self::IS_ACTIVE_COLUMN_NAME => $intakeMark->isActive() ? 1 : 0,
             self::CREATED_AT_COLUMN_NAME => $intakeMark->getCreatedAt()->format(DateFormats::DATE_TIME),
         ];
 
@@ -206,7 +203,6 @@ final readonly class IntakeMarkRepository implements IntakeMarkRepositoryInterfa
                 DateFormats::DATE_TIME,
                 $this->toString($row[self::CREATED_AT_COLUMN_NAME])
             ) ?: new DateTimeImmutable(),
-            $this->toBool($row[self::IS_ACTIVE_COLUMN_NAME])
         );
     }
 }

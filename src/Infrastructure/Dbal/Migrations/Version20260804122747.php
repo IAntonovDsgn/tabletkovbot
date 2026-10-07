@@ -33,11 +33,6 @@ final class Version20260804122747 extends AbstractMigration
             'notnull' => true,
         ]);
 
-        $table->addColumn(IntakeMarkRepository::IS_ACTIVE_COLUMN_NAME, 'boolean', [
-            'notnull' => true,
-            'default' => 1,
-        ]);
-
         $table->addColumn(IntakeMarkRepository::CREATED_AT_COLUMN_NAME, 'datetime', [
             'notnull' => true,
         ]);
