@@ -1,27 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
-use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
+use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
+use App\Application\StateManager\RequestDTO;
 use App\Application\StateManager\UseCases\StateChangeMedicamentNameSelectedHandler;
 use App\Domain\Entities\Message\EnumMessageText;
-use App\Domain\Entities\Session\Session;
+use App\Domain\Entities\Message\Message;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class StateChangeMedicamentNameSelectedHandlerTest extends TestCase
 {
-    public function testHandleReturnsCorrectResponse(): void
+    private const int CHAT_ID = 12345;
+
+    private MockObject $outboxRepository;
+
+    protected function setUp(): void
     {
-        $handler = new StateChangeMedicamentNameSelectedHandler();
+        parent::setUp();
 
-        $session = Session::create(12345, payload: '1');
-        $response = $handler->handle($session, null, null);
+        $this->outboxRepository = $this->createMock(MessageOutboxRepositoryInterface::class);
+    }
 
-        $expectedResponse = new StateHandlerResponseDTO(
-            EnumMessageText::ENTER_NEW_NAME,
-            []
-        );
+    public function testHandleAsksForTheNewName(): void
+    {
+        $handler = new StateChangeMedicamentNameSelectedHandler($this->outboxRepository);
 
-        $this->assertEquals($expectedResponse, $response);
+        $this->outboxRepository->expects($this->once())
+            ->method('insert')
+            ->with(Message::create(self::CHAT_ID, EnumMessageText::ENTER_NEW_NAME->value));
+
+        $handler->handle(new RequestDTO(self::CHAT_ID));
     }
 }

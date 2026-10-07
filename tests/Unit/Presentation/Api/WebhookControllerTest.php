@@ -3,9 +3,10 @@
 namespace Tests\Unit\Presentation\Api;
 
 use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
-use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
+use App\Application\StateManager\Factories\KeyboardFactory;
 use App\Application\StateManager\Factories\StateHandlerFactory;
 use App\Application\StateManager\Manager;
+use App\Application\StateManager\RequestDTO;
 use App\Application\StateManager\UseCases\StateHandlerInterface;
 use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
@@ -51,6 +52,7 @@ class WebhookControllerTest extends TestCase
             $this->sessionRepository,
             $this->outboxRepository,
             $this->unitOfWork,
+            new KeyboardFactory(),
         );
 
         $this->controller = new WebhookController($this->telegramApi, $manager, $this->logger);
@@ -114,25 +116,21 @@ class WebhookControllerTest extends TestCase
 
         $stateHandler->expects($this->once())
             ->method('handle')
-            ->with(
-                $this->callback(fn(Session $s) => $s->getChatId() === $chatId && $s->getState() === EnumState::MENU),
-                'start',
-                null,
-            )
-            ->willReturn(new StateHandlerResponseDTO(EnumMessageText::MENU, []));
+            ->with($this->callback(
+                fn(RequestDTO $params): bool
+                    => $params->chatId === $chatId
+                    && $params->messageText === 'start'
+                    && $params->payload === null
+            ));
 
         $this->sessionRepository->expects($this->once())
             ->method('insert')
-            ->with($this->callback(function (Session $session) use ($chatId) {
-                return $session->getChatId() === $chatId && $session->getState() === EnumState::MENU;
-            }));
+            ->with($this->callback(
+                fn(Session $session): bool
+                    => $session->getChatId() === $chatId && $session->getState() === EnumState::MENU
+            ));
 
-        $this->outboxRepository->expects($this->once())
-            ->method('insert')
-            ->with($this->callback(function (Message $message) use ($chatId) {
-                return $message->getChatId() === $chatId
-                    && $message->getText() === EnumMessageText::MENU->value;
-            }));
+        $this->outboxRepository->expects($this->never())->method('insert');
 
         $this->controller->handle();
     }
@@ -168,22 +166,24 @@ class WebhookControllerTest extends TestCase
 
         $stateHandler->expects($this->once())
             ->method('handle')
-            ->with(
-                $this->callback(fn(Session $s) => $s->getChatId() === $chatId && $s->getState() === EnumState::ADD_MEDICAMENT_SELECTED),
-                null,
-                null,
-            )
-            ->willReturn(new StateHandlerResponseDTO(EnumMessageText::ENTER_NEW_NAME, []));
+            ->with($this->callback(
+                fn(RequestDTO $params): bool
+                    => $params->chatId === $chatId
+                    && $params->messageText === null
+                    && $params->payload === $payload
+            ));
 
         $this->sessionRepository->expects($this->once())
             ->method('update')
-            ->with($this->callback(function (Session $session) {
-                return $session->getState() === EnumState::ADD_MEDICAMENT_SELECTED;
-            }));
+            ->with($this->callback(
+                fn(Session $session): bool => $session->getState() === EnumState::ADD_MEDICAMENT_SELECTED
+            ));
 
-        $this->outboxRepository->expects($this->once())->method('insert');
+        $this->outboxRepository->expects($this->never())->method('insert');
 
         $this->controller->handle();
+
+        $this->assertSame(EnumState::ADD_MEDICAMENT_SELECTED, $existingSession->getState());
     }
 
     /**
@@ -238,10 +238,11 @@ class WebhookControllerTest extends TestCase
 
         $this->outboxRepository->expects($this->once())
             ->method('insert')
-            ->with($this->callback(function (Message $message) use ($chatId) {
-                return $message->getChatId() === $chatId
-                    && $message->getText() === EnumMessageText::INTERNAL_ERROR->value;
-            }));
+            ->with($this->callback(
+                fn(Message $message): bool
+                    => $message->getChatId() === $chatId
+                    && $message->getText() === EnumMessageText::INTERNAL_ERROR->value
+            ));
 
         $this->logger->expects($this->once())->method('error');
 

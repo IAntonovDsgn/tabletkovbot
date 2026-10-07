@@ -3,8 +3,8 @@
 namespace Tests\Unit\Application\BotManager;
 
 use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
-use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
 use App\Application\StateManager\Exceptions\InvalidValueException;
+use App\Application\StateManager\Factories\KeyboardFactory;
 use App\Application\StateManager\Factories\StateHandlerFactory;
 use App\Application\StateManager\Manager;
 use App\Application\StateManager\RequestDTO;
@@ -43,6 +43,7 @@ class ManagerTest extends TestCase
             $this->sessionRepository,
             $this->outboxRepository,
             $this->unitOfWork,
+            new KeyboardFactory(),
         );
     }
 
@@ -71,27 +72,23 @@ class ManagerTest extends TestCase
             ->with(EnumState::MENU)
             ->willReturn($mockStateHandler);
 
-        $handlerResponseDTO = new StateHandlerResponseDTO(EnumMessageText::MENU, []);
         $mockStateHandler->expects($this->once())
             ->method('handle')
-            ->with(
-                $this->callback(fn(Session $s) => $s->getChatId() === $chatId && $s->getState() === EnumState::MENU && $s->getPayload() === null),
-                'start',
-                null,
-            )
-            ->willReturn($handlerResponseDTO);
+            ->with($this->callback(
+                fn(RequestDTO $params): bool
+                    => $params->chatId === $chatId
+                    && $params->messageText === 'start'
+                    && $params->payload === null
+            ));
 
         $this->sessionRepository->expects($this->once())
             ->method('insert')
-            ->with($this->callback(function (Session $session) use ($chatId) {
-                return $session->getChatId() === $chatId && $session->getState() === EnumState::MENU;
-            }));
+            ->with($this->callback(
+                fn(Session $session): bool
+                    => $session->getChatId() === $chatId && $session->getState() === EnumState::MENU
+            ));
 
-        $this->outboxRepository->expects($this->once())
-            ->method('insert')
-            ->with($this->callback(function (Message $message) use ($chatId) {
-                return $message->getChatId() === $chatId && $message->getText() === EnumMessageText::MENU->value;
-            }));
+        $this->outboxRepository->expects($this->never())->method('insert');
 
         $this->manager->process($requestDTO);
     }
@@ -107,16 +104,11 @@ class ManagerTest extends TestCase
         $payloadState = EnumState::ADD_MEDICAMENT_SELECTED;
         $requestDTO = new RequestDTO($chatId, 'some_text', $payloadState->value);
 
-        $existingSession = Session::restoreFromPersistence(1, $chatId, true, EnumState::MENU);
+        $existingSession = $this->givenExistingSession($chatId, EnumState::MENU);
 
         $this->unitOfWork->expects($this->once())->method('begin');
         $this->unitOfWork->expects($this->once())->method('commit');
         $this->unitOfWork->expects($this->never())->method('rollback');
-
-        $this->sessionRepository->expects($this->once())
-            ->method('findByChatId')
-            ->with($chatId)
-            ->willReturn($existingSession);
 
         $mockStateHandler = $this->createMock(StateHandlerInterface::class);
         $this->factoryStateHandler->expects($this->once())
@@ -124,34 +116,25 @@ class ManagerTest extends TestCase
             ->with($payloadState)
             ->willReturn($mockStateHandler);
 
-        $handlerResponseDTO = new StateHandlerResponseDTO(EnumMessageText::ENTER_NEW_NAME, [], 'new_payload_data');
         $mockStateHandler->expects($this->once())
             ->method('handle')
-            ->with(
-                $this->callback(fn(Session $s) => $s->getChatId() === $chatId && $s->getState() === $payloadState),
-                'some_text',
-                null,
-            )
-            ->willReturn($handlerResponseDTO);
+            ->with($this->callback(
+                fn(RequestDTO $params): bool
+                    => $params->chatId === $chatId
+                    && $params->messageText === 'some_text'
+                    && $params->payload === $payloadState->value
+            ));
 
         $this->sessionRepository->expects($this->once())
             ->method('update')
-            ->with($this->callback(function (Session $session) use ($chatId, $payloadState, $handlerResponseDTO) {
-                return $session->getChatId() === $chatId
-                       && $session->getState() === $payloadState
-                       && $session->getPayload() === $handlerResponseDTO->payload;
-            }));
-
-        $this->outboxRepository->expects($this->once())
-            ->method('insert')
-            ->with($this->callback(function (Message $message) use ($chatId, $handlerResponseDTO) {
-                $messageText = $handlerResponseDTO->messageText;
-                $messageTextValue = $messageText?->value;
-                return $message->getChatId() === $chatId
-                       && $message->getText() === $messageTextValue;
-            }));
+            ->with($this->callback(
+                fn(Session $session): bool
+                    => $session->getChatId() === $chatId && $session->getState() === $payloadState
+            ));
 
         $this->manager->process($requestDTO);
+
+        $this->assertSame($payloadState, $existingSession->getState());
     }
 
     /**
@@ -162,16 +145,11 @@ class ManagerTest extends TestCase
     {
         $chatId = 123;
         $requestDTO = new RequestDTO($chatId, 'invalid_input', null);
-        $existingSession = Session::create($chatId);
+        $this->givenExistingSession($chatId, EnumState::MENU);
 
         $this->unitOfWork->expects($this->once())->method('begin');
         $this->unitOfWork->expects($this->never())->method('commit');
         $this->unitOfWork->expects($this->once())->method('rollback');
-
-        $this->sessionRepository->expects($this->once())
-             ->method('findByChatId')
-             ->with($chatId)
-             ->willReturn($existingSession);
 
         $mockStateHandler = $this->createMock(StateHandlerInterface::class);
         $this->factoryStateHandler->method('makeByState')->willReturn($mockStateHandler);
@@ -180,14 +158,12 @@ class ManagerTest extends TestCase
             ->method('handle')
             ->willThrowException(new InvalidValueException('Error message'));
 
-        $this->sessionRepository->expects($this->never())->method('insert');
-        $this->sessionRepository->expects($this->never())->method('update');
-
         $this->outboxRepository->expects($this->once())
             ->method('insert')
-            ->with($this->callback(function (Message $message) use ($chatId) {
-                return $message->getChatId() === $chatId && $message->getText() === 'Error message';
-            }));
+            ->with($this->callback(
+                fn(Message $message): bool
+                    => $message->getChatId() === $chatId && $message->getText() === 'Error message'
+            ));
 
         $this->expectException(InvalidValueException::class);
         $this->expectExceptionMessage('Error message');
@@ -203,17 +179,13 @@ class ManagerTest extends TestCase
     {
         $chatId = 123;
         $requestDTO = new RequestDTO($chatId, 'error', null);
-        $existingSession = Session::create($chatId);
-        $expectedException = new class extends Exception {};
+        $this->givenExistingSession($chatId, EnumState::MENU);
+        $expectedException = new class extends Exception {
+        };
 
         $this->unitOfWork->expects($this->once())->method('begin');
         $this->unitOfWork->expects($this->never())->method('commit');
         $this->unitOfWork->expects($this->once())->method('rollback');
-
-        $this->sessionRepository->expects($this->once())
-            ->method('findByChatId')
-            ->with($chatId)
-            ->willReturn($existingSession);
 
         $mockStateHandler = $this->createMock(StateHandlerInterface::class);
         $this->factoryStateHandler->method('makeByState')->willReturn($mockStateHandler);
@@ -222,15 +194,13 @@ class ManagerTest extends TestCase
             ->method('handle')
             ->willThrowException($expectedException);
 
-        $this->sessionRepository->expects($this->never())->method('insert');
-        $this->sessionRepository->expects($this->never())->method('update');
-
         $this->outboxRepository->expects($this->once())
             ->method('insert')
-            ->with($this->callback(function (Message $message) use ($chatId) {
-                return $message->getChatId() === $chatId
-                    && $message->getText() === EnumMessageText::INTERNAL_ERROR->value;
-            }));
+            ->with($this->callback(
+                fn(Message $message): bool
+                    => $message->getChatId() === $chatId
+                    && $message->getText() === EnumMessageText::INTERNAL_ERROR->value
+            ));
 
         $this->expectException(get_class($expectedException));
         $this->manager->process($requestDTO);
@@ -245,15 +215,11 @@ class ManagerTest extends TestCase
     {
         $chatId = 123;
         $requestDTO = new RequestDTO($chatId, 'error', null);
-        $existingSession = Session::create($chatId);
-        $expectedException = new class extends Exception {};
+        $this->givenExistingSession($chatId, EnumState::MENU);
+        $expectedException = new class extends Exception {
+        };
 
         $this->unitOfWork->expects($this->once())->method('rollback');
-
-        $this->sessionRepository->expects($this->once())
-            ->method('findByChatId')
-            ->with($chatId)
-            ->willReturn($existingSession);
 
         $mockStateHandler = $this->createMock(StateHandlerInterface::class);
         $this->factoryStateHandler->method('makeByState')->willReturn($mockStateHandler);
@@ -278,33 +244,35 @@ class ManagerTest extends TestCase
     {
         $chatId = 123;
         $requestDTO = new RequestDTO($chatId, 'text', 'INVALID_STATE');
-        $existingSession = Session::create($chatId);
+        $this->givenExistingSession($chatId, EnumState::MENU);
 
         $this->unitOfWork->expects($this->once())->method('begin');
         $this->unitOfWork->expects($this->never())->method('commit');
         $this->unitOfWork->expects($this->once())->method('rollback');
 
-        $this->sessionRepository->expects($this->once())
-            ->method('findByChatId')
-            ->with($chatId)
-            ->willReturn($existingSession);
-
-        $mockStateHandler = $this->createMock(StateHandlerInterface::class);
         $this->factoryStateHandler->expects($this->never())
             ->method('makeByState');
 
-        $mockStateHandler->expects($this->never())
-            ->method('handle');
-
-        $this->sessionRepository->expects($this->never())->method('update');
-
         $this->outboxRepository->expects($this->once())
             ->method('insert')
-            ->with($this->callback(function (Message $message) use ($chatId) {
-                return $message->getChatId() === $chatId && $message->getText() === EnumMessageText::ERROR->value;
-            }));
+            ->with($this->callback(
+                fn(Message $message): bool
+                    => $message->getChatId() === $chatId && $message->getText() === EnumMessageText::ERROR->value
+            ));
 
         $this->expectException(InvalidValueException::class);
         $this->manager->process($requestDTO);
+    }
+
+    private function givenExistingSession(int $chatId, EnumState $state): Session
+    {
+        $session = Session::restoreFromPersistence(1, $chatId, true, $state);
+
+        $this->sessionRepository->expects($this->once())
+            ->method('findByChatId')
+            ->with($chatId)
+            ->willReturn($session);
+
+        return $session;
     }
 }

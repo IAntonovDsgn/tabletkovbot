@@ -1,74 +1,102 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Application\BotManager\StateHandlers;
 
-use App\Application\StateManager\DTOs\StateHandlerResponseDTO;
+use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
 use App\Application\StateManager\Factories\KeyboardFactory;
+use App\Application\StateManager\RequestDTO;
 use App\Application\StateManager\UseCases\StateMakeIntakeMarkSelectedHandler;
 use App\Domain\Entities\Medicament\Medicament;
 use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Entities\Message\EnumMessageText;
+use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Message\MessageButton;
-use App\Domain\Entities\Session\Session;
 use App\Domain\Entities\Session\States\EnumState;
 use App\Domain\Exceptions\NotFoundEntityException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class StateMakeIntakeMarkSelectedHandlerTest extends TestCase
 {
-    private MedicamentRepositoryInterface $medicamentRepository;
+    private const int CHAT_ID = 12345;
+
+    private MockObject $medicamentRepository;
+    private MockObject $outboxRepository;
+    private KeyboardFactory $keyboardFactory;
     private StateMakeIntakeMarkSelectedHandler $handler;
 
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->medicamentRepository = $this->createMock(MedicamentRepositoryInterface::class);
+        $this->outboxRepository = $this->createMock(MessageOutboxRepositoryInterface::class);
+        $this->keyboardFactory = new KeyboardFactory();
         $this->handler = new StateMakeIntakeMarkSelectedHandler(
             $this->medicamentRepository,
-            new KeyboardFactory()
+            $this->keyboardFactory,
+            $this->outboxRepository,
         );
     }
 
-    public function testHandleSuccessWithMedicaments(): void
+    public function testHandleOffersActiveMedicaments(): void
     {
-        $chatId = 12345;
         $medicaments = [
-            Medicament::restoreFromPersistence(1, 'Aspirin', $chatId, new \DateTimeImmutable(), true),
-            Medicament::restoreFromPersistence(2, 'Ibuprofen', $chatId, new \DateTimeImmutable(), true),
+            Medicament::restoreFromPersistence(1, 'Aspirin', self::CHAT_ID, new \DateTimeImmutable(), true),
+            Medicament::restoreFromPersistence(2, 'Ibuprofen', self::CHAT_ID, new \DateTimeImmutable(), true),
         ];
 
         $this->medicamentRepository->expects($this->once())
             ->method('findByChatId')
-            ->with($chatId)
+            ->with(self::CHAT_ID)
             ->willReturn($medicaments);
 
-        $response = $this->handler->handle(Session::create($chatId), null, null);
+        $this->outboxRepository->expects($this->once())
+            ->method('insert')
+            ->with(Message::create(
+                self::CHAT_ID,
+                EnumMessageText::CHOOSE_MEDICAMENT->value,
+                [
+                    new MessageButton('Aspirin', EnumState::INTAKE_MARK_HAS_MADE, '1'),
+                    new MessageButton('Ibuprofen', EnumState::INTAKE_MARK_HAS_MADE, '2'),
+                    new MessageButton(MessageButton::MENU, EnumState::MENU),
+                ]
+            ));
 
-        $expectedButtons = [
-            new MessageButton('Aspirin', EnumState::INTAKE_MARK_HAS_MADE, '1'),
-            new MessageButton('Ibuprofen', EnumState::INTAKE_MARK_HAS_MADE, '2'),
-            new MessageButton(MessageButton::MENU, EnumState::MENU),
+        $this->handler->handle(new RequestDTO(self::CHAT_ID));
+    }
+
+    public function testHandleSkipsInactiveMedicaments(): void
+    {
+        $medicaments = [
+            Medicament::restoreFromPersistence(1, 'Aspirin', self::CHAT_ID, new \DateTimeImmutable(), false),
         ];
-        $expectedResponse = new StateHandlerResponseDTO(
-            EnumMessageText::CHOOSE_MEDICAMENT,
-            $expectedButtons
-        );
 
-        $this->assertEquals($expectedResponse, $response);
+        $this->medicamentRepository->method('findByChatId')->willReturn($medicaments);
+
+        $this->outboxRepository->expects($this->once())
+            ->method('insert')
+            ->with(Message::create(
+                self::CHAT_ID,
+                EnumMessageText::NOT_FOUND_ACTIVE_MEDICAMENTS->value,
+                $this->keyboardFactory->makeMenuKeyboard()
+            ));
+
+        $this->handler->handle(new RequestDTO(self::CHAT_ID));
     }
 
     public function testHandleThrowsExceptionWhenNoMedicamentsFound(): void
     {
-        $chatId = 12345;
-
         $this->medicamentRepository->expects($this->once())
             ->method('findByChatId')
-            ->with($chatId)
+            ->with(self::CHAT_ID)
             ->willReturn([]);
 
         $this->expectException(NotFoundEntityException::class);
-        $this->expectExceptionMessage(EnumMessageText::MEDICAMENT_NOT_FOUND->value);
+        $this->expectExceptionMessage(EnumMessageText::MEDICAMENTS_NOT_FOUND->value);
 
-        $this->handler->handle(Session::create($chatId), null, null);
+        $this->handler->handle(new RequestDTO(self::CHAT_ID));
     }
 }

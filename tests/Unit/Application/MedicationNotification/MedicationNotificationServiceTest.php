@@ -4,8 +4,11 @@ namespace Tests\Unit\Application\MedicationNotification;
 
 use App\Application\Services\Notification\NotificationService;
 use App\Application\Services\Outbox\MessageOutboxRepositoryInterface;
+use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
 use App\Domain\Entities\Medicament\Medicament;
+use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Support\DateFormats;
+use App\Domain\Entities\Message\EnumMessageText;
 use App\Domain\Entities\Message\Message;
 use App\Domain\Entities\Session\States\EnumState;
 use App\Domain\UnitOfWorkInterface;
@@ -19,6 +22,7 @@ use Tests\Support\FakeLogger;
 class MedicationNotificationServiceTest extends TestCase
 {
     private MockObject $medicamentRepository;
+    private MockObject $intakeMarkRepository;
     private MockObject $outboxRepository;
     private MockObject $unitOfWork;
     private FakeLogger $logger;
@@ -28,16 +32,43 @@ class MedicationNotificationServiceTest extends TestCase
     {
         parent::setUp();
         $this->medicamentRepository = $this->createMock(MedicamentRepositoryInterface::class);
+        $this->intakeMarkRepository = $this->createMock(IntakeMarkRepositoryInterface::class);
         $this->outboxRepository = $this->createMock(MessageOutboxRepositoryInterface::class);
         $this->unitOfWork = $this->createMock(UnitOfWorkInterface::class);
         $this->logger = new FakeLogger();
         $this->service = new NotificationService(
             $this->medicamentRepository,
+            $this->intakeMarkRepository,
             $this->outboxRepository,
             $this->unitOfWork,
             $this->logger,
             0,
         );
+
+        $this->intakeMarkRepository->method('existsForTodayByMedicamentId')->willReturn(false);
+    }
+
+    /**
+     * Stubs findForNotificationNow() so the first poll returns $medicaments and asks
+     * the run() loop to stop; every following poll returns an empty batch.
+     *
+     * @param Medicament[] $medicaments
+     */
+    private function givenOneCycleOf(array $medicaments): void
+    {
+        $polled = false;
+
+        $this->medicamentRepository->method('findForNotificationNow')
+            ->willReturnCallback(function () use (&$polled, $medicaments): array {
+                if ($polled) {
+                    return [];
+                }
+
+                $polled = true;
+                $this->service->requestStop();
+
+                return $medicaments;
+            });
     }
 
     private function makeMedicament(int $id, int $chatId): Medicament
@@ -45,13 +76,10 @@ class MedicationNotificationServiceTest extends TestCase
         return Medicament::restoreFromPersistence($id, 'Aspirin', $chatId, new DateTimeImmutable(), true);
     }
 
-    public function testProcessCycleDispatchesDueMedicamentToOutbox(): void
+    public function testRunDispatchesDueMedicamentToOutbox(): void
     {
         $medicament = $this->makeMedicament(7, 123);
-
-        $this->medicamentRepository->expects($this->once())
-            ->method('findForNotificationNow')
-            ->willReturn([$medicament]);
+        $this->givenOneCycleOf([$medicament]);
 
         $this->unitOfWork->expects($this->once())->method('begin');
         $this->unitOfWork->expects($this->once())->method('commit');
@@ -78,17 +106,16 @@ class MedicationNotificationServiceTest extends TestCase
                     && $m->getLastNotificationDate()->format(DateFormats::DATE) === $today;
             }));
 
-        $this->service->processCycle();
+        $this->service->run();
 
         self::assertSame([], $this->logger->records);
     }
 
-    public function testProcessCycleRollsBackAndContinuesOnOutboxFailure(): void
+    public function testRunRollsBackAndContinuesOnOutboxFailure(): void
     {
         $first = $this->makeMedicament(1, 111);
         $second = $this->makeMedicament(2, 222);
-
-        $this->medicamentRepository->method('findForNotificationNow')->willReturn([$first, $second]);
+        $this->givenOneCycleOf([$first, $second]);
 
         $this->unitOfWork->expects($this->exactly(2))->method('begin');
         $this->unitOfWork->expects($this->once())->method('commit');
@@ -104,7 +131,7 @@ class MedicationNotificationServiceTest extends TestCase
 
         $this->medicamentRepository->expects($this->once())->method('update');
 
-        $this->service->processCycle();
+        $this->service->run();
 
         self::assertTrue($this->logger->hasMessage('outbox is down'));
         self::assertTrue($this->logger->hasRecordWithContext('phase', 'medication_notification'));
@@ -117,7 +144,17 @@ class MedicationNotificationServiceTest extends TestCase
         $first = $this->makeMedicament(1, 111);
         $second = $this->makeMedicament(2, 222);
 
-        $this->medicamentRepository->method('findForNotificationNow')->willReturn([$first, $second]);
+        $polled = false;
+        $this->medicamentRepository->method('findForNotificationNow')
+            ->willReturnCallback(function () use (&$polled, $first, $second): array {
+                if ($polled) {
+                    return [];
+                }
+
+                $polled = true;
+
+                return [$first, $second];
+            });
 
         $updates = 0;
 

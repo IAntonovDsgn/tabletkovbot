@@ -4,6 +4,8 @@ namespace Tests\Unit\Infrastructure\PDF;
 
 use App\Domain\Entities\IntakeMark\IntakeMark;
 use App\Domain\Entities\IntakeMark\IntakeMarkRepositoryInterface;
+use App\Domain\Entities\Medicament\Medicament;
+use App\Domain\Entities\Medicament\MedicamentRepositoryInterface;
 use App\Domain\Support\DateFormats;
 use App\Domain\Entities\Report\Report;
 use App\Infrastructure\Dbal\Exceptions\RepositoryException;
