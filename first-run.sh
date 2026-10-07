@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-echo "=== TabletkovBot: First Run Setup ==="
+echo "=== Run Setup ==="
 
 cd "$(dirname "$0")"
 

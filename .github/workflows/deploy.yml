@@ -1,0 +1,111 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: PHPStan & Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo, pdo_mysql, pcntl, sockets, zip, gd, mbstring
+          coverage: none
+          tools: composer:v2
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: PHPStan
+        run: vendor/bin/phpstan analyse --memory-limit=512M
+
+      - name: Tests
+        run: composer test
+
+  deploy:
+    name: Deploy to server
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Deploy over SSH
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          RABBITMQ_USER: ${{ secrets.RABBITMQ_USER }}
+          RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
+          APP_URL: ${{ secrets.APP_URL }}
+          NGINX_HOST_PORT: ${{ secrets.NGINX_HOST_PORT }}
+        run: |
+          set -euo pipefail
+
+          {
+            printf 'TELEGRAM_BOT_TOKEN=%s\n' "${TELEGRAM_BOT_TOKEN:-}"
+            printf 'MYSQL_ROOT_PASSWORD=%s\n' "${MYSQL_ROOT_PASSWORD:-}"
+            printf 'MYSQL_USER=%s\n' "${MYSQL_USER:-}"
+            printf 'MYSQL_PASSWORD=%s\n' "${MYSQL_PASSWORD:-}"
+            printf 'MYSQL_DATABASE=%s\n' "${MYSQL_DATABASE:-}"
+            printf 'RABBITMQ_USER=%s\n' "${RABBITMQ_USER:-}"
+            printf 'RABBITMQ_PASSWORD=%s\n' "${RABBITMQ_PASSWORD:-}"
+            printf 'APP_URL=%s\n' "${APP_URL:-}"
+            printf 'NGINX_HOST_PORT=%s\n' "${NGINX_HOST_PORT:-}"
+          } > /tmp/ci-env-fragment
+          trap 'rm -f /tmp/ci-env-fragment' EXIT
+
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          if [ -n "${SSH_KNOWN_HOSTS:-}" ]; then
+            printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" > ~/.ssh/known_hosts 2>/dev/null
+          fi
+
+          ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" -o StrictHostKeyChecking=yes "$SSH_USER@$SSH_HOST" \
+            "set -euo pipefail && \
+             cd '$DEPLOY_PATH' && \
+             git pull --ff-only origin main </dev/null && \
+             bash scripts/apply-env.sh .env && \
+             ./first-run.sh && \
+             docker compose -f docker/docker-compose.yml --env-file .env restart outbox-relay message-queue-consumer report-queue-consumer scheduler && \
+             docker compose -f docker/docker-compose.yml --env-file .env exec -T nginx nginx -s reload && \
+             APP_STATUS=\$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' \"\$(docker compose -f docker/docker-compose.yml --env-file .env ps -q app)\") && \
+             if [ \"\$APP_STATUS\" != 'healthy' ] && [ \"\$APP_STATUS\" != 'running' ]; then echo \"Deployment failed: app status is \$APP_STATUS\" >&2; exit 1; fi" \
+            < /tmp/ci-env-fragment
