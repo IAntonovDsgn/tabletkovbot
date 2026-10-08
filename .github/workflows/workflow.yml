@@ -107,4 +107,23 @@ jobs:
           fi
           
           ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" -o StrictHostKeyChecking=yes "$SSH_USER@$SSH_HOST" \
-            "set -euo pipefail &&
+            "set -euo pipefail && \
+             cd '$DEPLOY_PATH' && \
+             git pull --ff-only origin main </dev/null && \
+             bash scripts/apply-env.sh .env && \
+             chmod 644 .env && \
+             mkdir -p storage var/log var/cache && \
+             chmod -R 775 storage var 2>/dev/null || true && \
+             ./first-run.sh && \
+             docker compose -f docker/docker-compose.yml --env-file .env restart app outbox-relay message-queue-consumer report-queue-consumer scheduler nginx && \
+             echo '[*] Waiting for app health status...' && \
+             for i in {1..30}; do \
+               APP_STATUS=\$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' \"\$(docker compose -f docker/docker-compose.yml --env-file .env ps -q app)\") || APP_STATUS='unknown'; \
+               if [ \"\$APP_STATUS\" = 'healthy' ] || [ \"\$APP_STATUS\" = 'running' ]; then \
+                 echo \"[✓] App is \$APP_STATUS\"; \
+                 exit 0; \
+               fi; \
+               sleep 2; \
+             done && \
+             echo \"[✗] Deployment failed: app status is \$APP_STATUS\" >&2 && exit 1" \
+            < /tmp/ci-env-fragment
