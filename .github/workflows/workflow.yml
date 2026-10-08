@@ -112,8 +112,8 @@ jobs:
              git pull --ff-only origin main </dev/null && \
              bash scripts/apply-env.sh .env && \
              chmod 644 .env && \
-             mkdir -p storage var/log var/cache && \
-             chmod -R 775 storage var 2>/dev/null || true && \
+             mkdir -p storage/logs var/log var/cache && \
+             (chmod -R 777 storage var 2>/dev/null || true) && \
              ./first-run.sh && \
              docker compose -f docker/docker-compose.yml --env-file .env restart app outbox-relay message-queue-consumer report-queue-consumer scheduler nginx && \
              echo '[*] Waiting for app health status...' && \
