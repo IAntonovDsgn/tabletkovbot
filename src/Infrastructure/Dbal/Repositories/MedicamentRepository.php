@@ -67,10 +67,6 @@ final readonly class MedicamentRepository implements MedicamentRepositoryInterfa
             throw new NotFoundEntityException('isExistInPersistence = false');
         }
 
-        if ($this->findByChatIdAndMedicamentName($medicament->getName(), $medicament->getChatId()) !== null) {
-            throw new AlreadyExistInPersistenceException(EnumMessageText::MEDICAMENT_ALREADY_EXIST->value);
-        }
-
         $data = [
             self::NAME_COLUMN_NAME => $medicament->getName(),
             self::CHAT_ID_COLUMN_NAME => $medicament->getChatId(),
