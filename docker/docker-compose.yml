@@ -23,10 +23,14 @@ services:
   app:
     build:
       context: ./app
+    container_name: "${COMPOSE_PROJECT_NAME}-app"
+    networks:
+      app-network:
+        aliases:
+          - app
     volumes:
       - ../:/var/www/tabletkovbot:rw
       - ./php-fpm-zz-logs.conf:/usr/local/etc/php-fpm.d/zz-logs.conf:ro
-    container_name: "${COMPOSE_PROJECT_NAME}-app"
     logging: *default-logging
     environment:
       - REDIS_HOST=redis
@@ -40,10 +44,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    networks:
-      app-network:
-        aliases:
-          - app
     env_file:
       - ../.env
     healthcheck:

@@ -112,8 +112,7 @@ jobs:
              git pull --ff-only origin main </dev/null && \
              bash scripts/apply-env.sh .env && \
              ./first-run.sh && \
-             docker compose -f docker/docker-compose.yml --env-file .env restart app outbox-relay message-queue-consumer report-queue-consumer scheduler && \
-             docker compose -f docker/docker-compose.yml --env-file .env exec -T nginx nginx -s reload && \
+             docker compose -f docker/docker-compose.yml --env-file .env restart app outbox-relay message-queue-consumer report-queue-consumer scheduler nginx && \
              echo '[*] Waiting for app health status...' && \
              for i in {1..30}; do \
                APP_STATUS=\$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' \"\$(docker compose -f docker/docker-compose.yml --env-file .env ps -q app)\") || APP_STATUS='unknown'; \
