@@ -78,7 +78,7 @@ jobs:
           NGINX_HOST_PORT: ${{ secrets.NGINX_HOST_PORT }}
         run: |
           set -euo pipefail
-
+          
           {
             printf 'COMPOSE_PROJECT_NAME=%s\n' "${COMPOSE_PROJECT_NAME:-tabletkovbot}"
             printf 'TELEGRAM_BOT_TOKEN=%s\n' "${TELEGRAM_BOT_TOKEN:-}"
@@ -92,35 +92,19 @@ jobs:
             printf 'RABBITMQ_USER=%s\n' "${RABBITMQ_USER:-}"
             printf 'RABBITMQ_PASSWORD=%s\n' "${RABBITMQ_PASSWORD:-}"
             printf 'APP_URL=%s\n' "${APP_URL:-}"
-            printf 'NGINX_HOST_PORT=%s\n' "${NGINX_HOST_PORT:-}"
+            printf 'NGINX_HOST_PORT=%s\n' "${NGINX_HOST_PORT:-8000}"
           } > /tmp/ci-env-fragment
           trap 'rm -f /tmp/ci-env-fragment' EXIT
-
+          
           mkdir -p ~/.ssh
           printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-
+          
           if [ -n "${SSH_KNOWN_HOSTS:-}" ]; then
             printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
           else
             ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" > ~/.ssh/known_hosts 2>/dev/null
           fi
-
+          
           ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" -o StrictHostKeyChecking=yes "$SSH_USER@$SSH_HOST" \
-            "set -euo pipefail && \
-             cd '$DEPLOY_PATH' && \
-             git pull --ff-only origin main </dev/null && \
-             bash scripts/apply-env.sh .env && \
-             ./first-run.sh && \
-             docker compose -f docker/docker-compose.yml --env-file .env restart app outbox-relay message-queue-consumer report-queue-consumer scheduler nginx && \
-             echo '[*] Waiting for app health status...' && \
-             for i in {1..30}; do \
-               APP_STATUS=\$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' \"\$(docker compose -f docker/docker-compose.yml --env-file .env ps -q app)\") || APP_STATUS='unknown'; \
-               if [ \"\$APP_STATUS\" = 'healthy' ] || [ \"\$APP_STATUS\" = 'running' ]; then \
-                 echo \"[✓] App is \$APP_STATUS\"; \
-                 exit 0; \
-               fi; \
-               sleep 2; \
-             done && \
-             echo \"[✗] Deployment failed: app status is \$APP_STATUS\" >&2 && exit 1" \
-            < /tmp/ci-env-fragment
+            "set -euo pipefail &&
