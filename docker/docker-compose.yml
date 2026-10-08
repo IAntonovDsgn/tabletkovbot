@@ -178,8 +178,6 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
-    ports:
-      - "${MYSQL_PORT}:3306"
     networks:
       - app-network
     healthcheck:
