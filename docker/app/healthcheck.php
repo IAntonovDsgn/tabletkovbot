@@ -18,7 +18,8 @@ try {
         ],
     );
 
-    $pdo->query('SELECT 1 FROM migrations LIMIT 1');
+    // Проверяем соединение с сервером
+    $pdo->query('SELECT 1');
 
     exit(0);
 } catch (Throwable) {

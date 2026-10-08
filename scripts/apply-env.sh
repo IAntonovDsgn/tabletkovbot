@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usage: scripts/apply-env.sh <env-file>   (KEY=VALUE lines come from stdin)
-# - Creates <env-file> from <env-file>.example if it is missing.
-# - Overwrites existing keys, appends missing ones.
-# - Empty values are skipped (an empty secret never wipes a server value).
-
 if [[ $# -ne 1 ]]; then
     echo "Usage: $0 <env-file>  (KEY=VALUE lines on stdin)" >&2
     exit 2
@@ -26,6 +21,8 @@ if [[ ! -f $env_file ]]; then
     echo "[✓] $env_file created from $example"
 fi
 
+# 1. Читаем входящие переменные со stdin в ассоциативный массив
+declare -A new_vars
 applied=0
 skipped=0
 
@@ -48,28 +45,40 @@ while IFS= read -r line || [[ -n ${line:-} ]]; do
         continue
     fi
 
-    found=0
-    rm -f "$tmp_file"
-    while IFS= read -r existing || [[ -n ${existing:-} ]]; do
-        case $existing in
-            "$key="*)
-                printf '%s=%s\n' "$key" "$value" >>"$tmp_file"
-                found=1
-                ;;
-            *)
-                printf '%s\n' "$existing" >>"$tmp_file"
+    new_vars["$key"]="$value"
+done
+
+# 2. Обновляем существующий файл за один проход
+while IFS= read -r line || [[ -n ${line:-} ]]; do
+    clean_line=${line%$'\r'}
+    matched=0
+
+    for key in "${!new_vars[@]}"; do
+        case $clean_line in
+            "$key="*|"# $key="*|"#$key="*)
+                printf '%s=%s\n' "$key" "${new_vars[$key]}" >> "$tmp_file"
+                unset "new_vars[$key]"
+                applied=$((applied + 1))
+                matched=1
+                echo "[✓] $key set"
+                break
                 ;;
         esac
-    done <"$env_file"
+    done
 
-    if [[ $found -eq 0 ]]; then
-        printf '%s=%s\n' "$key" "$value" >>"$tmp_file"
+    if [[ $matched -eq 0 ]]; then
+        printf '%s\n' "$clean_line" >> "$tmp_file"
     fi
+done < "$env_file"
 
-    mv "$tmp_file" "$env_file"
-    chmod 600 "$env_file"
-    echo "[✓] $key set"
+# 3. Дописываем ключи, которых не было в файле
+for key in "${!new_vars[@]}"; do
+    printf '%s=%s\n' "$key" "${new_vars[$key]}" >> "$tmp_file"
     applied=$((applied + 1))
+    echo "[✓] $key appended"
 done
+
+mv "$tmp_file" "$env_file"
+chmod 600 "$env_file"
 
 echo "[=] applied: $applied, skipped: $skipped"
