@@ -109,14 +109,24 @@ jobs:
           ssh -i ~/.ssh/deploy_key -p "$SSH_PORT" -o StrictHostKeyChecking=yes "$SSH_USER@$SSH_HOST" \
             "set -euo pipefail && \
              cd '$DEPLOY_PATH' && \
-             git pull --ff-only origin main </dev/null && \
-             bash scripts/apply-env.sh .env && \
-             chmod 644 .env && \
-             mkdir -p storage/logs var/log var/cache && \
-             (chmod -R 777 storage var 2>/dev/null || true) && \
-             ./first-run.sh && \
-             docker compose -f docker/docker-compose.yml --env-file .env restart app outbox-relay message-queue-consumer report-queue-consumer scheduler nginx && \
-             echo '[*] Waiting for app health status...' && \
+            test -d .git && \
+            git remote get-url origin | grep -q 'tg-bot-' && \
+            if [ -f .env ]; then \
+            docker compose -f docker/docker-compose.yml --env-file .env stop \
+            app outbox-relay message-queue-consumer report-queue-consumer scheduler nginx || true; \
+            fi && \
+            git fetch --prune origin && \
+            git reset --hard origin/main && \
+            git clean -fdx -e .env && \
+            git status --porcelain && \
+            bash scripts/apply-env.sh .env && \
+            chmod 644 .env && \
+            mkdir -p storage/logs var/log var/cache && \
+            (chmod -R 777 storage var 2>/dev/null || true) && \
+            ./first-run.sh && \
+            docker compose -f docker/docker-compose.yml --env-file .env restart \
+            app outbox-relay message-queue-consumer report-queue-consumer scheduler nginx && \
+            echo '[*] Waiting for app health status...' && \
              for i in {1..30}; do \
                APP_STATUS=\$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' \"\$(docker compose -f docker/docker-compose.yml --env-file .env ps -q app)\") || APP_STATUS='unknown'; \
                if [ \"\$APP_STATUS\" = 'healthy' ] || [ \"\$APP_STATUS\" = 'running' ]; then \
