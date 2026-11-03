@@ -7,4 +7,5 @@ run-phpstan-from-docker.sh
 /.php-cs-fixer.cache
 /composer.lock
 /.idea
+.DS_Store
 /.php-cs-fixer.php

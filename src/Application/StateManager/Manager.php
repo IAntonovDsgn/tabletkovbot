@@ -34,6 +34,7 @@ final readonly class Manager
      * @throws InvalidValueException
      * @throws NotFoundEntityException
      * @throws AlreadyExistInPersistenceException
+     * @throws \Throwable
      */
     public function process(RequestDTO $params): void
     {
@@ -47,7 +48,7 @@ final readonly class Manager
             $this->unitOfWork->rollback();
             $this->notifyClientError($params->chatId, $e->getMessage());
             throw $e;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->unitOfWork->rollback();
             $this->notifyInternalError($params->chatId);
             throw $e;
@@ -83,7 +84,7 @@ final readonly class Manager
             $this->outboxRepository->insert(
                 Message::create($chatId, EnumMessageText::INTERNAL_ERROR->value)
             );
-        } catch (\Exception) {
+        } catch (\Throwable) {
         }
     }
 

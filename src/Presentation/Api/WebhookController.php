@@ -9,6 +9,7 @@ use App\Application\StateManager\RequestDTO;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Telegram\Bot\Api;
+use Telegram\Bot\Exceptions\TelegramSDKException;
 use Throwable;
 
 #[OA\Info(
@@ -24,9 +25,6 @@ final readonly class WebhookController
         private LoggerInterface $logger,
     ) {}
 
-    /**
-     * @throws Throwable
-     */
     #[OA\Post(
         path: '/webhook',
         summary: 'Входящий вебхук от серверов Telegram',
@@ -56,6 +54,18 @@ final readonly class WebhookController
     )]
     public function handle(): void
     {
+        try {
+            $this->processUpdate();
+        } catch (Throwable $e) {
+            $this->logger->error($e);
+        }
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private function processUpdate(): void
+    {
         $update = $this->telegramApi->getWebhookUpdate();
 
         if ($update->has('callback_query')) {
@@ -64,9 +74,13 @@ final readonly class WebhookController
                 return;
             }
 
-            $this->telegramApi->answerCallbackQuery([
-                'callback_query_id' => $callbackQuery->id,
-            ]);
+            try {
+                $this->telegramApi->answerCallbackQuery([
+                    'callback_query_id' => $callbackQuery->id,
+                ]);
+            } catch (TelegramSDKException $e) {
+                $this->logger->warning('Failed to answer callback query: ' . $e->getMessage());
+            }
 
             $chatId = $callbackQuery->message->chat->id;
             $requestDTO = new RequestDTO($chatId, null, $callbackQuery->data);
@@ -82,11 +96,6 @@ final readonly class WebhookController
             return;
         }
 
-        try {
-            $this->manager->process($requestDTO);
-        } catch (Throwable $e) {
-            $this->logger->error($e);
-        }
-
+        $this->manager->process($requestDTO);
     }
 }

@@ -16,11 +16,13 @@ use App\Domain\Entities\Session\SessionRepositoryInterface;
 use App\Domain\Entities\Session\States\EnumState;
 use App\Domain\Exceptions\TransitionStateNotAllowedException;
 use App\Domain\UnitOfWorkInterface;
+use Error;
 use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Throwable;
+use TypeError;
 
 class ManagerTest extends TestCase
 {
@@ -233,6 +235,68 @@ class ManagerTest extends TestCase
             ->willThrowException(new RuntimeException('DB is down'));
 
         $this->expectException(get_class($expectedException));
+        $this->manager->process($requestDTO);
+    }
+
+    /**
+     * @throws TransitionStateNotAllowedException
+     * @throws Throwable
+     * @throws InvalidValueException
+     */
+    public function testProcessRollsBackAndNotifiesWhenHandlerThrowsError(): void
+    {
+        $chatId = 123;
+        $requestDTO = new RequestDTO($chatId, 'error', null);
+        $this->givenExistingSession($chatId, EnumState::MENU);
+
+        $this->unitOfWork->expects($this->once())->method('begin');
+        $this->unitOfWork->expects($this->never())->method('commit');
+        $this->unitOfWork->expects($this->once())->method('rollback');
+
+        $mockStateHandler = $this->createMock(StateHandlerInterface::class);
+        $this->factoryStateHandler->method('makeByState')->willReturn($mockStateHandler);
+
+        $mockStateHandler->expects($this->once())
+            ->method('handle')
+            ->willThrowException(new TypeError('boom'));
+
+        $this->outboxRepository->expects($this->once())
+            ->method('insert')
+            ->with($this->callback(
+                fn(Message $message): bool
+                    => $message->getChatId() === $chatId
+                    && $message->getText() === EnumMessageText::INTERNAL_ERROR->value
+            ));
+
+        $this->expectException(TypeError::class);
+        $this->manager->process($requestDTO);
+    }
+
+    /**
+     * @throws TransitionStateNotAllowedException
+     * @throws Throwable
+     * @throws InvalidValueException
+     */
+    public function testProcessStillThrowsOriginalErrorWhenNotificationFailsWithError(): void
+    {
+        $chatId = 123;
+        $requestDTO = new RequestDTO($chatId, 'error', null);
+        $this->givenExistingSession($chatId, EnumState::MENU);
+
+        $this->unitOfWork->expects($this->once())->method('rollback');
+
+        $mockStateHandler = $this->createMock(StateHandlerInterface::class);
+        $this->factoryStateHandler->method('makeByState')->willReturn($mockStateHandler);
+
+        $mockStateHandler->expects($this->once())
+            ->method('handle')
+            ->willThrowException(new RuntimeException('boom'));
+
+        $this->outboxRepository->expects($this->once())
+            ->method('insert')
+            ->willThrowException(new Error('outbox is down'));
+
+        $this->expectException(RuntimeException::class);
         $this->manager->process($requestDTO);
     }
 

@@ -20,11 +20,11 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Telegram\Bot\Api as TelegramBotApi;
+use Telegram\Bot\Exceptions\TelegramSDKException;
 use Telegram\Bot\Objects\CallbackQuery;
 use Telegram\Bot\Objects\Chat;
 use Telegram\Bot\Objects\Message as TelegramMessage;
 use Telegram\Bot\Objects\Update;
-use Throwable;
 
 class WebhookControllerTest extends TestCase
 {
@@ -89,9 +89,6 @@ class WebhookControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @throws Throwable
-     */
     public function testHandleRoutesTextMessageToManager(): void
     {
         $chatId = 123;
@@ -135,9 +132,6 @@ class WebhookControllerTest extends TestCase
         $this->controller->handle();
     }
 
-    /**
-     * @throws Throwable
-     */
     public function testHandleRoutesCallbackQueryWithAnswerAndPayload(): void
     {
         $chatId = 123;
@@ -186,9 +180,6 @@ class WebhookControllerTest extends TestCase
         $this->assertSame(EnumState::ADD_MEDICAMENT_SELECTED, $existingSession->getState());
     }
 
-    /**
-     * @throws Throwable
-     */
     public function testHandleIgnoresCallbackQueryWithoutMessage(): void
     {
         $this->givenWebhookUpdate(new Update([
@@ -204,9 +195,6 @@ class WebhookControllerTest extends TestCase
         $this->controller->handle();
     }
 
-    /**
-     * @throws Throwable
-     */
     public function testHandleIgnoresUpdateWithoutMessageAndCallbackQuery(): void
     {
         $this->givenWebhookUpdate(new Update(['update_id' => 3]));
@@ -218,9 +206,6 @@ class WebhookControllerTest extends TestCase
         $this->controller->handle();
     }
 
-    /**
-     * @throws Throwable
-     */
     public function testHandleLogsManagerExceptionAfterRollback(): void
     {
         $chatId = 123;
@@ -245,6 +230,66 @@ class WebhookControllerTest extends TestCase
             ));
 
         $this->logger->expects($this->once())->method('error');
+
+        $this->controller->handle();
+    }
+
+    public function testHandleIgnoresCallbackAnswerFailureAndStillProcessesPayload(): void
+    {
+        $chatId = 123;
+        $payload = EnumState::ADD_MEDICAMENT_SELECTED->value;
+        $this->givenWebhookUpdate($this->callbackQueryUpdate($chatId, $payload));
+
+        $this->telegramApi->expects($this->once())
+            ->method('answerCallbackQuery')
+            ->with(['callback_query_id' => 'cb-1'])
+            ->willThrowException(new TelegramSDKException(
+                'Bad Request: query is too old and response timeout expired or query ID is invalid'
+            ));
+
+        $this->logger->expects($this->once())->method('warning');
+
+        $this->unitOfWork->expects($this->once())->method('begin');
+        $this->unitOfWork->expects($this->once())->method('commit');
+        $this->unitOfWork->expects($this->never())->method('rollback');
+
+        $existingSession = Session::restoreFromPersistence(1, $chatId, true, EnumState::MENU);
+        $this->sessionRepository->expects($this->once())
+            ->method('findByChatId')
+            ->with($chatId)
+            ->willReturn($existingSession);
+
+        $stateHandler = $this->createMock(StateHandlerInterface::class);
+        $this->stateHandlerFactory->expects($this->once())
+            ->method('makeByState')
+            ->with(EnumState::ADD_MEDICAMENT_SELECTED)
+            ->willReturn($stateHandler);
+
+        $stateHandler->expects($this->once())
+            ->method('handle')
+            ->with($this->callback(
+                fn(RequestDTO $params): bool
+                    => $params->chatId === $chatId
+                    && $params->messageText === null
+                    && $params->payload === $payload
+            ));
+
+        $this->sessionRepository->expects($this->once())->method('update');
+        $this->outboxRepository->expects($this->never())->method('insert');
+
+        $this->controller->handle();
+
+        $this->assertSame(EnumState::ADD_MEDICAMENT_SELECTED, $existingSession->getState());
+    }
+
+    public function testHandleLogsAndSwallowsWebhookUpdateException(): void
+    {
+        $this->telegramApi->method('getWebhookUpdate')
+            ->willThrowException(new RuntimeException('malformed payload'));
+
+        $this->logger->expects($this->once())->method('error');
+        $this->unitOfWork->expects($this->never())->method('begin');
+        $this->sessionRepository->expects($this->never())->method('findByChatId');
 
         $this->controller->handle();
     }
